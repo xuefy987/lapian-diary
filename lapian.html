@@ -21,6 +21,7 @@
     --warning: #f59e0b;
     --shadow: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+    --glass: rgba(255,255,255,0.75);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2546,6 +2547,7 @@ function applyPageTheme() {
     root.style.setProperty('--ink', '#e8edf5');
     root.style.setProperty('--muted', '#8a96b0');
     root.style.setProperty('--rule', '#2a3344');
+    root.style.setProperty('--glass', 'rgba(28,35,51,0.55)');
   } else {
     root.style.setProperty('--bg', '#f5f6f8');
     root.style.setProperty('--bg2', '#ffffff');
@@ -2553,6 +2555,7 @@ function applyPageTheme() {
     root.style.setProperty('--ink', '#1a1a2e');
     root.style.setProperty('--muted', '#6b7280');
     root.style.setProperty('--rule', '#e5e7eb');
+    root.style.setProperty('--glass', 'rgba(255,255,255,0.75)');
   }
 }
 
@@ -2568,6 +2571,7 @@ window.addEventListener('message', function(e) {
     document.body.style.backgroundSize = '';
     document.body.style.backgroundAttachment = '';
   } else if (e.data.type === 'theme') {
+    if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
   }
 });
