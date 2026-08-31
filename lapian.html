@@ -943,7 +943,7 @@
         <input type="file" id="wpsFile" style="display: none;" accept=".docx,.doc,.txt" onchange="importWPSDocument(event)">
         <button class="btn btn-primary" onclick="manualSave()">💾 保存</button>
         <button class="btn btn-secondary" onclick="openHistoryModal()">📜 历史</button>
-        <button class="btn btn-secondary" onclick="exportData()">📤 导出</button>
+        <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
         <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
         <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
@@ -1122,6 +1122,24 @@
     <div id="historyList" style="max-height:400px;overflow-y:auto;margin-bottom:16px;"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('historyModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出格式选择模态框 -->
+<div class="modal-overlay" id="exportFormatModal">
+  <div class="modal" style="max-width:380px;">
+    <h2>📤 选择导出格式</h2>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="exportAsWord()">📄 Word文档</button>
+      <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="exportAsPDF()">📋 PDF格式（打印另存）</button>
+      <button class="btn btn-secondary" style="justify-content:center;padding:12px;" onclick="exportData()">💾 JSON数据备份</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+      Word/PDF导出包含：影片名称、序号行、事件统计、剧情梗概
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('exportFormatModal')">取消</button>
     </div>
   </div>
 </div>
@@ -2193,7 +2211,127 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 });
 
 // ==================== 导入导出 ====================
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add('show');
+}
+
+function escapeHtml(text) {
+  var div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
+}
+
+function generateExportHTML() {
+  var html = '';
+  html += '<h1 style="font-size:24px;text-align:center;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:32px;">XFY工作坊 - 拉片笔记导出</h1>';
+
+  appData.films.forEach(function(film, idx) {
+    html += '<h2 style="font-size:20px;color:#4f46e5;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-top:' + (idx > 0 ? '40px' : '0') + ';">🎬 ' + escapeHtml(film.name) + '</h2>';
+
+    if (film.rows && film.rows.length > 0) {
+      html += '<h3 style="font-size:15px;margin:20px 0 10px;">序号行（共' + film.rows.length + '行）</h3>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<tr style="background:#f5f6f8;">';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;text-align:center;width:60px;">序号</th>';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;text-align:center;width:200px;">时间码</th>';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;">内容</th>';
+      html += '</tr>';
+      film.rows.forEach(function(row) {
+        var timeRange = (row.startTime || '') + ' → ' + (row.endTime || '');
+        html += '<tr>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;font-weight:600;">' + row.number + '</td>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;white-space:nowrap;">' + escapeHtml(timeRange) + '</td>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;">' + (row.content || '') + '</td>';
+        html += '</tr>';
+      });
+      html += '</table>';
+    }
+
+    if (film.events && film.events.length > 0) {
+      html += '<h3 style="font-size:15px;margin:20px 0 10px;">事件统计（共' + film.events.length + '个事件）</h3>';
+      film.events.forEach(function(event) {
+        var rowNums = event.rowIds.map(function(rid) {
+          var r = film.rows.find(function(row) { return row.id === rid; });
+          return r ? r.number : null;
+        }).filter(function(n) { return n !== null; }).sort(function(a, b) { return a - b; });
+
+        var rowText = '';
+        if (rowNums.length > 0) {
+          var ranges = [];
+          var start = rowNums[0], end = rowNums[0];
+          for (var i = 1; i < rowNums.length; i++) {
+            if (rowNums[i] === end + 1) { end = rowNums[i]; }
+            else { ranges.push(start === end ? '#' + start : '#' + start + '-' + end); start = end = rowNums[i]; }
+          }
+          ranges.push(start === end ? '#' + start : '#' + start + '-' + end);
+          rowText = ranges.join(', ') + ' (' + rowNums.length + '行)';
+        }
+
+        html += '<div style="padding:6px 0;font-size:13px;">';
+        html += '<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:' + event.color + ';vertical-align:middle;margin-right:8px;border:1px solid #ccc;"></span>';
+        html += '<strong>' + escapeHtml(event.name) + '</strong> — ' + rowText;
+        html += '</div>';
+      });
+    }
+
+    if (film.plotSummary && film.plotSummary.trim()) {
+      html += '<h3 style="font-size:15px;margin:20px 0 10px;">剧情梗概</h3>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.plotSummary + '</div>';
+    }
+    if (film.characters && film.characters.trim()) {
+      html += '<h3 style="font-size:15px;margin:20px 0 10px;">人物分析</h3>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.characters + '</div>';
+    }
+    if (film.theme && film.theme.trim()) {
+      html += '<h3 style="font-size:15px;margin:20px 0 10px;">主题思考</h3>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.theme + '</div>';
+    }
+  });
+
+  return html;
+}
+
+function exportAsWord() {
+  closeModal('exportFormatModal');
+  var content = generateExportHTML();
+  var header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+  header += '<head><meta charset="utf-8"><title>拉片笔记导出</title></head><body>';
+  var footer = '</body></html>';
+  var blob = new Blob(['\ufeff' + header + content + footer], { type: 'application/msword' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '拉片笔记_' + new Date().toLocaleDateString() + '.doc';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Word文档导出成功');
+}
+
+function exportAsPDF() {
+  closeModal('exportFormatModal');
+  var content = generateExportHTML();
+  var printWin = window.open('', '_blank');
+  if (!printWin) { showToast('请允许弹出窗口'); return; }
+  printWin.document.write('<html><head><meta charset="utf-8"><title>拉片笔记导出</title>');
+  printWin.document.write('<style>');
+  printWin.document.write('body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.8; color: #1a1a2e; padding: 40px; max-width: 900px; margin: 0 auto; }');
+  printWin.document.write('h1 { font-size: 24px; text-align: center; border-bottom: 3px solid #4f46e5; padding-bottom: 12px; margin-bottom: 32px; }');
+  printWin.document.write('h2 { font-size: 20px; color: #4f46e5; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-top: 40px; }');
+  printWin.document.write('h3 { font-size: 15px; margin: 20px 0 10px; }');
+  printWin.document.write('table { width: 100%; border-collapse: collapse; font-size: 13px; }');
+  printWin.document.write('th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; vertical-align: top; }');
+  printWin.document.write('th { background: #f5f6f8; font-weight: 600; }');
+  printWin.document.write('@media print { body { padding: 20px; } }');
+  printWin.document.write('</style></head><body>');
+  printWin.document.write(content);
+  printWin.document.write('</body></html>');
+  printWin.document.close();
+  setTimeout(function() { printWin.print(); }, 500);
+  showToast('正在打开打印窗口，可另存为PDF');
+}
+
 function exportData() {
+  closeModal('exportFormatModal');
   const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
