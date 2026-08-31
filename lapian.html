@@ -2523,9 +2523,40 @@ function createFilmFromImport(parsed) {
 
 // ==================== 启动 ====================
 init();
+
+// 读取本地存储的背景图
+var savedBg = localStorage.getItem('xfy_workshop_bg');
+if (savedBg) {
+  document.body.style.backgroundImage = 'url(' + savedBg + ')';
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+  document.body.style.backgroundAttachment = 'fixed';
+}
+
+applyPageTheme();
 window.parent.postMessage({ type: 'ready' }, '*');
 
-// 监听父窗口背景图设置
+function applyPageTheme() {
+  var mode = localStorage.getItem('xfy_theme_mode') || 'light';
+  var root = document.documentElement;
+  if (mode === 'dark') {
+    root.style.setProperty('--bg', '#0a0e1a');
+    root.style.setProperty('--bg2', '#1c2333');
+    root.style.setProperty('--bg3', '#131826');
+    root.style.setProperty('--ink', '#e8edf5');
+    root.style.setProperty('--muted', '#8a96b0');
+    root.style.setProperty('--rule', '#2a3344');
+  } else {
+    root.style.setProperty('--bg', '#f5f6f8');
+    root.style.setProperty('--bg2', '#ffffff');
+    root.style.setProperty('--bg3', '#f0f2f5');
+    root.style.setProperty('--ink', '#1a1a2e');
+    root.style.setProperty('--muted', '#6b7280');
+    root.style.setProperty('--rule', '#e5e7eb');
+  }
+}
+
+// 监听父窗口消息
 window.addEventListener('message', function(e) {
   if (e.data.type === 'setBg') {
     document.body.style.backgroundImage = 'url(' + e.data.bg + ')';
@@ -2536,6 +2567,8 @@ window.addEventListener('message', function(e) {
     document.body.style.backgroundImage = '';
     document.body.style.backgroundSize = '';
     document.body.style.backgroundAttachment = '';
+  } else if (e.data.type === 'theme') {
+    applyPageTheme();
   }
 });
 </script>
