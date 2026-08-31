@@ -51,7 +51,7 @@
   .bg-fullscreen.active { opacity: 1; }
 
 
-  .app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0; display: flex; min-height: 100vh; }
+  .app { position: relative; z-index: 1; margin: 0; padding: 0; display: flex; min-height: 100vh; }
 
   /* ====== LEFT SIDEBAR ====== */
   .sidebar {
@@ -83,11 +83,11 @@
     text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;
   }
   .project-name-input {
-    background: rgba(10,14,26,0.6); border: 1px solid var(--accent);
+    background: #fff; border: 1px solid #d1d5db;
     border-radius: 8px; padding: 8px 12px; color: var(--ink);
     font-size: 0.85rem; font-family: inherit; width: 100%;
   }
-  .project-name-input:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(91,141,239,0.15); }
+  .project-name-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,70,229,0.12); }
 
   .sidebar-actions {
     padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;
@@ -292,13 +292,13 @@
 
   /* Controls */
   textarea, input[type="text"], select {
-    background: rgba(10,14,26,0.6); border: 1px solid var(--rule);
-    border-radius: 10px; padding: 12px 14px; color: var(--ink);
+    background: #fff; border: 1px solid #d1d5db;
+    border-radius: 8px; padding: 10px 12px; color: var(--ink);
     font-size: 0.88rem; font-family: inherit; width: 100%;
     transition: border-color 0.2s; line-height: 1.7;
   }
-  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); }
-  textarea::placeholder, input::placeholder { color: #4a5670; }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,70,229,0.1); }
+  textarea::placeholder, input::placeholder { color: #9ca3af; }
   textarea { resize: vertical; }
 
   .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
@@ -3076,7 +3076,6 @@
   <!-- ====== LEFT SIDEBAR ====== -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <span class="sidebar-brand">XFM</span>
     </div>
 
     <div class="project-name-section">
@@ -7766,25 +7765,53 @@ function cropBlackBorders(img) {
 
 // Restore folder connection on page load
 window.addEventListener('DOMContentLoaded', function() {
-  // Render localStorage projects immediately (folder projects added async)
   renderProjectList();
   restoreFolderOnLoad();
   initScriptMetaSync();
   updateUndoButtonState();
+  // 读取本地存储的背景图
+  var savedBg = localStorage.getItem('xfy_workshop_bg');
+  if (savedBg) {
+    var bgEl = document.getElementById('bgFullscreen');
+    if (bgEl) { bgEl.style.backgroundImage = 'url(' + savedBg + ')'; bgEl.classList.add('active'); }
+  }
+  // 读取主题
+  applyPageTheme();
   window.parent.postMessage({ type: 'ready' }, '*');
 });
 
-// 监听父窗口背景图设置
+function applyPageTheme() {
+  var mode = localStorage.getItem('xfy_theme_mode') || 'light';
+  var root = document.documentElement;
+  if (mode === 'dark') {
+    root.style.setProperty('--bg', '#0a0e1a');
+    root.style.setProperty('--bg2', '#1c2333');
+    root.style.setProperty('--bg3', '#131826');
+    root.style.setProperty('--ink', '#e8edf5');
+    root.style.setProperty('--muted', '#8a96b0');
+    root.style.setProperty('--rule', '#2a3344');
+    root.style.setProperty('--glass', 'rgba(28,35,51,0.55)');
+  } else {
+    root.style.setProperty('--bg', '#f5f6f8');
+    root.style.setProperty('--bg2', '#ffffff');
+    root.style.setProperty('--bg3', '#f0f2f5');
+    root.style.setProperty('--ink', '#1a1a2e');
+    root.style.setProperty('--muted', '#6b7280');
+    root.style.setProperty('--rule', '#e5e7eb');
+    root.style.setProperty('--glass', 'rgba(255,255,255,0.75)');
+  }
+}
+
+// 监听父窗口消息
 window.addEventListener('message', function(e) {
   if (e.data.type === 'setBg') {
     var bg = document.getElementById('bgFullscreen');
-    if (bg) {
-      bg.style.backgroundImage = 'url(' + e.data.bg + ')';
-      bg.classList.add('active');
-    }
+    if (bg) { bg.style.backgroundImage = 'url(' + e.data.bg + ')'; bg.classList.add('active'); }
   } else if (e.data.type === 'clearBg') {
     var bg = document.getElementById('bgFullscreen');
     if (bg) { bg.style.backgroundImage = ''; bg.classList.remove('active'); }
+  } else if (e.data.type === 'theme') {
+    applyPageTheme();
   }
 });
 </script>
