@@ -922,8 +922,7 @@
   <!-- ========== 左侧片名栏 ========== -->
   <aside class="sidebar-left" id="sidebarLeft">
     <div class="sidebar-header">
-      <h1>🎬 剧作-xfy的拉片笔记</h1>
-      <button class="btn btn-primary" onclick="openNewFilmModal()">+ 新建</button>
+      <button class="btn btn-primary" onclick="openNewFilmModal()">+ 新建影片</button>
     </div>
     <div class="film-list" id="filmList"></div>
   </aside>
@@ -1192,7 +1191,11 @@ const highlightColors = [
 const eventColors = [
   '#fef3c7','#dbeafe','#d1fae5','#fce7f3','#fed7aa','#e9d5ff',
   '#cffafe','#fee2e2','#fef9c3','#ddd6fe','#bbf7d0','#fbcfe8',
-  '#fecaca','#fde68a','#bfdbfe','#a7f3d0','#fbcfe8','#ddd6fe'
+  '#fecaca','#fde68a','#bfdbfe','#a7f3d0','#fbcfe8','#ddd6fe',
+  '#ffedd5','#ddd6fe','#ccfbf1','#fae8ff','#fef3c7','#e0e7ff',
+  '#dcfce7','#fce7f3','#ffeee0','#e6e6fa','#f0fff0','#fff0f5',
+  '#e8f5e9','#fff3e0','#f3e5f5','#e8eaf6','#e0f2f1','#fff8e1',
+  '#f1f8e9','#fffde7','#e8eaf6','#fbe9e7','#e0f7fa','#f8bbd0'
 ];
 
 // ==================== 初始化 ====================
@@ -2520,6 +2523,21 @@ function createFilmFromImport(parsed) {
 
 // ==================== 启动 ====================
 init();
+window.parent.postMessage({ type: 'ready' }, '*');
+
+// 监听父窗口背景图设置
+window.addEventListener('message', function(e) {
+  if (e.data.type === 'setBg') {
+    document.body.style.backgroundImage = 'url(' + e.data.bg + ')';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+  } else if (e.data.type === 'clearBg') {
+    document.body.style.backgroundImage = '';
+    document.body.style.backgroundSize = '';
+    document.body.style.backgroundAttachment = '';
+  }
+});
 </script>
 </body>
 </html>
