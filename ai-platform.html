@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="zh-CN" data-theme="light" data-trae-theme="dark"><head>
+<html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI短片创作</title>
@@ -17,6 +17,10 @@
     --danger: #ef4444;
     --warning: #f59e0b;
     --glass: rgba(255, 255, 255, 0.75);
+    --prompt-bg: rgba(248,250,252,0.7);
+    --prompt-border: rgba(203,213,225,0.5);
+    --overlay-color: rgba(245,246,248,0.55);
+    --input-bg: #ffffff;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,7 +50,7 @@
   }
   .bg-fullscreen::after {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(245,246,248,0.72) 0%, rgba(245,246,248,0.8) 50%, rgba(245,246,248,0.88) 100%);
+    background: linear-gradient(135deg, var(--overlay-color) 0%, var(--overlay-color) 100%);
   }
   .bg-fullscreen.active { opacity: 1; }
 
@@ -55,8 +59,8 @@
 
   /* ====== LEFT SIDEBAR ====== */
   .sidebar {
-    width: 280px; flex-shrink: 0;
-    background: rgba(255,255,255,0.55); backdrop-filter: blur(8px);
+    width: 260px; flex-shrink: 0;
+    background: var(--glass); backdrop-filter: blur(8px);
     background-size: cover; background-position: center; background-repeat: no-repeat;
     border-right: 1px solid var(--rule);
     display: flex; flex-direction: column;
@@ -83,7 +87,7 @@
     text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;
   }
   .project-name-input {
-    background: #fff; border: 1px solid #d1d5db;
+    background: var(--input-bg); border: 1px solid var(--rule);
     border-radius: 8px; padding: 8px 12px; color: var(--ink);
     font-size: 0.85rem; font-family: inherit; width: 100%;
   }
@@ -155,12 +159,12 @@
 
   /* ====== RIGHT MAIN PANEL ====== */
   .main-panel {
-    flex: 1; padding: 24px 32px; overflow-x: hidden;
+    flex: 1; padding: 20px 24px; overflow-x: hidden;
     min-width: 0;
   }
   .folder-status {
     font-size: 0.75rem; color: var(--muted); padding: 5px 12px;
-    background: rgba(255,255,255,0.5); border-radius: 8px;
+    background: var(--bg3); border-radius: 8px;
     border: 1px solid var(--rule); display: inline-flex; align-items: center; gap: 5px;
     transition: all 0.2s;
   }
@@ -292,7 +296,7 @@
 
   /* Controls */
   textarea, input[type="text"], select {
-    background: #fff; border: 1px solid #d1d5db;
+    background: var(--input-bg); border: 1px solid var(--rule);
     border-radius: 8px; padding: 10px 12px; color: var(--ink);
     font-size: 0.88rem; font-family: inherit; width: 100%;
     transition: border-color 0.2s; line-height: 1.7;
@@ -315,7 +319,7 @@
   .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
   .btn-secondary { background: var(--bg3); color: var(--ink); border: 1px solid var(--rule); }
   .btn-secondary:hover { background: var(--bg2); }
-  .btn-success { background: var(--success); color: #052e1c; }
+  .btn-success { background: var(--success); color: #fff; }
   .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
   .btn-danger { background: rgba(248,113,113,0.12); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
   .btn-danger:hover { background: var(--danger); color: #fff; opacity: 0.9; }
@@ -385,7 +389,7 @@
   .asset-badge.has-image { background: rgba(52,211,153,0.85); }
   .asset-info { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
   .asset-shot-label { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
-  .asset-prompt { font-size: 0.76rem; color: var(--muted); line-height: 1.6; min-height: 80px; max-height: none; background: rgba(10,14,26,0.4); border-radius: 8px; padding: 10px; border: 1px solid rgba(42,51,68,0.5); white-space: pre-wrap; word-break: break-word; }
+  .asset-prompt { font-size: 0.76rem; color: var(--muted); line-height: 1.6; min-height: 80px; max-height: none; background: var(--prompt-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--prompt-border); white-space: pre-wrap; word-break: break-word; }
   .asset-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
   .asset-actions .btn { flex: 1; min-width: 70px; justify-content: center; }
 
@@ -408,9 +412,9 @@
   .video-thumb { background: var(--bg); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .video-thumb img, .video-thumb canvas { width: 100%; height: 100%; object-fit: cover; }
   .video-content { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-  .video-prompt { font-size: 0.8rem; color: var(--ink); line-height: 1.7; background: rgba(10,14,26,0.4); border-radius: 8px; padding: 12px; border: 1px solid rgba(42,51,68,0.5); min-height: 100px; max-height: none; white-space: pre-wrap; word-break: break-word; }
+  .video-prompt { font-size: 0.8rem; color: var(--ink); line-height: 1.7; background: var(--prompt-bg); border-radius: 8px; padding: 12px; border: 1px solid var(--prompt-border); min-height: 100px; max-height: none; white-space: pre-wrap; word-break: break-word; }
   .video-prompt .tag { color: var(--accent); font-weight: 600; }
-  .video-prompt-edit { font-size: 0.8rem; color: var(--ink); line-height: 1.7; background: rgba(10,14,26,0.4); border-radius: 8px; padding: 12px; border: 1px solid rgba(42,51,68,0.5); width: 100%; min-height: 100px; resize: vertical; font-family: inherit; outline: none; white-space: pre-wrap; word-break: break-word; }
+  .video-prompt-edit { font-size: 0.8rem; color: var(--ink); line-height: 1.7; background: var(--prompt-bg); border-radius: 8px; padding: 12px; border: 1px solid var(--prompt-border); width: 100%; min-height: 100px; resize: vertical; font-family: inherit; outline: none; white-space: pre-wrap; word-break: break-word; }
   .video-prompt-edit:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91,141,239,0.15); }
   .video-neg { font-size: 0.76rem; color: var(--danger); line-height: 1.6; background: rgba(248,113,113,0.06); border-radius: 8px; padding: 10px; border: 1px solid rgba(248,113,113,0.2); min-height: 60px; max-height: none; white-space: pre-wrap; word-break: break-word; }
 
@@ -456,7 +460,7 @@
 
   .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--rule), transparent); margin: 18px 0; }
   .section-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .script-meta { font-size: 0.72rem; color: var(--muted); margin-top: 6px; padding: 6px 10px; background: rgba(10,14,26,0.4); border-radius: 8px; border: 1px solid rgba(42,51,68,0.5); display: flex; gap: 14px; flex-wrap: wrap; }
+  .script-meta { font-size: 0.72rem; color: var(--muted); margin-top: 6px; padding: 6px 10px; background: var(--prompt-bg); border-radius: 8px; border: 1px solid var(--prompt-border); display: flex; gap: 14px; flex-wrap: wrap; }
   .script-meta .meta-item { display: inline-flex; align-items: center; gap: 4px; }
   .script-meta .meta-label { color: var(--accent); font-weight: 600; }
 
@@ -561,7 +565,7 @@
     padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; flex: 1;
   }
   .asset-prompt-edit {
-    background: rgba(10,14,26,0.4); border: 1px solid rgba(42,51,68,0.5);
+    background: var(--prompt-bg); border: 1px solid var(--prompt-border);
     border-radius: 8px; padding: 10px; color: var(--ink);
     font-size: 0.78rem; font-family: inherit; line-height: 1.6;
     width: 100%; resize: vertical; min-height: 80px;
@@ -6368,7 +6372,7 @@ function openModal(idx) {
     '<div style="color:var(--muted);text-align:center;padding:30px;">暂无上传图片</div>';
   content.innerHTML = imgHtml +
     '<div style="font-size:0.82rem;color:var(--muted);margin-bottom:6px;">画面提示词<span style="font-size:0.72rem;">（可直接编辑替换，保存后同步到分镜表格）</span>:</div>' +
-    '<textarea class="gallery-prompt-edit" id="galleryPrompt-' + idx + '" onchange="updateGalleryPrompt(' + idx + ',this.value)" oninput="autoResizeTextarea(this)" style="width:100%;min-height:120px;background:rgba(10,14,26,0.4);border:1px solid var(--rule);border-radius:8px;padding:10px;font-size:0.82rem;line-height:1.7;margin-bottom:12px;color:var(--ink);font-family:inherit;outline:none;resize:vertical;white-space:pre-wrap;word-break:break-word;">' + escHtml(shot.visualPrompt || '') + '</textarea>' +
+    '<textarea class="gallery-prompt-edit" id="galleryPrompt-' + idx + '" onchange="updateGalleryPrompt(' + idx + ',this.value)" oninput="autoResizeTextarea(this)" style="width:100%;min-height:120px;background:var(--prompt-bg);border:1px solid var(--rule);border-radius:8px;padding:10px;font-size:0.82rem;line-height:1.7;margin-bottom:12px;color:var(--ink);font-family:inherit;outline:none;resize:vertical;white-space:pre-wrap;word-break:break-word;">' + escHtml(shot.visualPrompt || '') + '</textarea>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
       '<button class="btn btn-success btn-sm" onclick="galleryUploadImage(' + idx + ');closeModal();">上传静帧</button>' +
       (project.images[idx] ? '<button class="btn btn-secondary btn-sm danger" onclick="deleteGalleryImage(' + idx + ');closeModal();">删除静帧</button>' : '') +
@@ -6859,7 +6863,7 @@ function copyAllVideoPrompts() {
 // ============ EXPORT ============
 function exportFullPackage() {
   var cfg = project.config;
-  var text = '========== XFM 完整制作包 ==========\n\n';
+  var text = '========== 完整制作包 ==========\n\n';
   text += '作品名称: ' + (project.name||'未命名') + '\n';
   text += '- Seedance模型: ' + (cfg.model||'doubao-seedance-2-5-pro') + '\n';
   text += '- 画幅: ' + (cfg.aspect||'') + '\n- 分辨率: ' + (cfg.resolution||'') + '\n- 单镜时长: ' + (cfg.duration||'') + '\n';
@@ -7791,6 +7795,10 @@ function applyPageTheme() {
     root.style.setProperty('--muted', '#8a96b0');
     root.style.setProperty('--rule', '#2a3344');
     root.style.setProperty('--glass', 'rgba(28,35,51,0.55)');
+    root.style.setProperty('--prompt-bg', 'rgba(28,35,51,0.6)');
+    root.style.setProperty('--prompt-border', 'rgba(42,51,68,0.5)');
+    root.style.setProperty('--overlay-color', 'rgba(10,14,26,0.7)');
+    root.style.setProperty('--input-bg', '#1c2333');
   } else {
     root.style.setProperty('--bg', '#f5f6f8');
     root.style.setProperty('--bg2', '#ffffff');
@@ -7799,6 +7807,10 @@ function applyPageTheme() {
     root.style.setProperty('--muted', '#6b7280');
     root.style.setProperty('--rule', '#e5e7eb');
     root.style.setProperty('--glass', 'rgba(255,255,255,0.75)');
+    root.style.setProperty('--prompt-bg', 'rgba(248,250,252,0.7)');
+    root.style.setProperty('--prompt-border', 'rgba(203,213,225,0.5)');
+    root.style.setProperty('--overlay-color', 'rgba(245,246,248,0.55)');
+    root.style.setProperty('--input-bg', '#ffffff');
   }
 }
 
@@ -7811,6 +7823,7 @@ window.addEventListener('message', function(e) {
     var bg = document.getElementById('bgFullscreen');
     if (bg) { bg.style.backgroundImage = ''; bg.classList.remove('active'); }
   } else if (e.data.type === 'theme') {
+    if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
   }
 });
