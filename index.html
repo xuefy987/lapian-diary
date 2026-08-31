@@ -8,49 +8,42 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: #f5f6f8;
-      color: #1a1a2e;
-      overflow: hidden;
-      height: 100vh;
+      background: #f5f6f8; color: #1a1a2e;
+      overflow: hidden; height: 100vh;
     }
+    body.dark-mode { background: #0a0e1a; }
     .top-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 48px;
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0 20px;
-      position: relative;
-      z-index: 100;
-      flex-shrink: 0;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex; align-items: center; height: 48px;
+      background: #ffffff; border-bottom: 1px solid #e5e7eb;
+      padding: 0 16px; position: relative; z-index: 100; flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); gap: 12px;
     }
-    .nav-brand { display: flex; align-items: center; gap: 12px; }
-    .brand-title {
-      font-size: 17px; font-weight: 700; color: #4f46e5;
-      letter-spacing: 1px; white-space: nowrap;
-    }
-    .nav-tabs { display: flex; gap: 2px; flex: 1; justify-content: center; }
+    body.dark-mode .top-nav { background: #131826; border-color: #2a3344; }
+    .nav-left { display: flex; align-items: center; gap: 16px; }
+    .brand-title { font-size: 16px; font-weight: 700; color: #4f46e5; white-space: nowrap; }
+    body.dark-mode .brand-title { color: #5b8def; }
+    .nav-tabs { display: flex; gap: 2px; }
     .nav-tab {
-      padding: 7px 18px; font-size: 14px; font-weight: 500;
-      color: #6b7280; background: transparent; border: none;
-      border-radius: 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      padding: 6px 14px; font-size: 13px; font-weight: 500; color: #6b7280;
+      background: transparent; border: none; border-radius: 6px; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
     }
+    body.dark-mode .nav-tab { color: #8a96b0; }
     .nav-tab:hover { color: #1a1a2e; background: rgba(79,70,229,0.06); }
-    .nav-tab.active { color: #ffffff; background: #4f46e5; }
-    .nav-right { display: flex; gap: 8px; align-items: center; }
+    body.dark-mode .nav-tab:hover { color: #e8edf5; background: rgba(91,141,239,0.1); }
+    .nav-tab.active { color: #fff; background: #4f46e5; }
+    .nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
     .nav-btn {
-      padding: 6px 14px; font-size: 13px; color: #6b7280;
-      background: #f0f2f5; border: 1px solid #e5e7eb; border-radius: 6px;
-      cursor: pointer; transition: all 0.2s;
+      padding: 6px 12px; font-size: 13px; color: #6b7280; background: #f0f2f5;
+      border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
+    body.dark-mode .nav-btn { background: #1c2333; color: #8a96b0; border-color: #2a3344; }
+    body.dark-mode .nav-btn:hover { color: #e8edf5; border-color: #5b8def; }
     .nav-btn:hover { color: #1a1a2e; border-color: #4f46e5; background: #eef2ff; }
     .app-container { width: 100%; height: calc(100vh - 48px); position: relative; }
     .app-frame { width: 100%; height: 100%; border: none; display: none; }
     .app-frame.active { display: block; }
 
-    /* 设置弹窗 */
     .settings-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.4); z-index: 9999; display: none;
@@ -58,66 +51,44 @@
     }
     .settings-overlay.show { display: flex; }
     .settings-box {
-      background: #ffffff; border-radius: 12px; padding: 24px;
+      background: #fff; border-radius: 12px; padding: 24px;
       width: 480px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
       box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     }
     .settings-box h2 { margin-bottom: 16px; font-size: 18px; color: #1a1a2e; }
     .settings-section { margin-bottom: 20px; }
-    .settings-section-title {
-      font-size: 14px; font-weight: 600; color: #4f46e5;
-      margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb;
-    }
-    .settings-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 0; border-bottom: 1px solid #f0f2f5;
-    }
+    .settings-section-title { font-size: 14px; font-weight: 600; color: #4f46e5; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+    .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f2f5; }
     .settings-item:last-child { border-bottom: none; }
     .settings-label { font-size: 14px; color: #1a1a2e; }
     .settings-desc { font-size: 12px; color: #6b7280; margin-top: 2px; }
-    .toggle-switch {
-      position: relative; width: 40px; height: 22px; background: #d1d5db;
-      border-radius: 11px; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
-    }
+    .toggle-switch { position: relative; width: 40px; height: 22px; background: #d1d5db; border-radius: 11px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
     .toggle-switch.on { background: #4f46e5; }
-    .toggle-switch::after {
-      content: ''; position: absolute; top: 2px; left: 2px;
-      width: 18px; height: 18px; background: #fff; border-radius: 50%;
-      transition: transform 0.2s;
-    }
+    .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
     .toggle-switch.on::after { transform: translateX(18px); }
     .settings-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
-    .settings-btn {
-      padding: 8px 20px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer;
-    }
+    .settings-btn { padding: 8px 20px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; }
     .settings-btn-primary { background: #4f46e5; color: #fff; }
     .settings-btn-secondary { background: #f0f2f5; color: #6b7280; }
-    .settings-input {
-      width: 100%; padding: 8px 12px; font-size: 13px;
-      border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; color: #1a1a2e;
-    }
+    .settings-input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; color: #1a1a2e; }
     .settings-input:focus { border-color: #4f46e5; outline: none; }
-    .bg-preview {
-      width: 100%; height: 60px; border: 1px solid #e5e7eb; border-radius: 6px;
-      margin-top: 8px; background-size: cover; background-position: center;
-    }
+    .bg-preview { width: 100%; height: 60px; border: 1px solid #e5e7eb; border-radius: 6px; margin-top: 8px; background-size: cover; background-position: center; }
     .cloud-status { font-size: 12px; color: #6b7280; margin-top: 6px; }
-
     @media (max-width: 600px) {
-      .brand-title { font-size: 14px; }
-      .nav-tab { padding: 6px 10px; font-size: 12px; }
+      .brand-title { font-size: 13px; }
+      .nav-tab { padding: 5px 8px; font-size: 11px; }
       .nav-btn { padding: 5px 8px; font-size: 11px; }
     }
   </style>
 </head>
 <body>
   <div class="top-nav">
-    <div class="nav-brand">
+    <div class="nav-left">
       <span class="brand-title">XFY工作坊</span>
-    </div>
-    <div class="nav-tabs">
-      <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">剧作-xfy的拉片笔记</button>
-      <button class="nav-tab" data-app="ai" onclick="switchApp('ai')">AI短片创作</button>
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">剧作-xfy的拉片笔记</button>
+        <button class="nav-tab" data-app="ai" onclick="switchApp('ai')">AI短片创作</button>
+      </div>
     </div>
     <div class="nav-right">
       <button class="nav-btn" onclick="openSettings()">⚙️ 设置</button>
@@ -129,31 +100,20 @@
     <iframe class="app-frame" id="app-ai" src="ai-platform.html"></iframe>
   </div>
 
-  <!-- 设置弹窗 -->
   <div class="settings-overlay" id="settingsOverlay">
     <div class="settings-box">
       <h2>⚙️ 平台设置</h2>
-
-      <!-- 布局设置 -->
       <div class="settings-section">
         <div class="settings-section-title">布局设置</div>
         <div class="settings-item">
-          <div>
-            <div class="settings-label">固定布局</div>
-            <div class="settings-desc">刷新后保持当前窗口布局</div>
-          </div>
+          <div><div class="settings-label">固定布局</div><div class="settings-desc">刷新后保持当前窗口布局</div></div>
           <div class="toggle-switch on" id="toggleLayout" onclick="this.classList.toggle('on')"></div>
         </div>
         <div class="settings-item">
-          <div>
-            <div class="settings-label">记住当前页面</div>
-            <div class="settings-desc">刷新后保持上次打开的页面</div>
-          </div>
+          <div><div class="settings-label">记住当前页面</div><div class="settings-desc">刷新后保持上次打开的页面</div></div>
           <div class="toggle-switch on" id="toggleRememberPage" onclick="this.classList.toggle('on')"></div>
         </div>
       </div>
-
-      <!-- 背景图片 -->
       <div class="settings-section">
         <div class="settings-section-title">背景图片 / 皮肤主题</div>
         <div class="settings-item" style="flex-direction:column;align-items:flex-start;">
@@ -167,18 +127,14 @@
           <div class="bg-preview" id="bgPreview"></div>
         </div>
         <div class="settings-item">
-          <div>
-            <div class="settings-label">主题模式</div>
-            <div class="settings-desc">浅色 / 深色 / 跟随背景</div>
-          </div>
+          <div><div class="settings-label">主题模式</div><div class="settings-desc">浅色 / 深色 / 跟随背景</div></div>
           <select class="settings-input" id="themeMode" style="width:120px;" onchange="changeTheme()">
             <option value="light">浅色</option>
+            <option value="dark">深色</option>
             <option value="auto">跟随背景</option>
           </select>
         </div>
       </div>
-
-      <!-- 云端存储 -->
       <div class="settings-section">
         <div class="settings-section-title">云端存储</div>
         <div class="settings-item" style="flex-direction:column;align-items:flex-start;">
@@ -187,17 +143,13 @@
           <input type="password" class="settings-input" id="githubToken" placeholder="ghp_..." style="margin-top:8px;">
         </div>
         <div class="settings-item">
-          <div>
-            <div class="settings-label">云端备份</div>
-            <div class="settings-desc" id="cloudStatus">将所有项目数据上传到GitHub</div>
-          </div>
+          <div><div class="settings-label">云端备份</div><div class="settings-desc" id="cloudStatus">将所有项目数据上传到GitHub</div></div>
           <div style="display:flex;gap:6px;">
             <button class="settings-btn settings-btn-primary" onclick="uploadToCloud()">⬆ 上传</button>
             <button class="settings-btn settings-btn-secondary" onclick="downloadFromCloud()">⬇ 恢复</button>
           </div>
         </div>
       </div>
-
       <div class="settings-actions">
         <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">关闭</button>
         <button class="settings-btn settings-btn-primary" onclick="saveSettings()">保存设置</button>
@@ -209,63 +161,45 @@
     const LAYOUT_KEY = 'xfy_workshop_settings';
     const BG_KEY = 'xfy_workshop_bg';
     const TOKEN_KEY = 'xfy_github_token';
+    const THEME_KEY = 'xfy_theme_mode';
     const REPO = 'xuefy987/lapian-diary';
     const CLOUD_FILE = 'cloud-backup.json';
 
     function loadSettings() {
-      try {
-        const raw = localStorage.getItem(LAYOUT_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch(e) {}
+      try { const raw = localStorage.getItem(LAYOUT_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
       return { activeApp: 'lapian', lockLayout: true, rememberPage: true };
     }
-
-    function saveSettingsData(data) {
-      localStorage.setItem(LAYOUT_KEY, JSON.stringify(data));
-    }
+    function saveSettingsData(data) { localStorage.setItem(LAYOUT_KEY, JSON.stringify(data)); }
 
     function switchApp(app) {
-      document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.app === app);
-      });
-      document.querySelectorAll('.app-frame').forEach(frame => {
-        frame.classList.toggle('active', frame.id === 'app-' + app);
-      });
-      const settings = loadSettings();
-      if (settings.rememberPage) {
-        settings.activeApp = app;
-        saveSettingsData(settings);
-      }
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.app === app));
+      document.querySelectorAll('.app-frame').forEach(f => f.classList.toggle('active', f.id === 'app-' + app));
+      const s = loadSettings();
+      if (s.rememberPage) { s.activeApp = app; saveSettingsData(s); }
+      applyBgToAll();
     }
 
     function openSettings() {
-      const settings = loadSettings();
-      document.getElementById('toggleLayout').classList.toggle('on', settings.lockLayout);
-      document.getElementById('toggleRememberPage').classList.toggle('on', settings.rememberPage);
-      const token = localStorage.getItem(TOKEN_KEY) || '';
-      document.getElementById('githubToken').value = token;
+      const s = loadSettings();
+      document.getElementById('toggleLayout').classList.toggle('on', s.lockLayout);
+      document.getElementById('toggleRememberPage').classList.toggle('on', s.rememberPage);
+      document.getElementById('githubToken').value = localStorage.getItem(TOKEN_KEY) || '';
       const bg = localStorage.getItem(BG_KEY);
       if (bg) document.getElementById('bgPreview').style.backgroundImage = 'url(' + bg + ')';
+      const theme = localStorage.getItem(THEME_KEY) || 'light';
+      document.getElementById('themeMode').value = theme;
       document.getElementById('settingsOverlay').classList.add('show');
     }
-
-    function closeSettings() {
-      document.getElementById('settingsOverlay').classList.remove('show');
-    }
-
+    function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
     function saveSettings() {
-      const settings = {
-        lockLayout: document.getElementById('toggleLayout').classList.contains('on'),
-        rememberPage: document.getElementById('toggleRememberPage').classList.contains('on'),
-        activeApp: loadSettings().activeApp || 'lapian'
-      };
-      saveSettingsData(settings);
-      const token = document.getElementById('githubToken').value.trim();
-      if (token) localStorage.setItem(TOKEN_KEY, token);
+      const s = { lockLayout: document.getElementById('toggleLayout').classList.contains('on'), rememberPage: document.getElementById('toggleRememberPage').classList.contains('on'), activeApp: loadSettings().activeApp || 'lapian' };
+      saveSettingsData(s);
+      const t = document.getElementById('githubToken').value.trim();
+      if (t) localStorage.setItem(TOKEN_KEY, t);
       closeSettings();
     }
 
-    // 背景图片
+    // 背景 & 主题
     function uploadBackground(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -273,39 +207,35 @@
       reader.onload = function(e) {
         localStorage.setItem(BG_KEY, e.target.result);
         document.getElementById('bgPreview').style.backgroundImage = 'url(' + e.target.result + ')';
-        applyBackgroundToAll();
+        applyBgToAll();
       };
       reader.readAsDataURL(file);
     }
-
     function clearBackground() {
       localStorage.removeItem(BG_KEY);
       document.getElementById('bgPreview').style.backgroundImage = '';
-      applyBackgroundToAll();
+      applyBgToAll();
     }
-
     function changeTheme() {
       const mode = document.getElementById('themeMode').value;
-      localStorage.setItem('xfy_theme_mode', mode);
-      applyBackgroundToAll();
+      localStorage.setItem(THEME_KEY, mode);
+      applyTheme();
     }
-
-    function applyBackgroundToAll() {
+    function applyTheme() {
+      const mode = localStorage.getItem(THEME_KEY) || 'light';
+      document.body.classList.toggle('dark-mode', mode === 'dark');
+      const bg = localStorage.getItem(BG_KEY);
+      // 告诉所有iframe应用主题
+      try {
+        document.getElementById('app-ai').contentWindow.postMessage({ type: 'theme', mode: mode }, '*');
+        document.getElementById('app-lapian').contentWindow.postMessage({ type: 'theme', mode: mode }, '*');
+      } catch(e) {}
+    }
+    function applyBgToAll() {
       const bg = localStorage.getItem(BG_KEY);
       try {
-        const aiFrame = document.getElementById('app-ai').contentWindow;
-        const lpFrame = document.getElementById('app-lapian').contentWindow;
-        if (bg) {
-          if (aiFrame) {
-            aiFrame.postMessage({ type: 'setBg', bg: bg }, '*');
-          }
-          if (lpFrame) {
-            lpFrame.postMessage({ type: 'setBg', bg: bg }, '*');
-          }
-        } else {
-          if (aiFrame) aiFrame.postMessage({ type: 'clearBg' }, '*');
-          if (lpFrame) lpFrame.postMessage({ type: 'clearBg' }, '*');
-        }
+        document.getElementById('app-ai').contentWindow.postMessage({ type: bg ? 'setBg' : 'clearBg', bg: bg }, '*');
+        document.getElementById('app-lapian').contentWindow.postMessage({ type: bg ? 'setBg' : 'clearBg', bg: bg }, '*');
       } catch(e) {}
     }
 
@@ -314,108 +244,44 @@
       const token = document.getElementById('githubToken').value.trim();
       if (!token) { alert('请先输入GitHub Token'); return; }
       localStorage.setItem(TOKEN_KEY, token);
-      const statusEl = document.getElementById('cloudStatus');
-      statusEl.textContent = '正在上传...';
-      statusEl.style.color = '#4f46e5';
-
+      const st = document.getElementById('cloudStatus');
+      st.textContent = '正在上传...'; st.style.color = '#4f46e5';
       try {
-        // 收集两个平台的所有数据
-        const allData = {
-          lapian: localStorage.getItem('lapian_platform_v2'),
-          lapianHistory: localStorage.getItem('lapian_platform_history'),
-          aiProjects: localStorage.getItem('ai_drama_projects'),
-          timestamp: Date.now()
-        };
+        const allData = { lapian: localStorage.getItem('lapian_platform_v2'), lapianHistory: localStorage.getItem('lapian_platform_history'), aiProjects: localStorage.getItem('ai_drama_projects'), timestamp: Date.now() };
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
-
-        // 获取现有文件的SHA（如果存在）
         let sha = null;
-        try {
-          const resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + CLOUD_FILE, {
-            headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
-          });
-          if (resp.ok) {
-            const data = await resp.json();
-            sha = data.sha;
-          }
-        } catch(e) {}
-
+        try { const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } }); if (r.ok) { const d = await r.json(); sha = d.sha; } } catch(e) {}
         const body = { message: 'Cloud backup ' + new Date().toLocaleString(), content: content };
         if (sha) body.sha = sha;
-
-        const resp2 = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + CLOUD_FILE, {
-          method: 'PUT',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-
-        if (resp2.ok) {
-          statusEl.textContent = '上传成功！';
-          statusEl.style.color = '#10b981';
-        } else {
-          const err = await resp2.json();
-          statusEl.textContent = '上传失败: ' + (err.message || '未知错误');
-          statusEl.style.color = '#ef4444';
-        }
-      } catch(err) {
-        statusEl.textContent = '上传失败: ' + err.message;
-        statusEl.style.color = '#ef4444';
-      }
+        const r2 = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { method: 'PUT', headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (r2.ok) { st.textContent = '上传成功！'; st.style.color = '#10b981'; }
+        else { const e = await r2.json(); st.textContent = '失败: ' + (e.message||''); st.style.color = '#ef4444'; }
+      } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }
     }
-
     async function downloadFromCloud() {
       const token = document.getElementById('githubToken').value.trim();
       if (!token) { alert('请先输入GitHub Token'); return; }
       localStorage.setItem(TOKEN_KEY, token);
-      const statusEl = document.getElementById('cloudStatus');
-      statusEl.textContent = '正在恢复...';
-      statusEl.style.color = '#4f46e5';
-
+      const st = document.getElementById('cloudStatus');
+      st.textContent = '正在恢复...'; st.style.color = '#4f46e5';
       try {
-        const resp = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + CLOUD_FILE, {
-          headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
-        });
-
-        if (resp.ok) {
-          const data = await resp.json();
-          const content = decodeURIComponent(escape(atob(data.content)));
-          const allData = JSON.parse(content);
-
-          if (allData.lapian) localStorage.setItem('lapian_platform_v2', allData.lapian);
-          if (allData.lapianHistory) localStorage.setItem('lapian_platform_history', allData.lapianHistory);
-          if (allData.aiProjects) localStorage.setItem('ai_drama_projects', allData.aiProjects);
-
-          statusEl.textContent = '恢复成功！请刷新页面生效';
-          statusEl.style.color = '#10b981';
-        } else {
-          statusEl.textContent = '未找到云端备份';
-          statusEl.style.color = '#f59e0b';
-        }
-      } catch(err) {
-        statusEl.textContent = '恢复失败: ' + err.message;
-        statusEl.style.color = '#ef4444';
-      }
+        const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } });
+        if (r.ok) {
+          const d = await r.json(); const c = decodeURIComponent(escape(atob(d.content))); const a = JSON.parse(c);
+          if (a.lapian) localStorage.setItem('lapian_platform_v2', a.lapian);
+          if (a.lapianHistory) localStorage.setItem('lapian_platform_history', a.lapianHistory);
+          if (a.aiProjects) localStorage.setItem('ai_drama_projects', a.aiProjects);
+          st.textContent = '恢复成功！请刷新页面'; st.style.color = '#10b981';
+        } else { st.textContent = '未找到云端备份'; st.style.color = '#f59e0b'; }
+      } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }
     }
 
     // 初始化
     const settings = loadSettings();
     if (settings.activeApp) switchApp(settings.activeApp);
-
-    // 等待iframe加载后应用背景
-    window.addEventListener('load', function() {
-      setTimeout(applyBackgroundToAll, 1000);
-    });
-
-    // 监听iframe消息
-    window.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'ready') {
-        applyBackgroundToAll();
-      }
-    });
+    applyTheme();
+    window.addEventListener('load', function() { setTimeout(function() { applyBgToAll(); applyTheme(); }, 1500); });
+    window.addEventListener('message', function(e) { if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); } });
   </script>
 </body>
 </html>
