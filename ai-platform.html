@@ -3639,6 +3639,7 @@ function getStoredProjects() {
 
 function setStoredProjects(list) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e) { showToast('存储失败: 可能超出限制'); }
+  localStorage.setItem('xfy_ai_modified', String(Date.now()));
   // 通知父页面数据已变化，触发云端自动备份
   try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
 }
