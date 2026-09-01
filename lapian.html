@@ -791,6 +791,12 @@
   #historyPreviewModal { align-items: flex-start; justify-content: flex-start; padding: 30px; }
   #historyPreviewModal.show { display: block; }
 
+  /* 版本对比弹窗手机端竖排 */
+  @media (max-width: 640px) {
+    #versionCompareModal > .modal { max-width: 95vw; }
+    #versionCompareModal > .modal > div:nth-child(3) { flex-direction: column !important; }
+  }
+
   /* 差异高亮 */
   .diff-added { background: rgba(34,197,94,0.18); border-left: 3px solid #22c55e; padding: 2px 4px; margin: 2px 0; border-radius: 2px; }
   .diff-removed { background: rgba(239,68,68,0.18); border-left: 3px solid #ef4444; padding: 2px 4px; margin: 2px 0; border-radius: 2px; text-decoration: line-through; opacity: 0.7; }
@@ -1010,6 +1016,33 @@
     .main-header .btn-icon.mobile-menu-btn { width: 36px; height: 36px; font-size: 15px; background: var(--bg3); border-radius: 8px; }
     .film-title-input { font-size: 15px !important; }
     .sidebar-right { width: 92%; max-width: 360px; }
+    /* 手机端隐藏不常用按钮，避免遮挡面板按钮 */
+    .main-header .btn.btn-secondary[data-mobile-hide="true"] { display: none; }
+    /* 浮动面板按钮 */
+    .fab-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .fab-panel.show { display: flex; }
+  }
+  /* 平板端也显示浮动按钮 */
+  @media (max-width: 1024px) {
+    .fab-panel { display: flex; }
   }
 
   /* 空状态 */
@@ -1052,22 +1085,26 @@
   <!-- ========== 中间主编辑区 ========== -->
   <main class="main-content">
     <div class="main-header">
-      <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
         <button class="btn-icon mobile-menu-btn" onclick="toggleLeftSidebar()">☰</button>
         <input type="text" class="film-title-input" id="filmTitleInput" placeholder="请输入影片名称" oninput="updateFilmTitle()">
+        <input type="text" class="film-duration-input" id="filmDurationInput" placeholder="片长" oninput="updateFilmDuration()" style="width:80px;flex-shrink:0;padding:6px 10px;border:1px solid var(--rule);border-radius:6px;font-size:13px;background:var(--bg1);color:var(--ink);" title="影片时长（如 120分钟）">
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
         <button class="btn-icon mobile-menu-btn" onclick="toggleRightSidebar()">📊 面板</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('wpsFile').click()">📄 导入WPS</button>
+        <button class="btn btn-secondary" data-mobile-hide="true" onclick="document.getElementById('wpsFile').click()">📄 导入WPS</button>
         <input type="file" id="wpsFile" style="display: none;" accept=".docx,.doc,.txt" onchange="importWPSDocument(event)">
         <button class="btn btn-primary" onclick="manualSave()">💾 保存</button>
-        <button class="btn btn-secondary" onclick="openHistoryModal()">📜 历史</button>
-        <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
+        <button class="btn btn-secondary" data-mobile-hide="true" onclick="openHistoryModal()">📜 历史</button>
+        <button class="btn btn-secondary" data-mobile-hide="true" onclick="openModal('exportFormatModal')">📤 导出</button>
+        <button class="btn btn-secondary" data-mobile-hide="true" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
         <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
       </div>
     </div>
+
+    <!-- 浮动面板按钮（手机/平板） -->
+    <button class="fab-panel" onclick="toggleRightSidebar()" title="打开事件面板">📊</button>
 
     <!-- 工具栏 -->
     <div class="toolbar">
@@ -1283,6 +1320,35 @@
   </div>
 </div>
 
+<!-- 版本对比弹窗 -->
+<div class="modal-overlay" id="versionCompareModal" style="z-index:10001;">
+  <div class="modal" style="max-width:700px;">
+    <h2>📋 版本对比</h2>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
+      检测到两个不同的数据版本，请对比后选择恢复。左侧为<b>版本A</b>（较新），右侧为<b>版本B</b>（较旧）。
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;border:1px solid var(--rule);border-radius:8px;overflow:hidden;">
+        <div style="padding:8px 12px;background:var(--bg3);font-weight:600;font-size:13px;border-bottom:1px solid var(--rule);">
+          版本A <span id="versionATime" style="font-weight:400;color:var(--muted);"></span>
+        </div>
+        <div id="versionAContent" style="max-height:300px;overflow-y:auto;padding:12px;font-size:12px;line-height:1.5;"></div>
+      </div>
+      <div style="flex:1;border:1px solid var(--rule);border-radius:8px;overflow:hidden;">
+        <div style="padding:8px 12px;background:var(--bg3);font-weight:600;font-size:13px;border-bottom:1px solid var(--rule);">
+          版本B <span id="versionBTime" style="font-weight:400;color:var(--muted);"></span>
+        </div>
+        <div id="versionBContent" style="max-height:300px;overflow-y:auto;padding:12px;font-size:12px;line-height:1.5;"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="restoreVersionA()">恢复版本A</button>
+      <button class="btn btn-secondary" onclick="restoreVersionB()">恢复版本B</button>
+      <button class="btn btn-secondary" onclick="closeModal('versionCompareModal')">跳过</button>
+    </div>
+  </div>
+</div>
+
 <!-- 导出格式选择模态框 -->
 <div class="modal-overlay" id="exportFormatModal">
   <div class="modal" style="max-width:380px;">
@@ -1409,9 +1475,25 @@ function init() {
   document.addEventListener('change', function() { dataDirty = true; });
   // 页面关闭前保存（仅当有未保存的修改时）
   window.addEventListener('beforeunload', function() {
-    if (dataDirty) saveData();
+    if (dataDirty) {
+      // 检查是否与最近的版本不同
+      var history = loadHistory();
+      if (history.length > 0) {
+        var lastDataStr = JSON.stringify(history[0].data);
+        var currentDataStr = JSON.stringify(appData);
+        if (lastDataStr !== currentDataStr) {
+          // 与最近版本不同，保存当前版本
+          saveToHistory('关闭时自动保存');
+        }
+      } else {
+        saveToHistory('关闭时自动保存');
+      }
+      saveData();
+    }
   });
   updateSaveStatus();
+  // 页面加载后检查版本冲突
+  setTimeout(checkVersionConflict, 500);
 }
 
 // ==================== 数据持久化 ====================
@@ -1503,8 +1585,26 @@ function renderFilmList() {
 }
 
 function updateFilmDuration(filmId, duration) {
-  var film = appData.films.find(f => f.id === filmId);
-  if (film) { film.duration = duration; saveData(); }
+  // 兼容左侧列表的调用方式
+  if (filmId) {
+    var film = appData.films.find(f => f.id === filmId);
+    if (film) { film.duration = duration; dataDirty = true; saveData(); }
+  }
+}
+
+// 头部片长输入框的实时更新
+function updateFilmDuration() {
+  var film = getCurrentFilm();
+  if (!film) return;
+  var durInput = document.getElementById('filmDurationInput');
+  if (durInput && film.duration !== durInput.value) {
+    film.duration = durInput.value;
+    dataDirty = true;
+    saveData();
+    // 同步更新左侧列表中的时长
+    var listDur = document.querySelector('.film-item.active .film-item-duration');
+    if (listDur) listDur.value = durInput.value;
+  }
 }
 
 function selectFilm(filmId) {
@@ -1525,6 +1625,7 @@ function updateFilmTitle() {
   const film = getCurrentFilm();
   if (film) {
     film.name = document.getElementById('filmTitleInput').value || '未命名影片';
+    dataDirty = true;
     saveData();
     // 更新左侧列表显示但不重渲染中间
     const items = document.querySelectorAll('.film-item');
@@ -1603,9 +1704,11 @@ function renderCurrentFilm() {
   const film = getCurrentFilm();
   const contentEl = document.getElementById('lapianContent');
   const titleInput = document.getElementById('filmTitleInput');
+  const durationInput = document.getElementById('filmDurationInput');
 
   if (!film) {
     titleInput.value = '';
+    if (durationInput) durationInput.value = '';
     contentEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎬</div><div class="empty-state-text">选择或创建一个影片开始拉片</div></div>';
     document.getElementById('plotSummary').innerHTML = '';
     document.getElementById('characters').innerHTML = '';
@@ -1615,6 +1718,7 @@ function renderCurrentFilm() {
   }
 
   titleInput.value = film.name;
+  if (durationInput) durationInput.value = film.duration || '';
   document.getElementById('plotSummary').innerHTML = film.plotSummary || '';
   document.getElementById('characters').innerHTML = film.characters || '';
   document.getElementById('theme').innerHTML = film.theme || '';
@@ -2762,8 +2866,9 @@ function renderPreviewContent(item, showDiff) {
       deletedFilms.forEach(function(film) {
         html += '<div class="diff-removed" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
         html += '<span class="diff-badge diff-badge-removed">删除</span> ';
-        html += '<span style="font-weight:600;">' + (film.name || '未命名') + '</span>';
-        html += '<span style="font-size:11px;margin-left:6px;">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
+        html += '<span style="font-weight:700;font-size:14px;background:rgba(239,68,68,0.2);padding:2px 6px;border-radius:4px;text-decoration:line-through;">' + (film.name || '未命名') + '</span>';
+        html += '<span style="font-size:11px;color:#ef4444;font-weight:600;margin-left:4px;">（已删除）</span>';
+        html += '<span style="font-size:11px;margin-left:6px;color:var(--muted);">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
         html += '</div>';
       });
     }
@@ -2804,14 +2909,29 @@ function renderPreviewContent(item, showDiff) {
       
       var diffClass = '';
       var diffBadge = '';
+      var nameHighlight = '';
+      var nameAnnotation = '';
       if (showDiff) {
-        if (isAdded) { diffClass = 'diff-added'; diffBadge = '<span class="diff-badge diff-badge-added">新增</span> '; }
-        else if (isChanged) { diffClass = 'diff-changed'; diffBadge = '<span class="diff-badge diff-badge-changed">修改</span> '; }
+        if (isAdded) { 
+          diffClass = 'diff-added'; 
+          diffBadge = '<span class="diff-badge diff-badge-added">新增</span> '; 
+          nameHighlight = 'background:rgba(34,197,94,0.25);padding:2px 6px;border-radius:4px;';
+          nameAnnotation = ' <span style="font-size:11px;color:#22c55e;font-weight:600;">（新增片名）</span>';
+        }
+        else if (isChanged) { 
+          diffClass = 'diff-changed'; 
+          diffBadge = '<span class="diff-badge diff-badge-changed">修改</span> '; 
+          nameHighlight = 'background:rgba(251,191,36,0.25);padding:2px 6px;border-radius:4px;';
+          if (currentFilm && currentFilm.name !== film.name) {
+            nameAnnotation = ' <span style="font-size:11px;color:#fbbf24;">（当前名: ' + (currentFilm.name || '无') + '）</span>';
+          }
+        }
       }
       
       html += '<div class="' + diffClass + '" style="margin-bottom:12px;padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);">';
       html += diffBadge;
-      html += '<span style="font-weight:600;font-size:14px;color:var(--ink);">' + (idx+1) + '. ' + (film.name || '未命名') + '</span>';
+      html += '<span style="font-weight:700;font-size:15px;color:var(--ink);' + nameHighlight + '">' + (film.name || '未命名') + '</span>';
+      html += nameAnnotation;
       if (film.duration) html += ' <span style="font-size:12px;color:var(--muted);">⏱ ' + film.duration + '</span>';
       if (showDiff && currentFilm && currentFilm.duration !== film.duration) {
         html += ' <span style="font-size:11px;color:#fbbf24;">(当前: ' + (currentFilm.duration || '无') + ')</span>';
@@ -2937,8 +3057,9 @@ function renderPreviewContent(item, showDiff) {
       addedFilms.forEach(function(film) {
         html += '<div class="diff-added" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
         html += '<span class="diff-badge diff-badge-added">新增</span> ';
-        html += '<span style="font-weight:600;">' + (film.name || '未命名') + '</span>';
-        html += '<span style="font-size:11px;margin-left:6px;">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
+        html += '<span style="font-weight:700;font-size:14px;background:rgba(34,197,94,0.25);padding:2px 6px;border-radius:4px;">' + (film.name || '未命名') + '</span>';
+        html += '<span style="font-size:11px;color:#22c55e;font-weight:600;margin-left:4px;">（新增片名）</span>';
+        html += '<span style="font-size:11px;margin-left:6px;color:var(--muted);">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
         html += '</div>';
       });
     }
@@ -3268,7 +3389,7 @@ window.addEventListener('message', function(e) {
     localStorage.setItem('xfy_lapian_modified', String(Date.now()));
     dataDirty = false;
     renderFilmList();
-    if (currentFilmId) loadFilm(currentFilmId);
+    renderCurrentFilm();
     showToast('已从云端同步最新数据');
   }
 });
@@ -3312,6 +3433,117 @@ document.addEventListener('visibilitychange', function() {
     checkFreshness();
   }
 });
+
+// ==================== 关闭时版本对比 ====================
+var pendingVersionA = null;
+var pendingVersionB = null;
+
+function checkVersionConflict() {
+  var history = loadHistory();
+  if (history.length < 2) return;
+  
+  var v1 = history[0]; // 最新
+  var v2 = history[1]; // 次新
+  
+  // 只在24小时内的版本之间对比
+  var now = Date.now();
+  if (now - v1.timestamp > 24 * 60 * 60 * 1000) return;
+  if (now - v2.timestamp > 24 * 60 * 60 * 1000) return;
+  
+  // 如果两个版本数据相同，不弹窗
+  if (JSON.stringify(v1.data) === JSON.stringify(v2.data)) return;
+  
+  // 如果已经检查过，不重复弹窗
+  var lastChecked = localStorage.getItem('xfy_version_compare_checked');
+  if (lastChecked && parseInt(lastChecked) >= v1.timestamp) return;
+  
+  pendingVersionA = v1;
+  pendingVersionB = v2;
+  showVersionCompareDialog(v1, v2);
+}
+
+function showVersionCompareDialog(vA, vB) {
+  document.getElementById('versionATime').textContent = '(' + new Date(vA.timestamp).toLocaleString() + ' - ' + vA.type + ')';
+  document.getElementById('versionBTime').textContent = '(' + new Date(vB.timestamp).toLocaleString() + ' - ' + vB.type + ')';
+  document.getElementById('versionAContent').innerHTML = renderVersionSummary(vA.data, vB.data);
+  document.getElementById('versionBContent').innerHTML = renderVersionSummary(vB.data, vA.data);
+  document.getElementById('versionCompareModal').classList.add('show');
+}
+
+function renderVersionSummary(data, compareData) {
+  var films = data.films || [];
+  var compareFilms = compareData.films || [];
+  var html = '';
+  
+  if (films.length === 0) return '<div style="color:var(--muted);text-align:center;padding:20px;">无影片</div>';
+  
+  films.forEach(function(film, idx) {
+    // 检查此影片在对比版本中是否存在
+    var compareFilm = compareFilms.find(function(f) { return f.id === film.id || f.name === film.name; });
+    var isNew = !compareFilm;
+    var isChanged = compareFilm && JSON.stringify(film) !== JSON.stringify(compareFilm);
+    
+    var badge = '';
+    var bgStyle = '';
+    if (isNew) { badge = '<span class="diff-badge diff-badge-added">新增</span> '; bgStyle = 'background:rgba(34,197,94,0.08);'; }
+    else if (isChanged) { badge = '<span class="diff-badge diff-badge-changed">修改</span> '; bgStyle = 'background:rgba(251,191,36,0.08);'; }
+    
+    html += '<div style="margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid var(--rule);' + bgStyle + '">';
+    html += badge;
+    html += '<span style="font-weight:600;font-size:13px;color:var(--ink);">' + (idx+1) + '. ' + (film.name || '未命名') + '</span>';
+    if (film.duration) html += ' <span style="font-size:11px;color:var(--muted);">⏱' + film.duration + '</span>';
+    html += '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + (film.rows ? film.rows.length : 0) + ' 行';
+    if (film.events && film.events.length > 0) html += ' · ' + film.events.length + ' 事件';
+    html += '</div>';
+    // 显示前3行内容
+    if (film.rows && film.rows.length > 0) {
+      film.rows.slice(0, 3).forEach(function(row) {
+        var text = (row.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 50);
+        html += '<div style="font-size:10px;color:var(--muted);padding:1px 0 1px 8px;border-left:2px solid var(--rule);margin:2px 0;">';
+        html += (row.number || '?') + '. ' + text + '</div>';
+      });
+      if (film.rows.length > 3) html += '<div style="font-size:10px;color:var(--muted);">...还有' + (film.rows.length - 3) + '行</div>';
+    }
+    html += '</div>';
+  });
+  
+  // 显示对比版本中有但当前版本没有的影片（已删除）
+  var deletedFilms = compareFilms.filter(function(cf) {
+    return !films.find(function(f) { return f.id === cf.id || f.name === cf.name; });
+  });
+  deletedFilms.forEach(function(film) {
+    html += '<div style="margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid var(--rule);background:rgba(239,68,68,0.06);">';
+    html += '<span class="diff-badge diff-badge-removed">已删除</span> ';
+    html += '<span style="font-weight:600;font-size:13px;color:var(--muted);text-decoration:line-through;">' + (film.name || '未命名') + '</span>';
+    html += '</div>';
+  });
+  
+  return html;
+}
+
+function restoreVersionA() {
+  if (!pendingVersionA) return;
+  saveToHistory('恢复前自动保存');
+  appData = JSON.parse(JSON.stringify(pendingVersionA.data));
+  saveData();
+  renderFilmList();
+  renderCurrentFilm();
+  closeModal('versionCompareModal');
+  localStorage.setItem('xfy_version_compare_checked', String(Date.now()));
+  showToast('已恢复版本A: ' + new Date(pendingVersionA.timestamp).toLocaleString());
+}
+
+function restoreVersionB() {
+  if (!pendingVersionB) return;
+  saveToHistory('恢复前自动保存');
+  appData = JSON.parse(JSON.stringify(pendingVersionB.data));
+  saveData();
+  renderFilmList();
+  renderCurrentFilm();
+  closeModal('versionCompareModal');
+  localStorage.setItem('xfy_version_compare_checked', String(Date.now()));
+  showToast('已恢复版本B: ' + new Date(pendingVersionB.timestamp).toLocaleString());
+}
 </script>
 </body>
 </html>
