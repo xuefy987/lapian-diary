@@ -3640,6 +3640,7 @@ function getStoredProjects() {
 function setStoredProjects(list) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e) { showToast('存储失败: 可能超出限制'); }
   localStorage.setItem('xfy_ai_modified', String(Date.now()));
+  localStorage.setItem('xfy_ai_local_ver', String(Date.now()));
   // 通知父页面数据已变化，触发云端自动备份
   try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
 }
@@ -7828,9 +7829,25 @@ window.addEventListener('message', function(e) {
   } else if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
+  } else if (e.data.type === 'cloudVersion') {
+    // 收到父页面推送的云端版本
+    var cloudVer = e.data.timestamp || 0;
+    var localVer = parseInt(localStorage.getItem('xfy_ai_local_ver') || '0');
+    if (cloudVer > localVer && !window._aiFreshnessAck) {
+      // 云端有更新，提示用户
+      var ack = confirm('⚠ 检测到其他设备有更新的AI短片数据（更新时间: ' + new Date(cloudVer).toLocaleString() + '）\n当前页面可能不是最新版本。\n\n点击"确定"立即同步，点击"取消"继续操作');
+      if (ack) {
+        try { window.parent.postMessage({ type: 'requestSync' }, '*'); } catch(e) {}
+      } else {
+        window._aiFreshnessAck = true;
+      }
+    }
   } else if (e.data.type === 'cloudRestored') {
     // 云端数据已更新，重新加载
     aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
+    var aiRestoredTs = e.data.timestamp || Date.now();
+    localStorage.setItem('xfy_ai_local_ver', String(aiRestoredTs));
+    window._aiFreshnessAck = false;
     projectList = getStoredProjects();
     renderProjectList();
     var currentName = project ? project.name : '';
