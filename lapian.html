@@ -114,10 +114,10 @@
     padding: 10px 12px;
     border-radius: 6px;
     cursor: pointer;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 4px;
     transition: background 0.15s;
   }
 
@@ -129,11 +129,41 @@
     font-weight: 500;
   }
 
+  .film-item-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
   .film-item-title {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .film-item-duration {
+    width: 56px;
+    font-size: 11px;
+    padding: 2px 4px;
+    border: 1px solid var(--border, #ddd);
+    border-radius: 4px;
+    background: var(--bg2, #f5f5f5);
+    color: var(--text, #333);
+    text-align: center;
+    outline: none;
+    touch-action: manipulation;
+  }
+
+  .film-item-duration:focus {
+    border-color: var(--accent, #3b82f6);
+  }
+
+  .film-item-meta {
+    font-size: 11px;
+    color: var(--muted, #999);
+    padding-left: 2px;
   }
 
   .film-item-actions { display: none; gap: 2px; }
@@ -1072,6 +1102,7 @@
   <div class="modal">
     <h2>新建拉片文档</h2>
     <input type="text" class="modal-input" id="newFilmName" placeholder="请输入影片名称" onkeydown="if(event.key==='Enter')createNewFilm()">
+    <input type="text" class="modal-input" id="newFilmDuration" placeholder="影片时长（如：120分钟）" style="margin-top: 8px;" onkeydown="if(event.key==='Enter')createNewFilm()">
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newFilmModal')">取消</button>
       <button class="btn btn-primary" onclick="createNewFilm()">创建</button>
@@ -1284,6 +1315,8 @@ function initDefaultData() {
     films: [{
       id: id,
       name: '示例 - 肖申克的救赎',
+      duration: '142分钟',
+      createTime: Date.now(),
       rows: [
         { id: generateId(), number: 1, startTime: '00:00:00', endTime: '00:05:30', content: '<p><strong>开场 - 法庭审判</strong></p><p>影片开场以法庭审判场景切入，通过安迪的面部特写与法官的全景镜头交替，建立起主人公被冤枉的核心冲突。</p>', eventId: null, comments: [] },
         { id: generateId(), number: 2, startTime: '00:05:30', endTime: '00:15:00', content: '<p>安迪初入肖申克监狱，镜头语言从冷色调的外部环境逐渐过渡到暖色调的监狱内部，暗示人物命运的转变。</p>', eventId: null, comments: [] },
@@ -1312,16 +1345,30 @@ function renderFilmList() {
     renderCurrentFilm();
     return;
   }
-  listEl.innerHTML = appData.films.map(film => `
+  listEl.innerHTML = appData.films.map(film => {
+    var ct = film.createTime ? new Date(film.createTime) : null;
+    var dateStr = ct ? String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0') + ' ' + String(ct.getHours()).padStart(2,'0') + ':' + String(ct.getMinutes()).padStart(2,'0') : '';
+    var dur = film.duration || '';
+    return `
     <div class="film-item ${film.id === appData.currentFilmId ? 'active' : ''}" onclick="selectFilm('${film.id}')">
-      <span class="film-item-title">🎬 ${film.name}</span>
-      <div class="film-item-actions">
-        <button class="btn-icon" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="重命名">✏️</button>
-        <button class="btn-icon" onclick="event.stopPropagation();deleteFilm('${film.id}')" title="删除">🗑️</button>
+      <div class="film-item-main">
+        <span class="film-item-title">🎬 ${film.name}</span>
+        <input class="film-item-duration" type="text" value="${dur}" placeholder="时长" onclick="event.stopPropagation()" oninput="updateFilmDuration('${film.id}', this.value)" title="影片时长">
+        <div class="film-item-actions">
+          <button class="btn-icon" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="重命名">✏️</button>
+          <button class="btn-icon" onclick="event.stopPropagation();deleteFilm('${film.id}')" title="删除">🗑️</button>
+        </div>
       </div>
+      ${dateStr ? '<div class="film-item-meta">📅 创建: ' + dateStr + '</div>' : ''}
     </div>
-  `).join('');
+    `;
+  }).join('');
   renderCurrentFilm();
+}
+
+function updateFilmDuration(filmId, duration) {
+  var film = appData.films.find(f => f.id === filmId);
+  if (film) { film.duration = duration; saveData(); }
 }
 
 function selectFilm(filmId) {
@@ -1355,6 +1402,7 @@ function updateFilmTitle() {
 
 function openNewFilmModal() {
   document.getElementById('newFilmName').value = '';
+  document.getElementById('newFilmDuration').value = '';
   document.getElementById('newFilmModal').classList.add('show');
   document.getElementById('newFilmName').focus();
 }
@@ -1362,9 +1410,12 @@ function openNewFilmModal() {
 function createNewFilm() {
   const name = document.getElementById('newFilmName').value.trim();
   if (!name) { showToast('请输入影片名称'); return; }
+  const duration = document.getElementById('newFilmDuration').value.trim();
   const newFilm = {
     id: generateId(),
     name: name,
+    duration: duration,
+    createTime: Date.now(),
     rows: [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [] }],
     events: [],
     plotSummary: '',
