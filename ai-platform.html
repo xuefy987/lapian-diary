@@ -7830,6 +7830,7 @@ window.addEventListener('message', function(e) {
     applyPageTheme();
   } else if (e.data.type === 'cloudRestored') {
     // 云端数据已更新，重新加载
+    aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
     projectList = getStoredProjects();
     renderProjectList();
     var currentName = project ? project.name : '';
@@ -7952,14 +7953,18 @@ async function aiCloudRestore() {
 
 function aiStartAutoBackup() {
   if (aiAutoBackupTimer) clearInterval(aiAutoBackupTimer);
+  var freq = parseInt(localStorage.getItem('xfy_backup_freq') || '3');
+  if (freq === 0) { aiSetCloudStatus('自动备份已关闭', 'var(--warning)'); return; }
+  // AI平台不再直接写云端，而是通知父页面统一处理（避免双写冲突）
   aiAutoBackupTimer = setInterval(function() {
-    var token = aiGetToken();
-    if (!token) return;
     var currentData = localStorage.getItem(STORAGE_KEY) || '';
     if (currentData && currentData !== aiLastBackupData && currentData.length > 10) {
-      aiCloudBackup();
+      // 通知父页面数据变化，由父页面统一备份到云端
+      try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
+      aiLastBackupData = currentData;
     }
-  }, 5 * 60 * 1000);
+  }, Math.max(freq, 30) * 1000); // 至少30秒检查一次
+  aiSetCloudStatus('自动备份已启用（通过主平台统一同步）', 'var(--muted)');
 }
 
 window.addEventListener('load', function() {
@@ -7967,7 +7972,7 @@ window.addEventListener('load', function() {
     aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
     aiStartAutoBackup();
     if (aiGetToken()) {
-      aiSetCloudStatus('自动备份已启用 (每5分钟)', 'var(--muted)');
+      aiSetCloudStatus('自动备份已启用（通过主平台统一同步）', 'var(--muted)');
     } else {
       aiSetCloudStatus('未设Token，请在设置中输入', 'var(--warning)');
     }
