@@ -121,6 +121,7 @@
       </div>
     </div>
     <div class="nav-right">
+      <button class="nav-btn" onclick="syncNow()" id="navSyncBtn" style="color:#4f46e5;border-color:#4f46e5;background:#eef2ff;">🔄 同步</button>
       <button class="nav-btn" onclick="openSettings()">⚙️ 设置</button>
     </div>
   </div>
@@ -549,23 +550,24 @@
     }
 
     async function syncNow() {
+      var btn = document.getElementById('navSyncBtn');
       var el = document.getElementById('syncNowStatus');
-      el.textContent = '正在同步...';
-      el.style.color = '#4f46e5';
+      if (btn) { btn.textContent = '🔄 同步中...'; btn.style.opacity = '0.7'; }
+      if (el) { el.textContent = '正在同步...'; el.style.color = '#4f46e5'; }
       try {
         var restored = await autoCloudRestore();
+        var msg;
         if (restored) {
-          el.textContent = '✓ 已同步最新数据';
-          el.style.color = '#10b981';
+          msg = '✓ 已同步最新数据';
         } else {
-          // 如果恢复没有变化，主动上传本地数据到云端
           await autoCloudBackup();
-          el.textContent = '✓ 本地数据已上传到云端';
-          el.style.color = '#10b981';
+          msg = '✓ 本地数据已上传到云端';
         }
+        if (el) { el.textContent = msg; el.style.color = '#10b981'; }
+        if (btn) { btn.textContent = '✓ 已同步'; btn.style.opacity = '1'; setTimeout(function() { btn.textContent = '🔄 同步'; }, 2000); }
       } catch(e) {
-        el.textContent = '同步失败: ' + e.message;
-        el.style.color = '#ef4444';
+        if (el) { el.textContent = '同步失败: ' + e.message; el.style.color = '#ef4444'; }
+        if (btn) { btn.textContent = '🔄 同步'; btn.style.opacity = '1'; }
       }
     }
 
