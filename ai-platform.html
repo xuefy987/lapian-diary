@@ -3085,6 +3085,14 @@
       <button class="btn btn-secondary btn-sm" onclick="pickSaveFolder()">📁 选择保存文件夹</button>
     </div>
 
+    <div class="sidebar-cloud-section" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);">
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="aiCloudBackup()" id="aiCloudBackupBtn" style="flex:1;touch-action:manipulation;">☁️ 云端备份</button>
+        <button class="btn btn-secondary btn-sm" onclick="aiCloudRestore()" id="aiCloudRestoreBtn" style="flex:1;touch-action:manipulation;">⬇️ 云端恢复</button>
+      </div>
+      <div id="aiCloudStatus" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center;"></div>
+    </div>
+
     <div class="sidebar-save-status">
       <span class="folder-status connected" id="folderStatus"><span class="save-dot" style="background:var(--success)"></span> 已连接: 项目存储</span>
       <span class="save-indicator" id="saveIndicator"></span>
@@ -7818,6 +7826,137 @@ window.addEventListener('message', function(e) {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
   }
+});
+
+// ============ CLOUD BACKUP (AI平台专用) ============
+var AI_CLOUD_REPO = 'xuefy987/lapian-diary';
+var AI_CLOUD_FILE = 'cloud-backup.json';
+var AI_CLOUD_TOKEN_KEY = 'xfy_github_token';
+var aiLastBackupData = '';
+var aiAutoBackupTimer = null;
+
+function aiGetToken() {
+  return localStorage.getItem(AI_CLOUD_TOKEN_KEY) || '';
+}
+
+function aiSetCloudStatus(msg, color) {
+  var el = document.getElementById('aiCloudStatus');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--muted)'; }
+}
+
+async function aiFetchCloudBackup() {
+  var token = aiGetToken();
+  if (!token) throw new Error('未设置GitHub Token');
+  var apiUrl = 'https://api.github.com/repos/' + AI_CLOUD_REPO + '/contents/' + AI_CLOUD_FILE;
+  var r = await fetch(apiUrl, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
+  if (!r.ok) { if (r.status === 404) return { sha: null, data: {} }; throw new Error('API ' + r.status); }
+  var d = await r.json();
+  var content;
+  if (d.content && d.encoding === 'base64') {
+    content = decodeURIComponent(escape(atob(d.content)));
+  } else if (d.download_url) {
+    var rawR = await fetch(d.download_url);
+    content = await rawR.text();
+  } else {
+    return { sha: null, data: {} };
+  }
+  return { sha: d.sha, data: JSON.parse(content) };
+}
+
+async function aiCloudBackup() {
+  var token = aiGetToken();
+  if (!token) {
+    showToast('请先在设置中输入GitHub Token');
+    aiSetCloudStatus('请先在设置输入Token', '#ef4444');
+    return;
+  }
+  var btn = document.getElementById('aiCloudBackupBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 备份中...'; }
+  aiSetCloudStatus('正在上传到云端...', 'var(--accent)');
+  try {
+    saveCurrentToStorage();
+    var aiData = localStorage.getItem(STORAGE_KEY) || '[]';
+    var cloud;
+    try { cloud = await aiFetchCloudBackup(); } catch(e) { cloud = { sha: null, data: {} }; }
+    cloud.data.aiProjects = aiData;
+    cloud.data.aiCollapseStates = localStorage.getItem(COLLAPSE_KEY) || '{}';
+    cloud.data.aiTimestamp = Date.now();
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(cloud.data))));
+    var body = { message: 'AI平台备份 ' + new Date().toLocaleString(), content: content };
+    if (cloud.sha) body.sha = cloud.sha;
+    var apiUrl = 'https://api.github.com/repos/' + AI_CLOUD_REPO + '/contents/' + AI_CLOUD_FILE;
+    var r2 = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (r2.ok) {
+      aiLastBackupData = aiData;
+      aiSetCloudStatus('✓ 备份成功 ' + new Date().toLocaleTimeString(), 'var(--success)');
+      showToast('AI数据已备份到云端');
+    } else {
+      var err = await r2.json();
+      aiSetCloudStatus('✗ ' + (err.message || '失败'), '#ef4444');
+      showToast('云端备份失败');
+    }
+  } catch(err) {
+    aiSetCloudStatus('✗ ' + err.message, '#ef4444');
+    showToast('云端备份失败: ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '☁️ 云端备份'; }
+  }
+}
+
+async function aiCloudRestore() {
+  var token = aiGetToken();
+  if (!token) {
+    showToast('请先在设置中输入GitHub Token');
+    aiSetCloudStatus('请先在设置输入Token', '#ef4444');
+    return;
+  }
+  aiSetCloudStatus('正在从云端恢复...', 'var(--accent)');
+  try {
+    var cloud = await aiFetchCloudBackup();
+    if (cloud.data.aiProjects) {
+      localStorage.setItem(STORAGE_KEY, cloud.data.aiProjects);
+    }
+    if (cloud.data.aiCollapseStates) {
+      localStorage.setItem(COLLAPSE_KEY, cloud.data.aiCollapseStates);
+    }
+    aiLastBackupData = cloud.data.aiProjects || '';
+    var ts = cloud.data.aiTimestamp;
+    var dateStr = ts ? new Date(ts).toLocaleString() : '未知时间';
+    aiSetCloudStatus('✓ 恢复成功 (' + dateStr + ')，刷新中...', 'var(--success)');
+    showToast('AI数据已从云端恢复');
+    setTimeout(function() { location.reload(); }, 1500);
+  } catch(err) {
+    aiSetCloudStatus('✗ ' + err.message, '#ef4444');
+    showToast('恢复失败: ' + err.message);
+  }
+}
+
+function aiStartAutoBackup() {
+  if (aiAutoBackupTimer) clearInterval(aiAutoBackupTimer);
+  aiAutoBackupTimer = setInterval(function() {
+    var token = aiGetToken();
+    if (!token) return;
+    var currentData = localStorage.getItem(STORAGE_KEY) || '';
+    if (currentData && currentData !== aiLastBackupData && currentData.length > 10) {
+      aiCloudBackup();
+    }
+  }, 5 * 60 * 1000);
+}
+
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
+    aiStartAutoBackup();
+    if (aiGetToken()) {
+      aiSetCloudStatus('自动备份已启用 (每5分钟)', 'var(--muted)');
+    } else {
+      aiSetCloudStatus('未设Token，请在设置中输入', 'var(--warning)');
+    }
+  }, 2000);
 });
 </script>
 
