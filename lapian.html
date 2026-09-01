@@ -1303,6 +1303,7 @@ function loadData() {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  localStorage.setItem('xfy_lapian_modified', String(Date.now()));
   updateStats();
   if (activeTab === 'stats') renderEventList();
   // 通知父页面数据已变化，触发云端自动备份
