@@ -321,7 +321,18 @@
       try {
         const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } });
         if (r.ok) {
-          const d = await r.json(); const c = decodeURIComponent(escape(atob(d.content))); const a = JSON.parse(c);
+          const d = await r.json();
+          let content;
+          if (d.content && d.encoding === 'base64') {
+            content = decodeURIComponent(escape(atob(d.content)));
+          } else if (d.download_url) {
+            const rawR = await fetch(d.download_url);
+            content = await rawR.text();
+          } else {
+            st.textContent = '云端备份内容为空'; st.style.color = '#f59e0b';
+            return;
+          }
+          const a = JSON.parse(content);
           if (a.lapian) localStorage.setItem('lapian_platform_v2', a.lapian);
           if (a.lapianHistory) localStorage.setItem('lapian_platform_history', a.lapianHistory);
           if (a.aiProjects) localStorage.setItem('ai_drama_projects', a.aiProjects);
