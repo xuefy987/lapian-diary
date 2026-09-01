@@ -432,11 +432,18 @@
         }
         localStorage.setItem(SYNC_KEY, String(newestCloud));
         if (changed) {
+          // 数据已更新，通知iframe重新加载
           try {
-            document.getElementById('app-lapian').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
-            document.getElementById('app-ai').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
+            document.getElementById('app-lapian').contentWindow.postMessage({ type: 'cloudRestored', timestamp: newestCloud }, '*');
+            document.getElementById('app-ai').contentWindow.postMessage({ type: 'cloudRestored', timestamp: newestCloud }, '*');
           } catch(e) {}
           return true;
+        } else {
+          // 数据未变化，但通知iframe当前云端版本（用于freshness检查）
+          try {
+            document.getElementById('app-lapian').contentWindow.postMessage({ type: 'cloudVersion', timestamp: newestCloud }, '*');
+            document.getElementById('app-ai').contentWindow.postMessage({ type: 'cloudVersion', timestamp: newestCloud }, '*');
+          } catch(e) {}
         }
         return false;
       } catch(e) { return false; }
@@ -592,6 +599,15 @@
     window.addEventListener('message', function(e) {
       if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); }
       if (e.data && e.data.type === 'dataChanged') { scheduleBackup(); }
+      if (e.data && e.data.type === 'requestSync') {
+        // iframe请求立即同步
+        autoCloudRestore().then(function(restored) {
+          if (!restored) {
+            // 如果云端没有更新，上传本地数据
+            autoCloudBackup();
+          }
+        });
+      }
     });
   </script>
 </body>
