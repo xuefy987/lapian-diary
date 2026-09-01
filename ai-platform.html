@@ -3639,6 +3639,8 @@ function getStoredProjects() {
 
 function setStoredProjects(list) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch(e) { showToast('存储失败: 可能超出限制'); }
+  // 通知父页面数据已变化，触发云端自动备份
+  try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
 }
 
 function findStoredProject(name) {
@@ -7825,6 +7827,14 @@ window.addEventListener('message', function(e) {
   } else if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
+  } else if (e.data.type === 'cloudRestored') {
+    // 云端数据已更新，重新加载
+    projectList = getStoredProjects();
+    renderProjectList();
+    var currentName = project ? project.name : '';
+    var found = projectList.find(function(p) { return p.name === currentName; });
+    if (found) { project = found; loadProject(found); }
+    showToast('已从云端同步最新数据');
   }
 });
 
@@ -7836,7 +7846,11 @@ var aiLastBackupData = '';
 var aiAutoBackupTimer = null;
 
 function aiGetToken() {
-  return localStorage.getItem(AI_CLOUD_TOKEN_KEY) || '';
+  var t = localStorage.getItem(AI_CLOUD_TOKEN_KEY) || '';
+  if (t) return t;
+  // 尝试从父页面获取
+  try { if (window.parent && window.parent.EMBEDDED_TOKEN) return window.parent.EMBEDDED_TOKEN; } catch(e) {}
+  return '';
 }
 
 function aiSetCloudStatus(msg, color) {
