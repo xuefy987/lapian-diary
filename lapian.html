@@ -904,13 +904,14 @@
       z-index: 100;
       transform: translateX(100%);
       transition: transform 0.3s ease;
-      width: 300px;
+      width: 88%;
+      max-width: 380px;
       box-shadow: var(--shadow-lg);
     }
     .sidebar-right.open { transform: translateX(0); }
-    .sidebar-right.collapsed { width: 300px; min-width: 300px; }
+    .sidebar-right.collapsed { width: 88%; max-width: 380px; min-width: 0; }
 
-    .mobile-menu-btn { display: inline-flex; }
+    .mobile-menu-btn { display: inline-flex; touch-action: manipulation; }
     .resizer { display: none; }
     .toggle-panel-btn { display: none; }
   }
@@ -924,6 +925,12 @@
     .row-content { flex: 1 1 100%; margin-top: 4px; }
     .time-input { width: 56px; font-size: 10px; }
     .row-number { width: 22px; height: 22px; font-size: 11px; }
+    .main-header { padding: 8px 10px; gap: 4px; }
+    .main-header > div:last-child { gap: 4px !important; }
+    .main-header .btn { padding: 4px 8px; font-size: 12px; }
+    .main-header .btn-icon.mobile-menu-btn { width: 36px; height: 36px; font-size: 15px; background: var(--bg3); border-radius: 8px; }
+    .film-title-input { font-size: 15px !important; }
+    .sidebar-right { width: 92%; max-width: 360px; }
   }
 
   /* 空状态 */
@@ -1156,6 +1163,18 @@
     <div id="historyList" style="max-height:400px;overflow-y:auto;margin-bottom:16px;"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('historyModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 历史预览模态框 -->
+<div class="modal-overlay" id="historyPreviewModal">
+  <div class="modal" style="max-width:680px;">
+    <h2 id="previewTitle">📋 版本预览</h2>
+    <div id="previewContent" style="max-height:50vh;overflow-y:auto;margin-bottom:12px;padding:12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg1);"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('historyPreviewModal')">取消</button>
+      <button class="btn btn-primary" id="confirmRestoreBtn">✓ 确认恢复</button>
     </div>
   </div>
 </div>
@@ -2508,18 +2527,24 @@ function openHistoryModal() {
         time.getSeconds().toString().padStart(2,'0');
       var filmCount = h.data.films ? h.data.films.length : 0;
       var rowCount = 0;
+      var filmNames = [];
       if (h.data.films) {
         h.data.films.forEach(function(f) {
           if (f.rows) rowCount += f.rows.length;
+          if (f.name) filmNames.push(f.name + (f.duration ? ' (' + f.duration + ')' : ''));
         });
       }
+      var namesStr = filmNames.length > 0 ? filmNames.join('、') : '无影片';
+      if (namesStr.length > 60) namesStr = namesStr.substring(0, 60) + '...';
       return '<div class="history-item">' +
         '<div class="history-info">' +
           '<div class="history-time">' + timeStr + '</div>' +
           '<div class="history-detail">' + h.type + ' · ' + filmCount + '部影片 · ' + rowCount + '行</div>' +
+          '<div class="history-detail" style="margin-top:2px;font-size:11px;">影片: ' + namesStr + '</div>' +
         '</div>' +
         '<div class="history-actions">' +
-          '<button class="btn btn-secondary" onclick="restoreHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">恢复</button>' +
+          '<button class="btn btn-secondary" onclick="previewHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">👁 预览</button>' +
+          '<button class="btn btn-primary" onclick="previewHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">恢复</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -2528,7 +2553,7 @@ function openHistoryModal() {
   document.getElementById('historyModal').classList.add('show');
 }
 
-function restoreHistory(historyId) {
+function previewHistory(historyId) {
   var history = loadHistory();
   var item = history.find(function(h) { return h.id === historyId; });
   if (!item) {
@@ -2536,7 +2561,83 @@ function restoreHistory(historyId) {
     return;
   }
 
-  if (!confirm('恢复后将覆盖当前内容，确定继续吗？')) return;
+  var time = new Date(item.timestamp);
+  var timeStr = time.getFullYear() + '-' +
+    (time.getMonth()+1).toString().padStart(2,'0') + '-' +
+    time.getDate().toString().padStart(2,'0') + ' ' +
+    time.getHours().toString().padStart(2,'0') + ':' +
+    time.getMinutes().toString().padStart(2,'0') + ':' +
+    time.getSeconds().toString().padStart(2,'0');
+
+  document.getElementById('previewTitle').textContent = '📋 版本预览 - ' + timeStr + ' (' + item.type + ')';
+
+  var contentEl = document.getElementById('previewContent');
+  var html = '';
+
+  if (item.data.films && item.data.films.length > 0) {
+    html += '<div style="margin-bottom:8px;font-size:13px;color:var(--muted);">共 ' + item.data.films.length + ' 部影片</div>';
+    item.data.films.forEach(function(film, idx) {
+      html += '<div style="margin-bottom:12px;padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);">';
+      html += '<div style="font-weight:600;font-size:14px;color:var(--ink);margin-bottom:4px;">' + (idx+1) + '. ' + (film.name || '未命名');
+      if (film.duration) html += ' <span style="font-size:12px;color:var(--muted);">⏱ ' + film.duration + '</span>';
+      if (film.createTime) {
+        var ct = new Date(film.createTime);
+        html += ' <span style="font-size:11px;color:var(--muted);">创建: ' + ct.toLocaleDateString() + '</span>';
+      }
+      html += '</div>';
+      // 显示行内容预览
+      if (film.rows && film.rows.length > 0) {
+        html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">共 ' + film.rows.length + ' 行拉片</div>';
+        film.rows.slice(0, 5).forEach(function(row) {
+          var plainText = row.content ? row.content.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) : '';
+          html += '<div style="font-size:11px;color:var(--muted);padding:2px 0 2px 12px;border-left:2px solid var(--rule);margin-bottom:2px;">';
+          html += '<span style="color:var(--accent);font-weight:500;">' + (row.number || '?') + '.</span> ';
+          if (row.startTime) html += '<span style="font-family:monospace;">' + row.startTime + '</span> ';
+          html += plainText + (row.content && row.content.length > 80 ? '...' : '');
+          html += '</div>';
+        });
+        if (film.rows.length > 5) {
+          html += '<div style="font-size:11px;color:var(--muted);padding-left:12px;">... 还有 ' + (film.rows.length - 5) + ' 行</div>';
+        }
+      }
+      // 显示事件列表
+      if (film.events && film.events.length > 0) {
+        html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">📌 事件: ' + film.events.length + ' 个</div>';
+      }
+      // 显示右侧面板内容
+      if (film.plotSummary || film.characters || film.theme) {
+        html += '<div style="font-size:12px;margin-top:6px;padding:6px;background:var(--bg3);border-radius:4px;">';
+        if (film.plotSummary) html += '<div style="margin-bottom:3px;"><b>剧情梗概:</b> ' + film.plotSummary.replace(/<[^>]+>/g, ' ').trim().substring(0, 100) + '...</div>';
+        if (film.characters) html += '<div style="margin-bottom:3px;"><b>人物:</b> ' + film.characters.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
+        if (film.theme) html += '<div><b>主题:</b> ' + film.theme.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+  } else {
+    html = '<div style="text-align:center;color:var(--muted);padding:40px;">该版本无影片数据</div>';
+  }
+
+  contentEl.innerHTML = html;
+
+  // 设置确认恢复按钮
+  var confirmBtn = document.getElementById('confirmRestoreBtn');
+  confirmBtn.onclick = function() {
+    confirmRestoreHistory(historyId);
+  };
+
+  document.getElementById('historyPreviewModal').classList.add('show');
+}
+
+function confirmRestoreHistory(historyId) {
+  var history = loadHistory();
+  var item = history.find(function(h) { return h.id === historyId; });
+  if (!item) {
+    showToast('未找到该历史记录');
+    return;
+  }
+
+  if (!confirm('确认恢复到此版本？当前内容将被覆盖（当前状态已自动保存到历史记录）')) return;
 
   // 先保存当前状态到历史
   saveToHistory('恢复前自动保存');
@@ -2546,8 +2647,14 @@ function restoreHistory(historyId) {
   saveData();
   renderFilmList();
   renderRightPanel();
+  closeModal('historyPreviewModal');
   closeModal('historyModal');
   showToast('已恢复到: ' + new Date(item.timestamp).toLocaleString());
+}
+
+function restoreHistory(historyId) {
+  // 统一走预览流程
+  previewHistory(historyId);
 }
 
 // ==================== Toast ====================
@@ -2772,6 +2879,8 @@ window.addEventListener('message', function(e) {
     // 云端数据已更新，重新加载
     try { appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
     if (!appData.films) initDefaultData();
+    // 更新本地修改时间，避免恢复后被当作新修改覆盖云端
+    localStorage.setItem('xfy_lapian_modified', String(Date.now()));
     renderFilmList();
     if (currentFilmId) loadFilm(currentFilmId);
     showToast('已从云端同步最新数据');
