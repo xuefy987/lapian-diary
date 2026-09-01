@@ -722,6 +722,85 @@
     gap: 8px;
   }
 
+  /* 浮动可拖动预览窗口 */
+  .floating-window {
+    position: absolute;
+    width: 580px;
+    max-width: 92vw;
+    height: 70vh;
+    max-height: 600px;
+    background: var(--bg2);
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .floating-window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--rule);
+    cursor: move;
+    user-select: none;
+    -webkit-user-select: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .floating-window-close {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .floating-window-close:hover { background: rgba(0,0,0,0.1); color: var(--ink); }
+  .floating-window-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg1);
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  .floating-window-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .floating-window-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-top: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  /* 让预览窗口的overlay不强制居中，允许自由定位 */
+  #historyPreviewModal { align-items: flex-start; justify-content: flex-start; padding: 30px; }
+  #historyPreviewModal.show { display: block; }
+
+  /* 差异高亮 */
+  .diff-added { background: rgba(34,197,94,0.18); border-left: 3px solid #22c55e; padding: 2px 4px; margin: 2px 0; border-radius: 2px; }
+  .diff-removed { background: rgba(239,68,68,0.18); border-left: 3px solid #ef4444; padding: 2px 4px; margin: 2px 0; border-radius: 2px; text-decoration: line-through; opacity: 0.7; }
+  .diff-changed { background: rgba(251,191,36,0.18); border-left: 3px solid #fbbf24; padding: 2px 4px; margin: 2px 0; border-radius: 2px; }
+  .diff-same { opacity: 0.5; }
+  .diff-badge { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; margin-left: 4px; }
+  .diff-badge-added { background: #22c55e; color: #fff; }
+  .diff-badge-removed { background: #ef4444; color: #fff; }
+  .diff-badge-changed { background: #fbbf24; color: #fff; }
+
   /* 合并事件模态框 */
   .merge-event-modal { max-width: 420px; }
 
@@ -1167,14 +1246,39 @@
   </div>
 </div>
 
-<!-- 历史预览模态框 -->
+<!-- 历史预览浮动窗口 -->
 <div class="modal-overlay" id="historyPreviewModal">
-  <div class="modal" style="max-width:680px;">
-    <h2 id="previewTitle">📋 版本预览</h2>
-    <div id="previewContent" style="max-height:50vh;overflow-y:auto;margin-bottom:12px;padding:12px;border:1px solid var(--rule);border-radius:8px;background:var(--bg1);"></div>
-    <div class="modal-actions">
+  <div class="floating-window" id="previewWindow">
+    <div class="floating-window-header" id="previewWindowHeader">
+      <span id="previewTitle">📋 版本预览</span>
+      <button class="floating-window-close" onclick="closeModal('historyPreviewModal')">✕</button>
+    </div>
+    <div class="floating-window-toolbar">
+      <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" id="showDiff" onchange="toggleDiff()" style="cursor:pointer;"> 高亮差异
+      </label>
+      <div style="flex:1;"></div>
+      <span style="font-size:11px;color:var(--muted);">可拖动窗口 | 与当前版本对照</span>
+    </div>
+    <div id="previewContent" class="floating-window-body"></div>
+    <div class="floating-window-footer">
       <button class="btn btn-secondary" onclick="closeModal('historyPreviewModal')">取消</button>
       <button class="btn btn-primary" id="confirmRestoreBtn">✓ 确认恢复</button>
+    </div>
+  </div>
+</div>
+
+<!-- 数据版本容斥检查弹窗 -->
+<div class="modal-overlay" id="freshnessModal" style="z-index:10001;">
+  <div class="modal" style="max-width:420px;">
+    <h2>⚠ 数据版本检查</h2>
+    <div style="padding:12px 0;font-size:14px;line-height:1.6;color:var(--ink);">
+      检测到其他设备有更新的数据（云端更新时间: <span id="freshnessCloudTime" style="font-weight:600;color:var(--accent);">未知</span>），<br>
+      当前页面可能不是最新版本。继续操作可能导致数据互相覆盖丢失。
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="freshnessSyncNow()">🔄 立即同步</button>
+      <button class="btn btn-secondary" onclick="freshnessContinue()">继续操作</button>
     </div>
   </div>
 </div>
@@ -1244,6 +1348,10 @@ let formatBrushActive = false;
 let formatBrushStyles = null;
 let currentCommentRowId = null;
 let currentCommentMarkerId = null;
+let dataDirty = false; // 标记用户是否手动修改了数据（区别于程序内部保存）
+let lastCloudVersion = 0; // 最后一次已知的云端数据版本时间戳
+let localDataVersion = 0; // 本地数据版本时间戳（数据加载/同步时设置）
+let freshnessAcknowledged = false; // 用户是否已知晓数据过期并选择继续
 let selectedMergeColor = null;
 let renameFilmId = null;
 
@@ -1294,11 +1402,14 @@ function init() {
     this.classList.remove('show');
   });
 
-  // 启动自动保存（每3分钟）
-  setInterval(autoSave, AUTOSAVE_INTERVAL);
-  // 页面关闭前保存
+  // 启动自动保存（每3分钟，仅当有修改时才保存）
+  setInterval(function() { if (dataDirty) autoSave(); }, AUTOSAVE_INTERVAL);
+  // 全局监听用户输入，标记数据已修改
+  document.addEventListener('input', function() { dataDirty = true; });
+  document.addEventListener('change', function() { dataDirty = true; });
+  // 页面关闭前保存（仅当有未保存的修改时）
   window.addEventListener('beforeunload', function() {
-    saveData();
+    if (dataDirty) saveData();
   });
   updateSaveStatus();
 }
@@ -1318,11 +1429,16 @@ function loadData() {
   if (appData.films.length > 0 && !appData.currentFilmId) {
     appData.currentFilmId = appData.films[0].id;
   }
+  localDataVersion = Date.now(); // 记录本地数据加载时间
 }
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-  localStorage.setItem('xfy_lapian_modified', String(Date.now()));
+  // 只有用户实际操作触发的保存才更新修改时间（避免beforeunload误标记）
+  if (dataDirty) {
+    localStorage.setItem('xfy_lapian_modified', String(Date.now()));
+    dataDirty = false;
+  }
   updateStats();
   if (activeTab === 'stats') renderEventList();
   // 通知父页面数据已变化，触发云端自动备份
@@ -1430,6 +1546,7 @@ function openNewFilmModal() {
 function createNewFilm() {
   const name = document.getElementById('newFilmName').value.trim();
   if (!name) { showToast('请输入影片名称'); return; }
+  dataDirty = true;
   const duration = document.getElementById('newFilmDuration').value.trim();
   const newFilm = {
     id: generateId(),
@@ -1467,6 +1584,7 @@ function confirmRename() {
 }
 
 function deleteFilm(filmId) {
+  dataDirty = true;
   if (!confirm('确定要删除这个拉片文档吗？此操作不可恢复。')) return;
   const index = appData.films.findIndex(f => f.id === filmId);
   if (index > -1) {
@@ -1579,6 +1697,7 @@ function handleRowKeydown(e, editor) {
 }
 
 function addNewRowAfter(rowId) {
+  dataDirty = true;
   const film = getCurrentFilm();
   if (!film) return;
 
@@ -1634,6 +1753,7 @@ function renderRowsOnly() {
 }
 
 function deleteRow(rowId) {
+  dataDirty = true;
   const film = getCurrentFilm();
   if (!film) return;
   if (film.rows.length <= 1) {
@@ -2419,6 +2539,7 @@ function exportData() {
 }
 
 function importData(event) {
+  dataDirty = true;
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -2442,6 +2563,7 @@ function importData(event) {
 
 // ==================== 保存与历史记录 ====================
 function manualSave() {
+  dataDirty = true;
   saveData();
   saveToHistory('手动保存');
   showToast('已保存');
@@ -2553,6 +2675,8 @@ function openHistoryModal() {
   document.getElementById('historyModal').classList.add('show');
 }
 
+var currentPreviewHistoryId = null;
+
 function previewHistory(historyId) {
   var history = loadHistory();
   var item = history.find(function(h) { return h.id === historyId; });
@@ -2561,6 +2685,7 @@ function previewHistory(historyId) {
     return;
   }
 
+  currentPreviewHistoryId = historyId;
   var time = new Date(item.timestamp);
   var timeStr = time.getFullYear() + '-' +
     (time.getMonth()+1).toString().padStart(2,'0') + '-' +
@@ -2570,55 +2695,11 @@ function previewHistory(historyId) {
     time.getSeconds().toString().padStart(2,'0');
 
   document.getElementById('previewTitle').textContent = '📋 版本预览 - ' + timeStr + ' (' + item.type + ')';
-
-  var contentEl = document.getElementById('previewContent');
-  var html = '';
-
-  if (item.data.films && item.data.films.length > 0) {
-    html += '<div style="margin-bottom:8px;font-size:13px;color:var(--muted);">共 ' + item.data.films.length + ' 部影片</div>';
-    item.data.films.forEach(function(film, idx) {
-      html += '<div style="margin-bottom:12px;padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);">';
-      html += '<div style="font-weight:600;font-size:14px;color:var(--ink);margin-bottom:4px;">' + (idx+1) + '. ' + (film.name || '未命名');
-      if (film.duration) html += ' <span style="font-size:12px;color:var(--muted);">⏱ ' + film.duration + '</span>';
-      if (film.createTime) {
-        var ct = new Date(film.createTime);
-        html += ' <span style="font-size:11px;color:var(--muted);">创建: ' + ct.toLocaleDateString() + '</span>';
-      }
-      html += '</div>';
-      // 显示行内容预览
-      if (film.rows && film.rows.length > 0) {
-        html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">共 ' + film.rows.length + ' 行拉片</div>';
-        film.rows.slice(0, 5).forEach(function(row) {
-          var plainText = row.content ? row.content.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) : '';
-          html += '<div style="font-size:11px;color:var(--muted);padding:2px 0 2px 12px;border-left:2px solid var(--rule);margin-bottom:2px;">';
-          html += '<span style="color:var(--accent);font-weight:500;">' + (row.number || '?') + '.</span> ';
-          if (row.startTime) html += '<span style="font-family:monospace;">' + row.startTime + '</span> ';
-          html += plainText + (row.content && row.content.length > 80 ? '...' : '');
-          html += '</div>';
-        });
-        if (film.rows.length > 5) {
-          html += '<div style="font-size:11px;color:var(--muted);padding-left:12px;">... 还有 ' + (film.rows.length - 5) + ' 行</div>';
-        }
-      }
-      // 显示事件列表
-      if (film.events && film.events.length > 0) {
-        html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">📌 事件: ' + film.events.length + ' 个</div>';
-      }
-      // 显示右侧面板内容
-      if (film.plotSummary || film.characters || film.theme) {
-        html += '<div style="font-size:12px;margin-top:6px;padding:6px;background:var(--bg3);border-radius:4px;">';
-        if (film.plotSummary) html += '<div style="margin-bottom:3px;"><b>剧情梗概:</b> ' + film.plotSummary.replace(/<[^>]+>/g, ' ').trim().substring(0, 100) + '...</div>';
-        if (film.characters) html += '<div style="margin-bottom:3px;"><b>人物:</b> ' + film.characters.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
-        if (film.theme) html += '<div><b>主题:</b> ' + film.theme.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
-        html += '</div>';
-      }
-      html += '</div>';
-    });
-  } else {
-    html = '<div style="text-align:center;color:var(--muted);padding:40px;">该版本无影片数据</div>';
-  }
-
-  contentEl.innerHTML = html;
+  
+  // 重置diff复选框
+  document.getElementById('showDiff').checked = false;
+  
+  renderPreviewContent(item, false);
 
   // 设置确认恢复按钮
   var confirmBtn = document.getElementById('confirmRestoreBtn');
@@ -2626,7 +2707,302 @@ function previewHistory(historyId) {
     confirmRestoreHistory(historyId);
   };
 
+  // 显示窗口并初始化拖动
+  var win = document.getElementById('previewWindow');
+  win.style.left = '';
+  win.style.top = '';
+  win.style.right = '';
   document.getElementById('historyPreviewModal').classList.add('show');
+  initFloatingDrag();
+}
+
+function toggleDiff() {
+  if (!currentPreviewHistoryId) return;
+  var history = loadHistory();
+  var item = history.find(function(h) { return h.id === currentPreviewHistoryId; });
+  if (!item) return;
+  var showDiff = document.getElementById('showDiff').checked;
+  renderPreviewContent(item, showDiff);
+}
+
+function renderPreviewContent(item, showDiff) {
+  var contentEl = document.getElementById('previewContent');
+  var html = '';
+  
+  // 获取当前数据用于diff比较
+  var currentFilms = appData.films || [];
+  var previewFilms = item.data.films || [];
+  
+  if (showDiff) {
+    html += '<div style="margin-bottom:10px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;line-height:1.5;">';
+    html += '<span class="diff-badge diff-badge-added">新增</span> <span class="diff-badge diff-badge-removed">删除</span> <span class="diff-badge diff-badge-changed">修改</span>';
+    html += ' 与当前正文对比</div>';
+  }
+  
+  if (previewFilms.length > 0) {
+    // 找出当前版本有但预览版本没有的影片（已删除）
+    var deletedFilms = currentFilms.filter(function(cf) {
+      return !previewFilms.find(function(pf) { return pf.id === cf.id || pf.name === cf.name; });
+    });
+    // 找出预览版本有但当前版本没有的影片（新增）
+    var addedFilms = previewFilms.filter(function(pf) {
+      return !currentFilms.find(function(cf) { return cf.id === pf.id || cf.name === pf.name; });
+    });
+    
+    html += '<div style="margin-bottom:8px;font-size:13px;color:var(--muted);">预览版本: ' + previewFilms.length + ' 部影片';
+    if (showDiff) {
+      html += ' | 当前版本: ' + currentFilms.length + ' 部影片';
+      if (addedFilms.length > 0) html += ' | <span style="color:#22c55e;">+' + addedFilms.length + ' 新增</span>';
+      if (deletedFilms.length > 0) html += ' | <span style="color:#ef4444;">-' + deletedFilms.length + ' 删除</span>';
+    }
+    html += '</div>';
+    
+    // 渲染已删除的影片（当前有，预览没有）
+    if (showDiff && deletedFilms.length > 0) {
+      deletedFilms.forEach(function(film) {
+        html += '<div class="diff-removed" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
+        html += '<span class="diff-badge diff-badge-removed">删除</span> ';
+        html += '<span style="font-weight:600;">' + (film.name || '未命名') + '</span>';
+        html += '<span style="font-size:11px;margin-left:6px;">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
+        html += '</div>';
+      });
+    }
+    
+    previewFilms.forEach(function(film, idx) {
+      // 查找对应的当前版本影片
+      var currentFilm = currentFilms.find(function(cf) { return cf.id === film.id || cf.name === film.name; });
+      var isAdded = !currentFilm;
+      var isChanged = false;
+      var changes = [];
+      
+      if (showDiff && currentFilm) {
+        // 比较影片属性
+        if (currentFilm.name !== film.name) changes.push('名称');
+        if (currentFilm.duration !== film.duration) changes.push('时长');
+        if ((currentFilm.rows || []).length !== (film.rows || []).length) changes.push('行数(' + (currentFilm.rows||[]).length + '→' + (film.rows||[]).length + ')');
+        // 比较行内容
+        var curRows = currentFilm.rows || [];
+        var preRows = film.rows || [];
+        var maxRows = Math.max(curRows.length, preRows.length);
+        var rowChanges = 0;
+        for (var i = 0; i < maxRows; i++) {
+          var cr = curRows[i], pr = preRows[i];
+          if (!cr && pr) { rowChanges++; continue; }
+          if (cr && !pr) { rowChanges++; continue; }
+          if (cr && pr) {
+            if (cr.content !== pr.content || cr.startTime !== pr.startTime || cr.endTime !== pr.endTime) rowChanges++;
+          }
+        }
+        if (rowChanges > 0) changes.push(rowChanges + '行内容变化');
+        // 比较面板内容
+        if ((currentFilm.plotSummary || '') !== (film.plotSummary || '')) changes.push('剧情梗概');
+        if ((currentFilm.characters || '') !== (film.characters || '')) changes.push('人物');
+        if ((currentFilm.theme || '') !== (film.theme || '')) changes.push('主题');
+        if ((currentFilm.events || []).length !== (film.events || []).length) changes.push('事件(' + (currentFilm.events||[]).length + '→' + (film.events||[]).length + ')');
+        isChanged = changes.length > 0;
+      }
+      
+      var diffClass = '';
+      var diffBadge = '';
+      if (showDiff) {
+        if (isAdded) { diffClass = 'diff-added'; diffBadge = '<span class="diff-badge diff-badge-added">新增</span> '; }
+        else if (isChanged) { diffClass = 'diff-changed'; diffBadge = '<span class="diff-badge diff-badge-changed">修改</span> '; }
+      }
+      
+      html += '<div class="' + diffClass + '" style="margin-bottom:12px;padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);">';
+      html += diffBadge;
+      html += '<span style="font-weight:600;font-size:14px;color:var(--ink);">' + (idx+1) + '. ' + (film.name || '未命名') + '</span>';
+      if (film.duration) html += ' <span style="font-size:12px;color:var(--muted);">⏱ ' + film.duration + '</span>';
+      if (showDiff && currentFilm && currentFilm.duration !== film.duration) {
+        html += ' <span style="font-size:11px;color:#fbbf24;">(当前: ' + (currentFilm.duration || '无') + ')</span>';
+      }
+      if (film.createTime) {
+        var ct = new Date(film.createTime);
+        html += ' <span style="font-size:11px;color:var(--muted);">创建: ' + ct.toLocaleDateString() + '</span>';
+      }
+      if (showDiff && isChanged) {
+        html += '<div style="font-size:11px;color:#fbbf24;margin-top:2px;">变更: ' + changes.join('、') + '</div>';
+      }
+      html += '</div>';
+      
+      // 行内容对比
+      if (film.rows && film.rows.length > 0) {
+        if (showDiff && currentFilm) {
+          // Diff模式：逐行对比
+          var curRows = currentFilm.rows || [];
+          var preRows = film.rows;
+          var maxR = Math.max(curRows.length, preRows.length);
+          html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">拉片行对比:</div>';
+          for (var ri = 0; ri < maxR; ri++) {
+            var cr = curRows[ri], pr = preRows[ri];
+            if (!pr && cr) {
+              // 当前有，预览没有 → 删除
+              html += '<div class="diff-removed" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
+              html += '<span class="diff-badge diff-badge-removed">删</span> ';
+              html += '<span style="color:var(--accent);font-weight:500;">' + (cr.number || '?') + '.</span> ';
+              if (cr.startTime) html += '<span style="font-family:monospace;">' + cr.startTime + '</span> ';
+              html += (cr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
+              html += '</div>';
+            } else if (pr && !cr) {
+              // 预览有，当前没有 → 新增
+              html += '<div class="diff-added" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
+              html += '<span class="diff-badge diff-badge-added">增</span> ';
+              html += '<span style="color:var(--accent);font-weight:500;">' + (pr.number || '?') + '.</span> ';
+              if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
+              html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
+              html += '</div>';
+            } else if (pr && cr) {
+              var contentChanged = (cr.content !== pr.content);
+              var timeChanged = (cr.startTime !== pr.startTime || cr.endTime !== pr.endTime);
+              if (contentChanged || timeChanged) {
+                html += '<div class="diff-changed" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
+                html += '<span class="diff-badge diff-badge-changed">改</span> ';
+                html += '<span style="color:var(--accent);font-weight:500;">' + (pr.number || '?') + '.</span> ';
+                if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
+                if (timeChanged) html += '<span style="color:#fbbf24;font-size:10px;">(时间变化)</span> ';
+                html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
+                html += '</div>';
+              } else if (ri < 3) {
+                // 前3行未变化的显示为灰色
+                html += '<div class="diff-same" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
+                html += '<span style="color:var(--muted);font-weight:500;">' + (pr.number || '?') + '.</span> ';
+                if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
+                html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
+                html += '</div>';
+              }
+            }
+          }
+        } else {
+          // 普通模式：显示前5行
+          html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">共 ' + film.rows.length + ' 行拉片</div>';
+          film.rows.slice(0, 5).forEach(function(row) {
+            var plainText = row.content ? row.content.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) : '';
+            html += '<div style="font-size:11px;color:var(--muted);padding:2px 0 2px 12px;border-left:2px solid var(--rule);margin-bottom:2px;">';
+            html += '<span style="color:var(--accent);font-weight:500;">' + (row.number || '?') + '.</span> ';
+            if (row.startTime) html += '<span style="font-family:monospace;">' + row.startTime + '</span> ';
+            html += plainText + (row.content && row.content.length > 80 ? '...' : '');
+            html += '</div>';
+          });
+          if (film.rows.length > 5) {
+            html += '<div style="font-size:11px;color:var(--muted);padding-left:12px;">... 还有 ' + (film.rows.length - 5) + ' 行</div>';
+          }
+        }
+      }
+      
+      // 面板内容diff
+      if (showDiff && currentFilm) {
+        if ((currentFilm.plotSummary || '') !== (film.plotSummary || '')) {
+          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
+          html += '<span class="diff-badge diff-badge-changed">改</span> <b>剧情梗概:</b> ';
+          html += (film.plotSummary || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 100);
+          html += '</div>';
+        }
+        if ((currentFilm.characters || '') !== (film.characters || '')) {
+          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
+          html += '<span class="diff-badge diff-badge-changed">改</span> <b>人物:</b> ';
+          html += (film.characters || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 80);
+          html += '</div>';
+        }
+        if ((currentFilm.theme || '') !== (film.theme || '')) {
+          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
+          html += '<span class="diff-badge diff-badge-changed">改</span> <b>主题:</b> ';
+          html += (film.theme || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 80);
+          html += '</div>';
+        }
+      } else if (!showDiff) {
+        if (film.plotSummary || film.characters || film.theme) {
+          html += '<div style="font-size:12px;margin-top:6px;padding:6px;background:var(--bg3);border-radius:4px;">';
+          if (film.plotSummary) html += '<div style="margin-bottom:3px;"><b>剧情梗概:</b> ' + film.plotSummary.replace(/<[^>]+>/g, ' ').trim().substring(0, 100) + '...</div>';
+          if (film.characters) html += '<div style="margin-bottom:3px;"><b>人物:</b> ' + film.characters.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
+          if (film.theme) html += '<div><b>主题:</b> ' + film.theme.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
+          html += '</div>';
+        }
+      }
+      
+      // 事件统计
+      if (film.events && film.events.length > 0) {
+        var eventBadge = '';
+        if (showDiff && currentFilm && (currentFilm.events || []).length !== film.events.length) {
+          eventBadge = '<span class="diff-badge diff-badge-changed">改</span> ';
+        }
+        html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">' + eventBadge + '📌 事件: ' + film.events.length + ' 个';
+        if (showDiff && currentFilm) html += ' (当前: ' + (currentFilm.events || []).length + ' 个)';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    
+    // 新增的影片（预览有，当前没有）
+    if (showDiff && addedFilms.length > 0) {
+      addedFilms.forEach(function(film) {
+        html += '<div class="diff-added" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
+        html += '<span class="diff-badge diff-badge-added">新增</span> ';
+        html += '<span style="font-weight:600;">' + (film.name || '未命名') + '</span>';
+        html += '<span style="font-size:11px;margin-left:6px;">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
+        html += '</div>';
+      });
+    }
+  } else {
+    html = '<div style="text-align:center;color:var(--muted);padding:40px;">该版本无影片数据</div>';
+  }
+
+  contentEl.innerHTML = html;
+}
+
+// 浮动窗口拖动
+function initFloatingDrag() {
+  var header = document.getElementById('previewWindowHeader');
+  var win = document.getElementById('previewWindow');
+  var isDragging = false;
+  var startX, startY, startLeft, startTop;
+
+  // 鼠标拖动
+  header.onmousedown = function(e) {
+    if (e.target.classList.contains('floating-window-close')) return;
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    var rect = win.getBoundingClientRect();
+    win.style.right = 'auto';
+    startLeft = rect.left;
+    startTop = rect.top;
+    e.preventDefault();
+  };
+  document.onmousemove = function(e) {
+    if (!isDragging) return;
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+    var newLeft = Math.max(0, startLeft + dx);
+    var newTop = Math.max(0, startTop + dy);
+    win.style.left = newLeft + 'px';
+    win.style.top = newTop + 'px';
+  };
+  document.onmouseup = function() { isDragging = false; };
+
+  // 触摸拖动
+  header.ontouchstart = function(e) {
+    if (e.target.classList.contains('floating-window-close')) return;
+    var touch = e.touches[0];
+    isDragging = true;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    var rect = win.getBoundingClientRect();
+    win.style.right = 'auto';
+    startLeft = rect.left;
+    startTop = rect.top;
+  };
+  document.ontouchmove = function(e) {
+    if (!isDragging) return;
+    var touch = e.touches[0];
+    var dx = touch.clientX - startX;
+    var dy = touch.clientY - startY;
+    var newLeft = Math.max(0, startLeft + dx);
+    var newTop = Math.max(0, startTop + dy);
+    win.style.left = newLeft + 'px';
+    win.style.top = newTop + 'px';
+    e.preventDefault();
+  };
+  document.ontouchend = function() { isDragging = false; };
 }
 
 function confirmRestoreHistory(historyId) {
@@ -2875,15 +3251,65 @@ window.addEventListener('message', function(e) {
   } else if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
+  } else if (e.data.type === 'cloudVersion') {
+    // 收到父页面推送的云端版本时间戳
+    lastCloudVersion = e.data.timestamp || 0;
+    checkFreshness();
   } else if (e.data.type === 'cloudRestored') {
     // 云端数据已更新，重新加载
     try { appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
     if (!appData.films) initDefaultData();
-    // 更新本地修改时间，避免恢复后被当作新修改覆盖云端
+    // 更新本地版本和修改时间，避免恢复后被当作新修改覆盖云端
+    var restoredTs = e.data.timestamp || Date.now();
+    localDataVersion = restoredTs;
+    lastCloudVersion = restoredTs;
+    dataStale = false;
+    freshnessAcknowledged = false;
     localStorage.setItem('xfy_lapian_modified', String(Date.now()));
+    dataDirty = false;
     renderFilmList();
     if (currentFilmId) loadFilm(currentFilmId);
     showToast('已从云端同步最新数据');
+  }
+});
+
+// ==================== 数据版本容斥检查 ====================
+let dataStale = false;
+
+function checkFreshness() {
+  // 如果云端版本比本地数据版本新，且用户尚未知晓
+  if (lastCloudVersion > localDataVersion && !freshnessAcknowledged) {
+    dataStale = true;
+    showFreshnessWarning();
+  }
+}
+
+function showFreshnessWarning() {
+  // 避免重复弹窗
+  if (document.getElementById('freshnessModal').classList.contains('show')) return;
+  var cloudTime = lastCloudVersion ? new Date(lastCloudVersion).toLocaleString() : '未知';
+  document.getElementById('freshnessCloudTime').textContent = cloudTime;
+  document.getElementById('freshnessModal').classList.add('show');
+}
+
+function freshnessSyncNow() {
+  document.getElementById('freshnessModal').classList.remove('show');
+  // 请求父页面立即同步
+  try { window.parent.postMessage({ type: 'requestSync' }, '*'); } catch(e) {}
+  showToast('正在同步云端数据...');
+}
+
+function freshnessContinue() {
+  document.getElementById('freshnessModal').classList.remove('show');
+  freshnessAcknowledged = true;
+  dataStale = false;
+  showToast('已继续操作，请注意当前数据可能非最新');
+}
+
+// 页面重新可见时检查数据版本
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && lastCloudVersion > 0) {
+    checkFreshness();
   }
 });
 </script>
