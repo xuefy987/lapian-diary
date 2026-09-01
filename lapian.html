@@ -24,13 +24,16 @@
     --glass: rgba(255,255,255,0.75);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; touch-action: manipulation; }
+  body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  button, [onclick], .btn, .btn-icon, .toolbar-btn, .nav-tab { touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     background: var(--bg);
     color: var(--ink);
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     font-size: 14px;
     line-height: 1.6;
@@ -38,7 +41,7 @@
 
   .app-container {
     display: flex;
-    height: 100vh;
+    height: 100%;
     width: 100%;
   }
 
@@ -1144,7 +1147,7 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script>
 // ==================== 数据管理 ====================
 const STORAGE_KEY = 'lapian_platform_v2';
