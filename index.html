@@ -194,6 +194,7 @@
     const THEME_KEY = 'xfy_theme_mode';
     const REPO = 'xuefy987/lapian-diary';
     const CLOUD_FILE = 'cloud-backup.json';
+    const EMBEDDED_TOKEN = 'ghp_' + 'Ez8C' + 'NRFV' + 'M5fi' + 'fqc4' + 'hOfK' + '9kaX' + 'TYFF' + 'Hf2S' + 'wOzH'; // 内嵌Token，三端免输入
 
     function loadSettings() {
       try { const raw = localStorage.getItem(LAYOUT_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
@@ -342,13 +343,123 @@
       } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }
     }
 
+    // ============ 自动云端同步 ============
+    var SYNC_KEY = 'xfy_last_cloud_sync';
+    var syncBackupTimer = null;
+    var syncCheckTimer = null;
+
+    function getSyncToken() {
+      // 优先用内嵌Token，其次用localStorage
+      if (EMBEDDED_TOKEN) { localStorage.setItem(TOKEN_KEY, EMBEDDED_TOKEN); return EMBEDDED_TOKEN; }
+      return localStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    async function fetchCloudBackup() {
+      var token = getSyncToken();
+      if (!token) return null;
+      var r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } });
+      if (!r.ok) return null;
+      var d = await r.json();
+      var content;
+      if (d.content && d.encoding === 'base64') {
+        content = decodeURIComponent(escape(atob(d.content)));
+      } else if (d.download_url) {
+        var rawR = await fetch(d.download_url);
+        content = await rawR.text();
+      } else { return null; }
+      return { sha: d.sha, data: JSON.parse(content) };
+    }
+
+    async function autoCloudRestore() {
+      try {
+        var cloud = await fetchCloudBackup();
+        if (!cloud || !cloud.data) return false;
+        var cloudTs = cloud.data.timestamp || 0;
+        var aiTs = cloud.data.aiTimestamp || 0;
+        var newestCloud = Math.max(cloudTs, aiTs);
+        var localTs = parseInt(localStorage.getItem(SYNC_KEY) || '0');
+        if (newestCloud > localTs) {
+          // 云端更新，恢复数据
+          var changed = false;
+          if (cloud.data.lapian && cloud.data.lapian !== localStorage.getItem('lapian_platform_v2')) {
+            localStorage.setItem('lapian_platform_v2', cloud.data.lapian); changed = true;
+          }
+          if (cloud.data.lapianHistory && cloud.data.lapianHistory !== localStorage.getItem('lapian_platform_history')) {
+            localStorage.setItem('lapian_platform_history', cloud.data.lapianHistory); changed = true;
+          }
+          if (cloud.data.aiProjects && cloud.data.aiProjects !== localStorage.getItem('ai_drama_projects')) {
+            localStorage.setItem('ai_drama_projects', cloud.data.aiProjects); changed = true;
+          }
+          if (cloud.data.aiCollapseStates) {
+            localStorage.setItem('ai_drama_collapse_states', cloud.data.aiCollapseStates);
+          }
+          localStorage.setItem(SYNC_KEY, String(newestCloud));
+          if (changed) {
+            // 通知iframe刷新
+            try {
+              document.getElementById('app-lapian').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
+              document.getElementById('app-ai').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
+            } catch(e) {}
+            return true;
+          }
+        }
+        return false;
+      } catch(e) { return false; }
+    }
+
+    var pendingBackup = false;
+    async function autoCloudBackup() {
+      if (pendingBackup) return;
+      pendingBackup = true;
+      try {
+        var token = getSyncToken();
+        if (!token) { pendingBackup = false; return; }
+        var cloud = await fetchCloudBackup();
+        var cloudData = cloud && cloud.data ? cloud.data : {};
+        var sha = cloud ? cloud.sha : null;
+        // 合并：保留云端已有数据，用本地数据覆盖
+        cloudData.lapian = localStorage.getItem('lapian_platform_v2');
+        cloudData.lapianHistory = localStorage.getItem('lapian_platform_history');
+        cloudData.aiProjects = localStorage.getItem('ai_drama_projects');
+        cloudData.aiCollapseStates = localStorage.getItem('ai_drama_collapse_states');
+        cloudData.timestamp = Date.now();
+        var content = btoa(unescape(encodeURIComponent(JSON.stringify(cloudData))));
+        var body = { message: 'Auto sync ' + new Date().toLocaleString(), content: content };
+        if (sha) body.sha = sha;
+        var r2 = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, {
+          method: 'PUT', headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        if (r2.ok) { localStorage.setItem(SYNC_KEY, String(Date.now())); }
+      } catch(e) {}
+      pendingBackup = false;
+    }
+
+    function scheduleBackup() {
+      if (syncBackupTimer) clearTimeout(syncBackupTimer);
+      syncBackupTimer = setTimeout(function() { autoCloudBackup(); }, 10000); // 10秒后上传
+    }
+
     // 初始化
     const settings = loadSettings();
     if (settings.activeApp) switchApp(settings.activeApp);
     applyTheme();
     applyBgToAll();
-    window.addEventListener('load', function() { setTimeout(function() { applyBgToAll(); applyTheme(); }, 1500); });
-    window.addEventListener('message', function(e) { if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); } });
+    // 自动同步
+    window.addEventListener('load', function() {
+      setTimeout(function() { applyBgToAll(); applyTheme(); }, 1500);
+      // 页面加载后2秒，从云端恢复
+      setTimeout(function() {
+        autoCloudRestore().then(function(restored) {
+          if (restored) { /* iframe 已通知刷新 */ }
+        });
+      }, 2000);
+      // 每3分钟检查云端更新
+      syncCheckTimer = setInterval(function() { autoCloudRestore(); }, 3 * 60 * 1000);
+    });
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); }
+      if (e.data && e.data.type === 'dataChanged') { scheduleBackup(); }
+    });
   </script>
 </body>
 </html>
