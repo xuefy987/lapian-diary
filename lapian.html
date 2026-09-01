@@ -1274,6 +1274,8 @@ function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
   updateStats();
   if (activeTab === 'stats') renderEventList();
+  // 通知父页面数据已变化，触发云端自动备份
+  try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
 }
 
 function initDefaultData() {
@@ -2714,6 +2716,13 @@ window.addEventListener('message', function(e) {
   } else if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
+  } else if (e.data.type === 'cloudRestored') {
+    // 云端数据已更新，重新加载
+    try { appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+    if (!appData.films) initDefaultData();
+    renderFilmList();
+    if (currentFilmId) loadFilm(currentFilmId);
+    showToast('已从云端同步最新数据');
   }
 });
 </script>
