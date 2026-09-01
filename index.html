@@ -301,7 +301,7 @@
       const st = document.getElementById('cloudStatus');
       st.textContent = '正在上传...'; st.style.color = '#4f46e5';
       try {
-        const allData = { lapian: localStorage.getItem('lapian_platform_v2'), lapianHistory: localStorage.getItem('lapian_platform_history'), aiProjects: localStorage.getItem('ai_drama_projects'), timestamp: Date.now() };
+        const allData = { lapian: localStorage.getItem('lapian_platform_v2'), lapianHistory: localStorage.getItem('lapian_platform_history'), aiProjects: localStorage.getItem('ai_drama_projects'), aiCollapseStates: localStorage.getItem('ai_drama_collapse_states'), timestamp: Date.now() };
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
         let sha = null;
         try { const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } }); if (r.ok) { const d = await r.json(); sha = d.sha; } } catch(e) {}
@@ -336,6 +336,7 @@
           if (a.lapian) localStorage.setItem('lapian_platform_v2', a.lapian);
           if (a.lapianHistory) localStorage.setItem('lapian_platform_history', a.lapianHistory);
           if (a.aiProjects) localStorage.setItem('ai_drama_projects', a.aiProjects);
+          if (a.aiCollapseStates) localStorage.setItem('ai_drama_collapse_states', a.aiCollapseStates);
           st.textContent = '恢复成功！请刷新页面'; st.style.color = '#10b981';
         } else { st.textContent = '未找到云端备份'; st.style.color = '#f59e0b'; }
       } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }
