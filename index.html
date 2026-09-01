@@ -379,23 +379,25 @@
         var newestCloud = Math.max(cloudTs, aiTs);
         var localTs = parseInt(localStorage.getItem(SYNC_KEY) || '0');
         if (newestCloud > localTs) {
-          // 云端更新，恢复数据
+          // 检查本地是否有未备份的修改
+          var lapianModified = parseInt(localStorage.getItem('xfy_lapian_modified') || '0');
+          var aiModified = parseInt(localStorage.getItem('xfy_ai_modified') || '0');
           var changed = false;
-          if (cloud.data.lapian && cloud.data.lapian !== localStorage.getItem('lapian_platform_v2')) {
+          // 只在本地没有更新的修改时才恢复
+          if (cloud.data.lapian && cloud.data.lapian !== localStorage.getItem('lapian_platform_v2') && lapianModified <= localTs) {
             localStorage.setItem('lapian_platform_v2', cloud.data.lapian); changed = true;
           }
-          if (cloud.data.lapianHistory && cloud.data.lapianHistory !== localStorage.getItem('lapian_platform_history')) {
+          if (cloud.data.lapianHistory && cloud.data.lapianHistory !== localStorage.getItem('lapian_platform_history') && lapianModified <= localTs) {
             localStorage.setItem('lapian_platform_history', cloud.data.lapianHistory); changed = true;
           }
-          if (cloud.data.aiProjects && cloud.data.aiProjects !== localStorage.getItem('ai_drama_projects')) {
+          if (cloud.data.aiProjects && cloud.data.aiProjects !== localStorage.getItem('ai_drama_projects') && aiModified <= localTs) {
             localStorage.setItem('ai_drama_projects', cloud.data.aiProjects); changed = true;
           }
-          if (cloud.data.aiCollapseStates) {
+          if (cloud.data.aiCollapseStates && aiModified <= localTs) {
             localStorage.setItem('ai_drama_collapse_states', cloud.data.aiCollapseStates);
           }
           localStorage.setItem(SYNC_KEY, String(newestCloud));
           if (changed) {
-            // 通知iframe刷新
             try {
               document.getElementById('app-lapian').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
               document.getElementById('app-ai').contentWindow.postMessage({ type: 'cloudRestored' }, '*');
@@ -436,7 +438,7 @@
 
     function scheduleBackup() {
       if (syncBackupTimer) clearTimeout(syncBackupTimer);
-      syncBackupTimer = setTimeout(function() { autoCloudBackup(); }, 10000); // 10秒后上传
+      syncBackupTimer = setTimeout(function() { autoCloudBackup(); }, 3000); // 3秒后上传
     }
 
     // 初始化
