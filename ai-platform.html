@@ -3608,6 +3608,15 @@ var project = {
 var currentStage = 1;
 var selectedShotIndices = new Set(); // Multi-select state for storyboard table
 
+// ============ 自动保存与云端版本控制 ============
+var aiDataDirty = false;         // 标记用户是否修改了数据但还未保存到localStorage
+var aiLocalDataVersion = 0;      // 本地数据版本时间戳（数据加载/同步时设置）
+var aiLastCloudVersion = 0;      // 最后一次已知的云端数据版本时间戳
+var aiDataStale = false;         // 本地数据是否比云端旧
+var aiFreshnessAcknowledged = false; // 用户是否已确认数据过时提示
+var AI_AUTOSAVE_INTERVAL = 180 * 1000; // 自动保存间隔：3分钟（同拉片平台）
+var aiAutoSaveTimer = null;
+
 // ============ UNDO HISTORY STACK ============
 var undoStack = []; // Stores snapshots before each major generation action
 var MAX_UNDO = 10;
@@ -3729,6 +3738,8 @@ function saveCurrentToStorage() {
   }
   try {
     setStoredProjects(list);
+    aiDataDirty = false;
+    aiLocalDataVersion = Date.now();
     showToast('作品「' + project.name + '」已保存');
   } catch(e) {
     // If storage fails (images too large), try saving without images
@@ -3748,6 +3759,8 @@ function saveCurrentToStorage() {
       if (ex2 >= 0) slimList[ex2] = slimProject; else slimList.push(slimProject);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(slimList));
+        aiDataDirty = false;
+        aiLocalDataVersion = Date.now();
         showToast('已保存(图片因存储限制未包含，请用导出功能备份)');
       } catch(e2) {
         // Last resort: also strip character/scene libraries
@@ -3780,6 +3793,8 @@ function loadProjectFromStorage(name) {
   project = JSON.parse(JSON.stringify(p));
   applyProjectToUI();
   renderProjectList();
+  aiDataDirty = false;
+  aiLocalDataVersion = Date.now();
   showToast('已加载作品「' + name + '」');
   goStage(1);
 }
@@ -3798,6 +3813,8 @@ function newProject() {
     updateUndoButtonState();
     applyProjectToUI();
     renderProjectList();
+    aiDataDirty = false;
+    aiLocalDataVersion = Date.now();
     document.getElementById('sbSection').style.display = 'none';
     var bioSec = document.getElementById('bioSection');
     if (bioSec) bioSec.style.display = 'none';
@@ -7903,32 +7920,104 @@ window.addEventListener('message', function(e) {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
   } else if (e.data.type === 'cloudVersion') {
-    // 收到父页面推送的云端版本
-    var cloudVer = e.data.timestamp || 0;
-    var localVer = parseInt(localStorage.getItem('xfy_ai_local_ver') || '0');
-    if (cloudVer > localVer && !window._aiFreshnessAck) {
-      // 云端有更新，提示用户
-      var ack = confirm('⚠ 检测到其他设备有更新的AI短片数据（更新时间: ' + new Date(cloudVer).toLocaleString() + '）\n当前页面可能不是最新版本。\n\n点击"确定"立即同步，点击"取消"继续操作');
-      if (ack) {
-        try { window.parent.postMessage({ type: 'requestSync' }, '*'); } catch(e) {}
-      } else {
-        window._aiFreshnessAck = true;
-      }
-    }
+    // 收到父页面推送的云端版本 - 只做新鲜度检查，不自动恢复
+    aiLastCloudVersion = e.data.timestamp || 0;
+    aiCheckFreshness();
   } else if (e.data.type === 'cloudRestored') {
-    // 云端数据已更新，重新加载
+    // 云端数据已恢复到本地，重新加载
     aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
     var aiRestoredTs = e.data.timestamp || Date.now();
+    aiLocalDataVersion = aiRestoredTs;
+    aiLastCloudVersion = aiRestoredTs;
+    aiDataStale = false;
+    aiFreshnessAcknowledged = false;
     localStorage.setItem('xfy_ai_local_ver', String(aiRestoredTs));
-    window._aiFreshnessAck = false;
+    aiDataDirty = false;
     projectList = getStoredProjects();
     renderProjectList();
     var currentName = project ? project.name : '';
     var found = projectList.find(function(p) { return p.name === currentName; });
-    if (found) { project = found; loadProject(found); }
+    if (found) { project = JSON.parse(JSON.stringify(found)); applyProjectToUI(); }
+    aiHideFreshnessWarning();
     showToast('已从云端同步最新数据');
   }
 });
+
+// ============ 自动保存到localStorage（同拉片平台策略） ============
+function aiAutoSaveToStorage() {
+  if (!aiDataDirty) return;
+  // 静默保存，不弹提示
+  project.name = document.getElementById('projectName').value || '未命名作品';
+  project.script = document.getElementById('scriptInput').value;
+  project.config = getConfig();
+  project.negativePrompt = document.getElementById('cfgNegative').value;
+  project.updatedAt = Date.now();
+  if (!project.createdAt) project.createdAt = Date.now();
+
+  var list = getStoredProjects();
+  var existing = list.findIndex(function(p) { return p.name === project.name; });
+  if (existing >= 0) {
+    list[existing] = JSON.parse(JSON.stringify(project));
+  } else {
+    list.push(JSON.parse(JSON.stringify(project)));
+  }
+  try {
+    setStoredProjects(list);
+    aiDataDirty = false;
+    aiLocalDataVersion = Date.now();
+  } catch(e) {
+    // 自动保存失败不打扰用户，下一轮再试
+    console.warn('AI自动保存失败', e);
+  }
+}
+
+function aiStartAutoSaveStorage() {
+  if (aiAutoSaveTimer) clearInterval(aiAutoSaveTimer);
+  aiAutoSaveTimer = setInterval(function() {
+    if (aiDataDirty) aiAutoSaveToStorage();
+  }, AI_AUTOSAVE_INTERVAL);
+}
+
+// ============ 云端版本新鲜度检查（同拉片平台策略） ============
+function aiCheckFreshness() {
+  if (aiLastCloudVersion > aiLocalDataVersion && !aiFreshnessAcknowledged) {
+    aiDataStale = true;
+    aiShowFreshnessWarning();
+  } else {
+    aiDataStale = false;
+    aiHideFreshnessWarning();
+  }
+}
+
+function aiShowFreshnessWarning() {
+  var existing = document.getElementById('aiFreshnessBanner');
+  if (existing) { existing.style.display = 'flex'; return; }
+  var banner = document.createElement('div');
+  banner.id = 'aiFreshnessBanner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#f59e0b;color:#fff;padding:8px 16px;text-align:center;font-size:13px;display:flex;align-items:center;justify-content:center;gap:12px;';
+  var cloudTime = aiLastCloudVersion ? new Date(aiLastCloudVersion).toLocaleString() : '未知';
+  banner.innerHTML = '<span>⚠ 检测到其他设备有更新的数据（' + cloudTime + '），当前页面可能不是最新版本</span>' +
+    '<button onclick="aiSyncFromCloud()" style="background:#fff;color:#f59e0b;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:bold;">立即同步</button>' +
+    '<button onclick="aiAckFreshness()" style="background:transparent;color:#fff;border:1px solid #fff;padding:4px 12px;border-radius:4px;cursor:pointer;">知道了</button>';
+  document.body.appendChild(banner);
+  document.body.style.paddingTop = '40px';
+}
+
+function aiHideFreshnessWarning() {
+  var banner = document.getElementById('aiFreshnessBanner');
+  if (banner) { banner.style.display = 'none'; document.body.style.paddingTop = ''; }
+}
+
+function aiAckFreshness() {
+  aiFreshnessAcknowledged = true;
+  aiHideFreshnessWarning();
+}
+
+function aiSyncFromCloud() {
+  try { window.parent.postMessage({ type: 'requestSync' }, '*'); } catch(e) {}
+  aiFreshnessAcknowledged = true;
+  aiHideFreshnessWarning();
+}
 
 // ============ CLOUD BACKUP (AI平台专用) ============
 var AI_CLOUD_REPO = 'xuefy987/lapian-diary';
@@ -8085,13 +8174,40 @@ function aiStartAutoBackup() {
 window.addEventListener('load', function() {
   setTimeout(function() {
     aiLastBackupData = localStorage.getItem(STORAGE_KEY) || '';
-    aiStartAutoBackup();
+    aiLocalDataVersion = Date.now();
+    aiStartAutoSaveStorage();  // 启动自动保存到localStorage
+    aiStartAutoBackup();       // 启动云端自动备份检查
     if (aiGetToken()) {
       aiSetCloudStatus('自动备份已启用（通过主平台统一同步）', 'var(--muted)');
     } else {
       aiSetCloudStatus('未设Token，请在设置中输入', 'var(--warning)');
     }
   }, 2000);
+});
+
+// 全局监听用户输入，标记数据已修改（同拉片平台策略）
+document.addEventListener('input', function() { aiDataDirty = true; });
+document.addEventListener('change', function() { aiDataDirty = true; });
+
+// 页面关闭前保存（仅当有未保存的修改时）
+window.addEventListener('beforeunload', function() {
+  if (aiDataDirty) {
+    aiAutoSaveToStorage();
+  }
+});
+
+// 页面重新可见时检查云端版本新鲜度
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && aiLastCloudVersion > 0) {
+    aiCheckFreshness();
+  }
+});
+
+// 窗口获得焦点时也检查新鲜度
+window.addEventListener('focus', function() {
+  if (aiLastCloudVersion > 0) {
+    aiCheckFreshness();
+  }
 });
 </script>
 
