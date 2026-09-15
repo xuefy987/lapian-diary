@@ -2,6 +2,9 @@
 <html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>AI短片创作</title>
 <style>
   :root {
@@ -7966,6 +7969,24 @@ async function aiFetchCloudBackup() {
   return { sha: d.sha, data: JSON.parse(content) };
 }
 
+// 将字符串转为base64（兼容大字符串，避免btoa溢出）
+function safeBtoa(str) {
+  try {
+    // 优先尝试原生方法
+    return btoa(unescape(encodeURIComponent(str)));
+  } catch(e) {
+    // 备用：使用TextEncoder + Uint8Array手动编码
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    var chunkSize = 8192;
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+      var chunk = bytes.slice(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+  }
+}
+
 async function aiCloudBackup() {
   var token = aiGetToken();
   if (!token) {
@@ -7981,10 +8002,17 @@ async function aiCloudBackup() {
     var aiData = localStorage.getItem(STORAGE_KEY) || '[]';
     var cloud;
     try { cloud = await aiFetchCloudBackup(); } catch(e) { cloud = { sha: null, data: {} }; }
+    // 保留云端已有的拉片数据，只更新AI相关字段
     cloud.data.aiProjects = aiData;
     cloud.data.aiCollapseStates = localStorage.getItem(COLLAPSE_KEY) || '{}';
     cloud.data.aiTimestamp = Date.now();
-    var content = btoa(unescape(encodeURIComponent(JSON.stringify(cloud.data))));
+    // 如果云端没有拉片数据，保持空即可（避免覆盖云端拉片数据）
+    var content;
+    try {
+      content = safeBtoa(JSON.stringify(cloud.data));
+    } catch(e) {
+      throw new Error('数据编码失败: ' + e.message);
+    }
     var body = { message: 'AI平台备份 ' + new Date().toLocaleString(), content: content };
     if (cloud.sha) body.sha = cloud.sha;
     var apiUrl = 'https://api.github.com/repos/' + AI_CLOUD_REPO + '/contents/' + AI_CLOUD_FILE;
