@@ -11,7 +11,7 @@
 <script>
 // 强制版本检测：如果URL中没有版本参数，自动添加并刷新
 (function(){
-  var REQUIRED_VERSION = '20260914-v1';
+  var REQUIRED_VERSION = '20260915-v1';
   var url = new URL(window.location.href);
   var currentV = url.searchParams.get('v');
   if (currentV !== REQUIRED_VERSION) {
@@ -2334,7 +2334,8 @@ function createRowElement(rowData, film) {
          oninput="saveRowContent('${rowData.id}', this.innerHTML)"
          onfocus="trackRowFocus(this)"
          onclick="handleEditorClick(event)"
-         onmouseup="checkFormatBrush(event)"
+         onmouseup="saveSelection(); checkFormatBrush(event)"
+         onkeyup="saveSelection()"
          id="editor-${rowData.id}">${rowData.content || ''}</div>
     <button class="row-comment-btn ${commentCount > 0 ? 'has-comments' : ''}" onclick="showRowComments('${rowData.id}')" title="查看/添加评论">
       💬${commentCount > 0 ? `<span class="comment-count-badge">${commentCount}</span>` : ''}
@@ -2822,8 +2823,12 @@ function renderEventListByRow(film, listEl) {
     const { row, eventName, eventColor, eventId } = item;
     const timeRange = (row.startTime || '') + '-' + (row.endTime || '');
     const borderLeft = eventColor ? 'border-left:3px solid ' + eventColor + ';' : '';
+    // 使用深色文字 + 彩色背景标签，确保可读性
+    var eventBgStyle = eventColor
+      ? 'background:' + eventColor + ';color:#1a1a1a;padding:1px 6px;border-radius:3px;font-size:11px;'
+      : '';
     const nameDisplay = eventName
-      ? '<span class="event-row-name" style="color:' + (eventColor || 'var(--accent)') + ';">' + escapeHtml(eventName) + '</span>'
+      ? '<span class="event-row-name" style="' + eventBgStyle + '">' + escapeHtml(eventName) + '</span>'
       : '<span class="event-row-name" style="color:var(--muted);">（未分配事件）</span>';
 
     return `
@@ -3119,31 +3124,61 @@ function saveTheme() {
 }
 
 // ==================== 富文本编辑 ====================
-// 跟踪最后聚焦的行
+// 跟踪最后聚焦的行和选区
 var lastFocusedRowId = null;
+var savedSelection = null;
+
+function saveSelection() {
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0 && !sel.isCollapsed) {
+    let node = sel.anchorNode;
+    let editor = null;
+    while (node) {
+      if (node.classList?.contains('row-content')) { editor = node; break; }
+      node = node.parentNode;
+    }
+    if (editor) {
+      savedSelection = {
+        editorId: editor.id,
+        range: sel.getRangeAt(0).cloneRange()
+      };
+    }
+  }
+}
+
+function restoreSelection() {
+  if (savedSelection && savedSelection.range) {
+    const ed = document.getElementById(savedSelection.editorId);
+    if (ed) {
+      ed.focus();
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      try { sel.addRange(savedSelection.range); } catch(e) {}
+      return true;
+    }
+  }
+  return false;
+}
 
 function trackRowFocus(editor) {
   lastFocusedRowId = editor.id.replace('editor-', '');
 }
 
 function execCmd(command, value = null) {
-  // 如果有跟踪的行，先恢复焦点
-  if (lastFocusedRowId) {
-    var ed = document.getElementById('editor-' + lastFocusedRowId);
-    if (ed) ed.focus();
-  }
+  // 恢复保存的选区
+  restoreSelection();
   document.execCommand(command, false, value);
   saveCurrentRowContent();
 }
 
 function changeFontSize(size) {
-  if (lastFocusedRowId) { var ed = document.getElementById('editor-' + lastFocusedRowId); if (ed) ed.focus(); }
+  restoreSelection();
   document.execCommand('fontSize', false, size);
   saveCurrentRowContent();
 }
 
 function changeFontFamily(font) {
-  if (lastFocusedRowId) { var ed = document.getElementById('editor-' + lastFocusedRowId); if (ed) ed.focus(); }
+  restoreSelection();
   if (font === 'inherit' || font === '') {
     const sel = window.getSelection();
     if (sel.rangeCount > 0 && !sel.isCollapsed) {
@@ -3173,7 +3208,7 @@ function toggleColorPicker(type) {
 }
 
 function applyColor(type, color) {
-  if (lastFocusedRowId) { var ed = document.getElementById('editor-' + lastFocusedRowId); if (ed) ed.focus(); }
+  restoreSelection();
   if (type === 'hiliteColor' && color === 'transparent') {
     document.execCommand('removeFormat', false, null);
   } else {
@@ -4583,58 +4618,35 @@ function parseDocumentText(text, fileName) {
   var rows = [];
   var timeRegex = /(\d{1,2}:\d{2}(?::\d{2})?)/g;
 
-  // 策略：只有以编号开头的行才创建新序号行，没有编号的行合并到上一行的内容中
+  // 策略：每一行都是一个序号行，去掉行首的编号前缀
   for (var i = startIdx; i < lines.length; i++) {
     var line = lines[i];
+    // 尝试去掉行首的编号前缀（如 "1." "1、" "(1)" "第1段" 等）
     var nm = matchNumbered(line);
+    var content = nm ? nm.rest : line;
 
-    if (nm) {
-      // 有编号，创建新行
-      var content = nm.rest;
-      var times = content.match(timeRegex);
-      var startTime = '';
-      var endTime = '';
-      var textContent = content;
+    var times = content.match(timeRegex);
+    var startTime = '';
+    var endTime = '';
+    var textContent = content;
 
-      if (times && times.length >= 1) {
-        startTime = times[0];
-        if (times.length >= 2) endTime = times[1];
-        textContent = content.replace(timeRegex, '').replace(/^[\s\-–—~]+/, '').trim();
-      }
-
-      rows.push({
-        id: generateId(),
-        number: rows.length + 1,
-        startTime: startTime,
-        endTime: endTime,
-        content: textContent ? '<p>' + textContent + '</p>' : '',
-        eventId: null,
-        comments: [],
-        dialogue: []
-      });
-    } else {
-      // 没有编号，合并到上一行的内容中
-      if (rows.length > 0) {
-        var lastRow = rows[rows.length - 1];
-        if (lastRow.content) {
-          lastRow.content = lastRow.content.replace(/<\/p>$/, '') + '</p><p>' + line + '</p>';
-        } else {
-          lastRow.content = '<p>' + line + '</p>';
-        }
-      } else {
-        // 如果还没有任何行（文档开头就没有编号），创建第一行
-        rows.push({
-          id: generateId(),
-          number: 1,
-          startTime: '',
-          endTime: '',
-          content: '<p>' + line + '</p>',
-          eventId: null,
-          comments: [],
-          dialogue: []
-        });
-      }
+    if (times && times.length >= 1) {
+      startTime = times[0];
+      if (times.length >= 2) endTime = times[1];
+      textContent = content.replace(timeRegex, '').replace(/^[\s\-–—~]+/, '').trim();
     }
+
+    rows.push({
+      id: generateId(),
+      number: rows.length + 1,
+      startTime: startTime,
+      endTime: endTime,
+      content: textContent ? '<p>' + textContent + '</p>' : '',
+      eventId: null,
+      comments: [],
+      dialogue: []
+    });
+  }
   }
 
   if (rows.length === 0) {
