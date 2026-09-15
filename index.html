@@ -387,6 +387,22 @@
       } catch(e) {}
     }
 
+    // 安全的base64编码（兼容大字符串，避免btoa溢出）
+    function safeBtoa(str) {
+      try {
+        return btoa(unescape(encodeURIComponent(str)));
+      } catch(e) {
+        var bytes = new TextEncoder().encode(str);
+        var binary = '';
+        var chunkSize = 8192;
+        for (var i = 0; i < bytes.length; i += chunkSize) {
+          var chunk = bytes.slice(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk);
+        }
+        return btoa(binary);
+      }
+    }
+
     // 云端存储
     async function uploadToCloud() {
       const token = document.getElementById('githubToken').value.trim();
@@ -396,7 +412,7 @@
       st.textContent = '正在上传...'; st.style.color = '#4f46e5';
       try {
         const allData = { lapian: localStorage.getItem('lapian_platform_v2'), lapianHistory: localStorage.getItem('lapian_platform_history'), aiProjects: localStorage.getItem('ai_drama_projects'), aiCollapseStates: localStorage.getItem('ai_drama_collapse_states'), timestamp: Date.now() };
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
+        const content = safeBtoa(JSON.stringify(allData));
         let sha = null;
         try { const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } }); if (r.ok) { const d = await r.json(); sha = d.sha; } } catch(e) {}
         const body = { message: 'Cloud backup ' + new Date().toLocaleString(), content: content };
@@ -554,7 +570,7 @@
         cloudData.aiCollapseStates = localStorage.getItem('ai_drama_collapse_states');
         cloudData.timestamp = Date.now();
         cloudData.aiTimestamp = Date.now();
-        var content = btoa(unescape(encodeURIComponent(JSON.stringify(cloudData))));
+        var content = safeBtoa(JSON.stringify(cloudData));
         var body = { message: 'Auto sync ' + new Date().toLocaleString(), content: content };
         if (sha) body.sha = sha;
         var r2 = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, {
@@ -579,7 +595,7 @@
             }
             // 重新用合并后的数据上传
             cloudData.timestamp = Date.now();
-            content = btoa(unescape(encodeURIComponent(JSON.stringify(cloudData))));
+            content = safeBtoa(JSON.stringify(cloudData));
             body = { message: 'Auto sync (retry) ' + new Date().toLocaleString(), content: content, sha: sha };
             r2 = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, {
               method: 'PUT', headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body)
