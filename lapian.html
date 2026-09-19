@@ -5,6 +5,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>剧作-xfy的拉片笔记</title>
+<script>
+// 强制版本检测：如果URL中没有版本参数，自动添加并刷新
+(function(){
+  var REQUIRED_VERSION = '20260919-v4';
+  var url = new URL(window.location.href);
+  var currentV = url.searchParams.get('v');
+  if (currentV !== REQUIRED_VERSION) {
+    url.searchParams.set('v', REQUIRED_VERSION);
+    url.searchParams.set('t', Date.now().toString());
+    window.location.replace(url.toString());
+  }
+})();
+</script>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -594,6 +607,15 @@
 
   .event-item-editable:hover { border-color: var(--rule); }
 
+  .event-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    min-width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
   .event-color-input {
     width: 24px;
     height: 24px;
@@ -1145,6 +1167,25 @@
   </div>
 </div>
 
+<!-- 强制导出提醒模态框 -->
+<div class="modal-overlay" id="exportReminderModal" style="z-index:9999;">
+  <div class="modal" style="max-width:420px;">
+    <h2>⚠️ 定期备份提醒</h2>
+    <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;">
+      <p>距离上次导出备份已超过 <b style="color:var(--danger);">15 天</b>。</p>
+      <p style="margin-top:8px;">为防止数据丢失，请导出一份备份文件保存到本地或云端。</p>
+      <p style="margin-top:8px;color:var(--muted);font-size:12px;">建议：导出后可上传到网盘，确保数据安全。</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <button class="btn btn-primary" style="justify-content:center;padding:10px;" onclick="reminderExportJSON()">💾 导出 JSON 备份（推荐）</button>
+      <button class="btn btn-secondary" style="justify-content:center;padding:10px;" onclick="reminderExportWord()">📄 导出 Word 文档</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="snoozeExportReminder()">稍后提醒</button>
+    </div>
+  </div>
+</div>
+
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script>
 // ==================== 数据管理 ====================
@@ -1248,6 +1289,9 @@ function init() {
   window.addEventListener('beforeunload', function() {
     saveData();
   });
+
+  // 检查是否需要强制导出提醒（每15天）
+  checkExportReminder();
   updateSaveStatus();
 }
 
@@ -1681,13 +1725,24 @@ function openMergeEventModal() {
   `).join('');
 
   document.getElementById('eventNameInput').value = '';
-  selectedMergeColor = null;
   document.getElementById('mergeEventModal').classList.add('show');
 
-  // 默认选中第一个颜色
-  const firstColor = grid.querySelector('.merge-color-option');
-  if (firstColor) {
-    selectMergeColor(eventColors[0], firstColor);
+  // 自动选择下一个颜色（按顺序使用颜色，已有事件用完一个就选下一个）
+  const film = getCurrentFilm();
+  let nextColorIndex = 0;
+  if (film && film.events && film.events.length > 0) {
+    // 找到最后一个事件的颜色在调色板中的位置
+    const lastColor = film.events[film.events.length - 1].color;
+    const lastIdx = eventColors.indexOf(lastColor);
+    if (lastIdx !== -1) {
+      nextColorIndex = (lastIdx + 1) % eventColors.length;
+    }
+  }
+  const colorOptions = grid.querySelectorAll('.merge-color-option');
+  if (colorOptions[nextColorIndex]) {
+    selectMergeColor(eventColors[nextColorIndex], colorOptions[nextColorIndex]);
+  } else if (colorOptions[0]) {
+    selectMergeColor(eventColors[0], colorOptions[0]);
   }
   document.getElementById('eventNameInput').focus();
 }
@@ -1768,7 +1823,9 @@ function updateEventName(eventId, name) {
   const event = film.events.find(e => e.id === eventId);
   if (event) {
     event.name = name;
-    saveData();
+    // 直接保存数据并更新统计，不重渲染事件列表，避免输入框失焦
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    updateStats();
   }
 }
 
@@ -1793,7 +1850,7 @@ function renderEventList() {
     return;
   }
 
-  listEl.innerHTML = film.events.map(event => {
+  listEl.innerHTML = film.events.map((event, idx) => {
     const rowNums = event.rowIds.map(rid => {
       const r = film.rows.find(row => row.id === rid);
       return r ? r.number : null;
@@ -1818,6 +1875,7 @@ function renderEventList() {
 
     return `
       <div class="event-item-editable">
+        <span class="event-number">${idx + 1}</span>
         <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
         <input type="text" class="event-name-edit" value="${event.name}" oninput="updateEventName('${event.id}', this.value)" placeholder="事件名称">
         <span class="event-rows-info">${rowText}</span>
@@ -2333,6 +2391,7 @@ function exportAsPDF() {
 
 function exportData() {
   closeModal('exportFormatModal');
+  closeModal('exportReminderModal');
   const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2340,7 +2399,49 @@ function exportData() {
   a.download = `拉片数据_${new Date().toLocaleDateString()}.json`;
   a.click();
   URL.revokeObjectURL(url);
+  // 记录上次导出时间
+  localStorage.setItem('xfy_last_export_time', String(Date.now()));
   showToast('导出成功');
+}
+
+// ==================== 强制导出提醒（每15天） ====================
+const EXPORT_REMINDER_INTERVAL = 15 * 24 * 60 * 60 * 1000; // 15天
+const EXPORT_SNOOZE_KEY = 'xfy_export_snooze_time';
+const LAST_EXPORT_KEY = 'xfy_last_export_time';
+
+function checkExportReminder() {
+  const lastExport = parseInt(localStorage.getItem(LAST_EXPORT_KEY) || '0');
+  const snoozeUntil = parseInt(localStorage.getItem(EXPORT_SNOOZE_KEY) || '0');
+  const now = Date.now();
+
+  // 如果设置了稍后提醒，且还在稍后时间内，不弹窗
+  if (snoozeUntil > now) return;
+
+  // 如果从未导出过，或者距离上次导出超过15天
+  if (lastExport === 0 || (now - lastExport) > EXPORT_REMINDER_INTERVAL) {
+    // 延迟一点弹窗，避免页面加载初期干扰
+    setTimeout(function() {
+      document.getElementById('exportReminderModal').classList.add('show');
+    }, 1500);
+  }
+}
+
+function reminderExportJSON() {
+  exportData();
+}
+
+function reminderExportWord() {
+  closeModal('exportReminderModal');
+  localStorage.setItem(LAST_EXPORT_KEY, String(Date.now()));
+  exportAsWord();
+}
+
+function snoozeExportReminder() {
+  // 稍后提醒：3天后再提醒
+  const snoozeUntil = Date.now() + 3 * 24 * 60 * 60 * 1000;
+  localStorage.setItem(EXPORT_SNOOZE_KEY, String(snoozeUntil));
+  closeModal('exportReminderModal');
+  showToast('已设置3天后再次提醒');
 }
 
 function importData(event) {
