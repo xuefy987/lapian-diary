@@ -139,18 +139,6 @@
     <iframe class="app-frame" id="app-ai" data-src="ai-platform.html"></iframe>
   </div>
 
-    <!-- 强制备份导出弹窗 -->
-    <div id="forcedExportModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
-      <div style="background:#fff;border-radius:16px;padding:32px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <div style="font-size:48px;margin-bottom:12px;">💾</div>
-        <h2 style="font-size:20px;color:#1a1a2e;margin-bottom:12px;">定期备份提醒</h2>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:8px;">距上次备份已超过15天，为防止数据丢失，请立即导出一份完整备份。</p>
-        <p style="color:#9ca3af;font-size:12px;margin-bottom:24px;">备份将包含所有拉片数据和AI短片项目数据。</p>
-        <button onclick="executeForcedExport()" style="width:100%;padding:14px;background:#4f46e5;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;">📥 立即导出备份</button>
-        <button onclick="skipForcedExport()" style="width:100%;padding:12px;margin-top:8px;background:transparent;color:#9ca3af;border:none;font-size:13px;cursor:pointer;">稍后提醒（3天后）</button>
-      </div>
-    </div>
-
     <script>
       // 版本号：每次修改功能时递增，强制浏览器加载最新内容
       var APP_VERSION = '20260919-v1';
@@ -271,6 +259,17 @@
           <button class="settings-btn settings-btn-primary" onclick="syncNow()">🔄 立即同步</button>
         </div>
       </div>
+      <div class="settings-section">
+        <div class="settings-section-title">定期备份</div>
+        <div class="settings-item">
+          <div><div class="settings-label">完整数据导出</div><div class="settings-desc" id="forcedExportStatus">导出所有拉片和AI项目数据为本地文件</div></div>
+          <button class="settings-btn settings-btn-primary" onclick="executeForcedExport()">📥 立即导出</button>
+        </div>
+        <div class="settings-item">
+          <div><div class="settings-label">定期提醒</div><div class="settings-desc">每15天提醒一次导出备份</div></div>
+          <div class="toggle-switch on" id="toggleForcedExport" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
       <div class="settings-actions">
         <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">关闭</button>
         <button class="settings-btn settings-btn-primary" onclick="saveSettings()">保存设置</button>
@@ -325,6 +324,10 @@
       var labels = {'3':'3秒（实时）','30':'30秒','60':'1分钟','300':'5分钟','0':'已关闭'};
       document.getElementById('backupFreqDesc').textContent = '当前: ' + (labels[freq] || freq + '秒');
       document.getElementById('settingsOverlay').classList.add('show');
+      // 刷新定期备份状态
+      checkForcedExportStatus();
+      var fe = localStorage.getItem('xfy_forced_export_enabled');
+      if (fe === 'false') document.getElementById('toggleForcedExport').classList.remove('on');
     }
     function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
     function saveSettings() {
@@ -332,6 +335,8 @@
       saveSettingsData(s);
       const t = document.getElementById('githubToken').value.trim();
       if (t) localStorage.setItem(TOKEN_KEY, t);
+      // 保存定期提醒开关
+      localStorage.setItem('xfy_forced_export_enabled', document.getElementById('toggleForcedExport').classList.contains('on') ? 'true' : 'false');
       closeSettings();
     }
 
@@ -694,8 +699,8 @@
       window.addEventListener('focus', function() {
         autoCloudRestore();
       });
-      // 页面加载3秒后检查是否需要强制导出备份
-      setTimeout(checkForcedExport, 3000);
+      // 页面加载3秒后检查是否需要提醒导出备份（仅在设置面板状态栏提示，不弹窗）
+      setTimeout(checkForcedExportStatus, 3000);
     });
     window.addEventListener('message', function(e) {
       if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); }
@@ -711,34 +716,38 @@
       }
     });
 
-    // ==================== 强制备份导出机制 ====================
+    // ==================== 定期备份导出（设置面板内） ====================
     var FORCED_EXPORT_INTERVAL = 15 * 24 * 60 * 60 * 1000; // 15天
-    var FORCED_EXPORT_SKIP_INTERVAL = 3 * 24 * 60 * 60 * 1000; // 跳过后3天再提醒
 
-    function checkForcedExport() {
+    function checkForcedExportStatus() {
       try {
-        var lastExport = parseInt(localStorage.getItem('xfy_last_forced_export') || '0');
-        var lastSkip = parseInt(localStorage.getItem('xfy_last_forced_export_skip') || '0');
-        var now = Date.now();
-        // 如果从未导出过，或者距上次导出超过15天，且距上次跳过超过3天
-        if (lastExport === 0 || (now - lastExport > FORCED_EXPORT_INTERVAL && now - lastSkip > FORCED_EXPORT_SKIP_INTERVAL)) {
-          var modal = document.getElementById('forcedExportModal');
-          if (modal) {
-            modal.style.display = 'flex';
-          }
+        var toggle = document.getElementById('toggleForcedExport');
+        var enabled = localStorage.getItem('xfy_forced_export_enabled');
+        if (enabled === 'false') {
+          if (toggle) toggle.classList.remove('on');
+          return;
         }
-      } catch(e) { console.error('检查强制导出失败:', e); }
+        var lastExport = parseInt(localStorage.getItem('xfy_last_forced_export') || '0');
+        var now = Date.now();
+        var statusEl = document.getElementById('forcedExportStatus');
+        if (lastExport === 0) {
+          if (statusEl) { statusEl.textContent = '从未导出过，建议立即备份'; statusEl.style.color = '#ef4444'; }
+        } else if (now - lastExport > FORCED_EXPORT_INTERVAL) {
+          var days = Math.floor((now - lastExport) / (24 * 60 * 60 * 1000));
+          if (statusEl) { statusEl.textContent = '距上次导出已' + days + '天，建议立即备份'; statusEl.style.color = '#f59e0b'; }
+        } else {
+          var remain = Math.ceil((FORCED_EXPORT_INTERVAL - (now - lastExport)) / (24 * 60 * 60 * 1000));
+          if (statusEl) { statusEl.textContent = '距下次提醒还有' + remain + '天'; statusEl.style.color = '#6b7280'; }
+        }
+      } catch(e) {}
     }
 
     function executeForcedExport() {
       try {
-        // 收集拉片数据
         var lapianData = localStorage.getItem('lapian_platform_v2') || '{}';
         var lapianHistory = localStorage.getItem('lapian_platform_history') || '[]';
-        // 收集AI平台数据
         var aiData = localStorage.getItem('ai_drama_projects') || '[]';
         var aiCollapse = localStorage.getItem('ai_drama_collapse') || '{}';
-        // 组合备份
         var backup = {
           exportDate: new Date().toISOString(),
           version: '1.0',
@@ -757,21 +766,11 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        // 更新导出时间
         localStorage.setItem('xfy_last_forced_export', String(Date.now()));
-        localStorage.removeItem('xfy_last_forced_export_skip');
-        // 关闭弹窗
-        var modal = document.getElementById('forcedExportModal');
-        if (modal) modal.style.display = 'none';
+        checkForcedExportStatus();
       } catch(e) {
         alert('导出失败: ' + e.message);
       }
-    }
-
-    function skipForcedExport() {
-      localStorage.setItem('xfy_last_forced_export_skip', String(Date.now()));
-      var modal = document.getElementById('forcedExportModal');
-      if (modal) modal.style.display = 'none';
     }
   </script>
 </body>
