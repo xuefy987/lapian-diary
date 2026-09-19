@@ -2570,7 +2570,6 @@ function openMergeEventModal() {
     return;
   }
 
-  const film = getCurrentFilm();
   // 渲染颜色下拉选择
   const select = document.getElementById('mergeColorSelect');
   const colorLabels = ['暖黄','暖橙','暖红','粉红','淡紫','薰衣草','天蓝','青色','薄荷','浅绿','嫩绿','草绿','淡蓝','紫蓝','靛蓝','淡紫罗兰','冰蓝','粉紫','蜜桃','柠檬','奶油','青柠','嫩黄','翠绿','玫红','樱粉','珊瑚','浅粉','草莓','樱桃','湖蓝','碧蓝','天空蓝','薰衣草蓝','紫罗兰','淡紫','薄荷绿','苹果绿','翡翠','青绿','碧玉','橙黄','橘子','南瓜','金黄','琥珀','日落','紫红','兰花紫','葡萄紫','紫水晶','蓝紫','电蓝','薄荷','海洋','蔚蓝','金黄','琥珀','日落','珊瑚','砖红'];
@@ -2578,10 +2577,8 @@ function openMergeEventModal() {
     var label = colorLabels[i] || ('颜色' + (i + 1));
     return '<option value="' + color + '" style="background:' + color + ';">' + label + '</option>';
   }).join('');
-  // 自动选择下一个颜色（按当前事件数量循环取色）
-  var nextColorIdx = film.events.length % eventColors.length;
-  select.selectedIndex = nextColorIdx;
-  selectedMergeColor = eventColors[nextColorIdx];
+  select.selectedIndex = 0;
+  selectedMergeColor = eventColors[0];
 
   document.getElementById('eventNameInput').value = '';
   document.getElementById('mergeEventModal').classList.add('show');
@@ -2701,21 +2698,7 @@ function updateEventName(eventId, name) {
   const event = film.events.find(e => e.id === eventId);
   if (event) {
     event.name = name;
-    // 仅保存到localStorage，不触发renderEventList避免输入框失焦
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    localStorage.setItem('xfy_lapian_modified', String(Date.now()));
-    dataDirty = true;
-    try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
-  }
-}
-function updateEventNameOnBlur(eventId, name) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const event = film.events.find(e => e.id === eventId);
-  if (event) {
-    event.name = name;
     saveData();
-    renderRowsOnly();
   }
 }
 
@@ -2771,7 +2754,7 @@ function renderEventList() {
 
 // 按事件分组显示
 function renderEventListByGroup(film, listEl) {
-  listEl.innerHTML = film.events.map((event, idx) => {
+  listEl.innerHTML = film.events.map(event => {
     const rowNums = event.rowIds.map(rid => {
       const r = film.rows.find(row => row.id === rid);
       return r ? r.number : null;
@@ -2802,11 +2785,9 @@ function renderEventListByGroup(film, listEl) {
            ondragleave="onEventDragLeave(event)">
         <div class="event-item-row1">
           <span class="event-drag-handle" title="拖拽排序">⠿</span>
-          <span class="event-number" style="min-width:22px;text-align:center;font-weight:600;color:var(--ink);font-size:13px;">${idx + 1}.</span>
           <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
           <input type="text" class="event-name-edit" value="${event.name}"
                  oninput="updateEventName('${event.id}', this.value)"
-                 onblur="updateEventNameOnBlur('${event.id}', this.value)"
                  onclick="jumpToEventFirstRow('${event.id}')"
                  placeholder="事件名称" title="点击跳转到首个序号">
           <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
