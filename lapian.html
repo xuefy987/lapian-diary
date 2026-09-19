@@ -4,23 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>剧作-xfy的拉片笔记</title>
-<script>
-// 强制版本检测：如果URL中没有版本参数，自动添加并刷新
-(function(){
-  var REQUIRED_VERSION = '20260915-v1';
-  var url = new URL(window.location.href);
-  var currentV = url.searchParams.get('v');
-  if (currentV !== REQUIRED_VERSION) {
-    url.searchParams.set('v', REQUIRED_VERSION);
-    url.searchParams.set('t', Date.now().toString());
-    window.location.replace(url.toString());
-  }
-})();
-</script>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -40,10 +24,8 @@
     --glass: rgba(255,255,255,0.75);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html { height: 100%; touch-action: manipulation; }
-  body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-  button, [onclick], .btn, .btn-icon, .toolbar-btn, .nav-tab { touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -130,10 +112,10 @@
     padding: 10px 12px;
     border-radius: 6px;
     cursor: pointer;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
     transition: background 0.15s;
   }
 
@@ -145,48 +127,11 @@
     font-weight: 500;
   }
 
-  .film-item-main {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
-  }
-
   .film-item-title {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .film-item-duration {
-    width: 56px;
-    font-size: 11px;
-    padding: 2px 4px;
-    border: 1px solid var(--border, #ddd);
-    border-radius: 4px;
-    background: var(--bg2, #f5f5f5);
-    color: var(--text, #333);
-    text-align: center;
-    outline: none;
-    touch-action: manipulation;
-  }
-
-  .film-item-duration:focus {
-    border-color: var(--accent, #3b82f6);
-  }
-
-  .film-item-duration-unit {
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .film-item-meta {
-    font-size: 11px;
-    color: var(--muted, #999);
-    padding-left: 2px;
   }
 
   .film-item-actions { display: none; gap: 2px; }
@@ -219,8 +164,8 @@
     outline: none;
     background: transparent;
     color: var(--ink);
-    flex: 1 1 0%;
-    min-width: 0;
+    width: 100%;
+    max-width: 400px;
   }
 
   .film-title-input:focus { border-bottom: 2px solid var(--accent); }
@@ -311,17 +256,6 @@
     outline: none;
   }
 
-  .font-family-select {
-    padding: 4px 6px;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    font-size: 12px;
-    background: var(--bg2);
-    cursor: pointer;
-    outline: none;
-    max-width: 110px;
-  }
-
   /* 拉片内容区 - 序号行 */
   .lapian-content {
     flex: 1;
@@ -381,23 +315,6 @@
     flex-shrink: 0;
   }
 
-  .row-event-tag {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-    border: 1px solid rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: opacity 0.15s;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .row-event-tag:hover { opacity: 0.8; }
-
   .row-time {
     display: flex;
     align-items: center;
@@ -452,16 +369,6 @@
 
   .row-content:focus { border-color: var(--accent); }
   .row-content:empty:before { content: attr(data-placeholder); color: var(--muted); }
-
-  /* 确保文字选中在彩色背景上也清晰可见 */
-  .row-content::selection {
-    background: #4f46e5;
-    color: #ffffff;
-  }
-  .row-content::-moz-selection {
-    background: #4f46e5;
-    color: #ffffff;
-  }
 
   .row-delete {
     opacity: 0;
@@ -673,65 +580,19 @@
   /* 事件列表 - 可编辑 */
   .event-list { list-style: none; }
 
-  /* 视图切换按钮 */
-  .event-view-toggle {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-  .event-view-btn {
-    flex: 1;
-    padding: 4px 8px;
-    font-size: 11px;
-    border: 1px solid var(--rule);
-    background: var(--bg2);
-    color: var(--muted);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .event-view-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .event-view-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
   .event-item-editable {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    gap: 8px;
     padding: 8px 10px;
     border-radius: 6px;
     margin-bottom: 6px;
     background: var(--bg3);
     border: 1px solid transparent;
-    transition: border-color 0.15s, opacity 0.15s;
+    transition: border-color 0.15s;
   }
 
   .event-item-editable:hover { border-color: var(--rule); }
-  .event-item-editable.dragging { opacity: 0.4; border: 2px dashed var(--accent); }
-  .event-item-editable.drag-over { border: 2px solid var(--accent); background: rgba(79,70,229,0.05); }
-
-  .event-item-row1 {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .event-item-row2 {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding-left: 30px;
-  }
-
-  .event-drag-handle {
-    cursor: grab;
-    color: var(--muted);
-    font-size: 14px;
-    padding: 2px 4px;
-    flex-shrink: 0;
-    user-select: none;
-  }
-  .event-drag-handle:active { cursor: grabbing; }
-  .event-drag-handle:hover { color: var(--accent); }
 
   .event-color-input {
     width: 24px;
@@ -754,13 +615,8 @@
     font-size: 13px;
     color: var(--ink);
     min-width: 0;
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
-  .event-name-edit:hover { color: var(--accent); text-decoration: underline; }
-  .event-name-edit:focus { border-bottom: 1px solid var(--accent); text-decoration: none; }
+  .event-name-edit:focus { border-bottom: 1px solid var(--accent); }
 
   .event-rows-info {
     font-size: 11px;
@@ -768,20 +624,6 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
-
-  .event-manage-btn {
-    background: transparent;
-    border: 1px solid var(--rule);
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .event-manage-btn:hover { color: var(--accent); border-color: var(--accent); }
 
   .event-delete-btn {
     background: transparent;
@@ -796,48 +638,6 @@
     flex-shrink: 0;
   }
   .event-delete-btn:hover { opacity: 1; background: rgba(239,68,68,0.1); }
-
-  /* 按序号逐行显示模式 */
-  .event-row-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    background: var(--bg3);
-    border-left: 3px solid transparent;
-    font-size: 12px;
-    transition: all 0.15s;
-    cursor: pointer;
-  }
-  .event-row-item:hover { background: var(--bg2); border-left-color: var(--accent); }
-  .event-row-number {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .event-row-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--ink);
-  }
-  .event-row-time {
-    font-size: 10px;
-    color: var(--muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
 
   /* 分隔条 */
   .resizer {
@@ -890,148 +690,26 @@
     gap: 8px;
   }
 
-  /* 浮动可拖动预览窗口 */
-  .floating-window {
-    position: absolute;
-    width: 580px;
-    max-width: 92vw;
-    height: 70vh;
-    max-height: 600px;
-    background: var(--bg2);
-    border-radius: 10px;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--rule);
-  }
-  .floating-window-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--bg3);
-    border-bottom: 1px solid var(--rule);
-    cursor: move;
-    user-select: none;
-    -webkit-user-select: none;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    flex-shrink: 0;
-  }
-  .floating-window-close {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    color: var(--muted);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .floating-window-close:hover { background: rgba(0,0,0,0.1); color: var(--ink); }
-  .floating-window-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: var(--bg1);
-    border-bottom: 1px solid var(--rule);
-    flex-shrink: 0;
-  }
-  .floating-window-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .floating-window-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 10px 14px;
-    background: var(--bg3);
-    border-top: 1px solid var(--rule);
-    flex-shrink: 0;
-  }
-  /* 让预览窗口的overlay不强制居中，允许自由定位 */
-  #historyPreviewModal { align-items: flex-start; justify-content: flex-start; padding: 30px; }
-  #historyPreviewModal.show { display: block; }
-
-  /* 版本对比弹窗手机端竖排 */
-  @media (max-width: 640px) {
-    #versionCompareModal > .modal { max-width: 95vw; }
-    #versionCompareModal > .modal > div:nth-child(3) { flex-direction: column !important; }
-  }
-
-  /* 差异高亮 */
-  .diff-added { background: rgba(34,197,94,0.18); border-left: 3px solid #22c55e; padding: 2px 4px; margin: 2px 0; border-radius: 2px; }
-  .diff-removed { background: rgba(239,68,68,0.18); border-left: 3px solid #ef4444; padding: 2px 4px; margin: 2px 0; border-radius: 2px; text-decoration: line-through; opacity: 0.7; }
-  .diff-changed { background: rgba(251,191,36,0.18); border-left: 3px solid #fbbf24; padding: 2px 4px; margin: 2px 0; border-radius: 2px; }
-  .diff-same { opacity: 0.5; }
-  .diff-badge { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600; margin-left: 4px; }
-  .diff-badge-added { background: #22c55e; color: #fff; }
-  .diff-badge-removed { background: #ef4444; color: #fff; }
-  .diff-badge-changed { background: #fbbf24; color: #fff; }
-
   /* 合并事件模态框 */
   .merge-event-modal { max-width: 420px; }
 
-  #mergeColorSelect {
-    appearance: auto;
-    -webkit-appearance: auto;
-    height: 40px;
+  .merge-event-colors {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
-  /* 事件管理模态框 */
-  .event-manage-modal { max-width: 520px; }
-  .event-manage-row-list {
-    max-height: 350px;
-    overflow-y: auto;
-    border: 1px solid var(--rule);
+  .merge-color-option {
+    width: 100%;
+    aspect-ratio: 1;
     border-radius: 6px;
-    padding: 8px;
-    margin-bottom: 12px;
-  }
-  .event-manage-row-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    background: var(--bg3);
-    font-size: 13px;
-  }
-  .event-manage-row-item:hover { background: var(--bg2); }
-  .event-manage-row-item.in-event { border-left: 3px solid var(--accent); }
-  .event-manage-row-num {
-    font-weight: 700;
-    color: var(--accent);
-    min-width: 28px;
-    text-align: center;
-  }
-  .event-manage-row-content {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--ink);
-  }
-  .event-manage-toggle-btn {
-    padding: 4px 10px;
-    font-size: 11px;
-    border-radius: 4px;
-    border: 1px solid var(--rule);
     cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s;
+    border: 3px solid transparent;
+    transition: transform 0.1s;
   }
-  .event-manage-toggle-btn.add { color: var(--accent); border-color: var(--accent); }
-  .event-manage-toggle-btn.add:hover { background: var(--accent); color: #fff; }
-  .event-manage-toggle-btn.remove { color: var(--danger); border-color: var(--danger); }
-  .event-manage-toggle-btn.remove:hover { background: var(--danger); color: #fff; }
+  .merge-color-option:hover { transform: scale(1.1); }
+  .merge-color-option.selected { border-color: var(--ink); }
 
   /* 评论标记 */
   .comment-marker {
@@ -1062,233 +740,28 @@
   }
   .comment-marker:hover .comment-bubble { display: block; }
 
-  /* 行评论按钮 */
-  .row-comment-btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 2px 6px;
-    font-size: 12px;
-    color: var(--muted);
-    background: transparent;
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    white-space: nowrap;
-  }
-  .row-comment-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: rgba(79,70,229,0.06);
-  }
-  .row-comment-btn.has-comments {
-    color: #b45309;
-    border-color: var(--warning);
-    background: rgba(251,191,36,0.08);
-  }
-  .comment-count-badge {
-    display: inline-block;
-    min-width: 16px;
-    height: 16px;
-    line-height: 16px;
-    text-align: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: #fff;
-    background: var(--accent);
-    border-radius: 8px;
-    padding: 0 4px;
-  }
-  .row-comment-btn.has-comments .comment-count-badge {
-    background: var(--warning);
-    color: #78350f;
-  }
-
-  /* 台词拉片记录 */
-  .dialogue-toggle-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 4px 6px;
-    border-radius: 4px;
-    color: var(--muted);
-    transition: all 0.2s;
-    flex-shrink: 0;
-    padding-top: 5px;
-  }
-  .dialogue-toggle-btn:hover { background: rgba(79,70,229,0.1); color: var(--accent); }
-  .dialogue-toggle-btn.has-dialogue { color: #f59e0b; }
-
-  .dialogue-panel {
-    display: none;
-    width: 100%;
-    margin-top: 6px;
-    padding-left: 56px;
-    padding-right: 36px;
-    border-top: 1px dashed var(--rule);
-    padding-top: 6px;
-  }
-  .lapian-row.show-dialogue .dialogue-panel { display: block; }
-
-  .dialogue-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .dialogue-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .dialogue-item {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    background: rgba(255,255,255,0.6);
-    border-radius: 6px;
-    padding: 6px 8px;
-    border: 1px solid var(--rule);
-  }
-  body.dark-mode .dialogue-item { background: rgba(255,255,255,0.03); }
-
-  .dialogue-character {
-    flex-shrink: 0;
-    min-width: 60px;
-    max-width: 100px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    padding: 4px 6px;
-    background: rgba(79,70,229,0.08);
-    border-radius: 4px;
-    text-align: center;
-    cursor: pointer;
-    border: 1px solid transparent;
-    outline: none;
-  }
-  .dialogue-character:focus { border-color: var(--accent); background: #fff; }
-  body.dark-mode .dialogue-character:focus { background: var(--bg2); }
-
-  .dialogue-text {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
-    line-height: 1.7;
-    padding: 4px 6px;
-    border-radius: 4px;
-    outline: none;
-    border: 1px solid transparent;
-    word-break: break-word;
-  }
-  .dialogue-text:focus { border-color: var(--rule); background: #fff; }
-  body.dark-mode .dialogue-text:focus { background: var(--bg2); }
-  .dialogue-text:empty:before { content: attr(data-placeholder); color: var(--muted); }
-
-  .dialogue-delete-btn {
-    flex-shrink: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 16px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    opacity: 0;
-    transition: all 0.2s;
-  }
-  .dialogue-item:hover .dialogue-delete-btn { opacity: 1; }
-  .dialogue-delete-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
-
-  .dialogue-add-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: var(--accent);
-    background: rgba(79,70,229,0.06);
-    border: 1px dashed var(--accent);
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 4px;
-    transition: all 0.2s;
-  }
-  .dialogue-add-btn:hover { background: rgba(79,70,229,0.12); }
-
-  /* 工具栏台词按钮激活态 */
-  .toolbar-btn.dialogue-btn.active {
-    background: rgba(245,158,11,0.15);
-    color: #f59e0b;
-  }
-
   .comment-list-panel {
-    max-height: 250px;
+    max-height: 200px;
     overflow-y: auto;
     margin-bottom: 16px;
     border: 1px solid var(--rule);
     border-radius: 6px;
-    padding: 4px;
-    background: var(--bg3);
+    padding: 8px;
   }
 
   .comment-item {
-    position: relative;
-    padding: 8px 10px;
-    padding-right: 32px;
+    padding: 8px;
     border-bottom: 1px solid var(--rule);
     font-size: 13px;
-    background: var(--bg2);
-    border-radius: 4px;
-    margin-bottom: 4px;
   }
-  .comment-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .comment-item:last-child { border-bottom: none; }
 
   .comment-meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     color: var(--muted);
     font-size: 11px;
     margin-bottom: 4px;
-  }
-  .comment-meta-row {
-    display: inline-block;
-    padding: 1px 6px;
-    background: var(--bg3);
-    border-radius: 3px;
-    font-size: 10px;
-    color: var(--accent);
-    font-weight: 600;
-  }
-
-  .comment-delete-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: transparent;
-    border: none;
-    color: var(--danger);
-    cursor: pointer;
-    font-size: 14px;
-    opacity: 0.5;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    line-height: 1;
-  }
-  .comment-delete-btn:hover {
-    opacity: 1;
-    background: rgba(239,68,68,0.1);
   }
 
   .comment-textarea {
@@ -1399,24 +872,15 @@
       z-index: 100;
       transform: translateX(100%);
       transition: transform 0.3s ease;
-      width: 88%;
-      max-width: 380px;
+      width: 300px;
       box-shadow: var(--shadow-lg);
     }
     .sidebar-right.open { transform: translateX(0); }
-    .sidebar-right.collapsed { width: 88%; max-width: 380px; min-width: 0; }
+    .sidebar-right.collapsed { width: 300px; min-width: 300px; }
 
-    .mobile-menu-btn { display: inline-flex; touch-action: manipulation; }
+    .mobile-menu-btn { display: inline-flex; }
     .resizer { display: none; }
     .toggle-panel-btn { display: none; }
-
-    /* 平板端隐藏次要按钮，给片名更多空间 */
-    .main-header .btn.btn-secondary[data-mobile-hide="true"] { display: none; }
-    .main-header { padding: 6px 10px; gap: 6px; }
-    .film-title-input { font-size: 15px !important; }
-    /* 缩短左侧栏时长输入框 */
-    .film-item-duration { width: 36px; font-size: 10px; padding: 1px 2px; }
-    .film-item-duration-unit { font-size: 10px; }
   }
 
   @media (max-width: 640px) {
@@ -1428,43 +892,6 @@
     .row-content { flex: 1 1 100%; margin-top: 4px; }
     .time-input { width: 56px; font-size: 10px; }
     .row-number { width: 22px; height: 22px; font-size: 11px; }
-    .main-header { padding: 8px 10px; gap: 4px; }
-    .main-header > div:last-child { gap: 4px !important; }
-    .main-header .btn { padding: 4px 8px; font-size: 12px; }
-    .main-header .btn-icon.mobile-menu-btn { width: 36px; height: 36px; font-size: 15px; background: var(--bg3); border-radius: 8px; }
-    .film-title-input { font-size: 15px !important; }
-    .sidebar-right { width: 92%; max-width: 360px; }
-    /* 手机端隐藏不常用按钮，避免遮挡面板按钮 */
-    .main-header .btn.btn-secondary[data-mobile-hide="true"] { display: none; }
-    /* 浮动面板按钮 */
-    .fab-panel {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    .fab-panel.show { display: flex; }
-  }
-  /* 平板端也显示浮动按钮 */
-  @media (max-width: 1024px) {
-    .fab-panel { display: flex; }
-    /* 平板端隐藏不常用按钮，给片名留出空间 */
-    .main-header .btn.btn-secondary[data-mobile-hide="true"] { display: none; }
-    .main-header { padding: 8px 12px; gap: 6px; }
-    .film-title-input { font-size: 15px !important; }
   }
 
   /* 空状态 */
@@ -1507,25 +934,22 @@
   <!-- ========== 中间主编辑区 ========== -->
   <main class="main-content">
     <div class="main-header">
-      <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
         <button class="btn-icon mobile-menu-btn" onclick="toggleLeftSidebar()">☰</button>
-        <input type="text" class="film-title-input" id="filmTitleInput" placeholder="请输入影片名称" oninput="updateFilmTitle()" style="min-width:0;flex:1;">
+        <input type="text" class="film-title-input" id="filmTitleInput" placeholder="请输入影片名称" oninput="updateFilmTitle()">
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
         <button class="btn-icon mobile-menu-btn" onclick="toggleRightSidebar()">📊 面板</button>
-        <button class="btn btn-secondary" data-mobile-hide="true" onclick="document.getElementById('wpsFile').click()">📄 导入WPS</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('wpsFile').click()">📄 导入WPS</button>
         <input type="file" id="wpsFile" style="display: none;" accept=".docx,.doc,.txt" onchange="importWPSDocument(event)">
         <button class="btn btn-primary" onclick="manualSave()">💾 保存</button>
-        <button class="btn btn-secondary" data-mobile-hide="true" onclick="openHistoryModal()">📜 历史</button>
-        <button class="btn btn-secondary" data-mobile-hide="true" onclick="openModal('exportFormatModal')">📤 导出</button>
-        <button class="btn btn-secondary" data-mobile-hide="true" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
+        <button class="btn btn-secondary" onclick="openHistoryModal()">📜 历史</button>
+        <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
         <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
       </div>
     </div>
-
-    <!-- 浮动面板按钮（手机/平板） -->
-    <button class="fab-panel" onclick="toggleRightSidebar()" title="打开事件面板">📊</button>
 
     <!-- 工具栏 -->
     <div class="toolbar">
@@ -1536,20 +960,6 @@
         <button class="toolbar-btn" onclick="execCmd('strikeThrough')" title="删除线"><s>S</s></button>
       </div>
       <div class="toolbar-group">
-        <select class="font-family-select" onchange="changeFontFamily(this.value)" title="字体">
-          <option value="inherit">默认字体</option>
-          <option value="SimSun">宋体</option>
-          <option value="SimHei">黑体</option>
-          <option value="KaiTi">楷体</option>
-          <option value="FangSong">仿宋</option>
-          <option value="Microsoft YaHei">微软雅黑</option>
-          <option value="STXihei">细黑</option>
-          <option value="STKaiti">华文楷体</option>
-          <option value="Georgia">Georgia</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Arial">Arial</option>
-          <option value="Courier New">Courier New</option>
-        </select>
         <select class="font-size-select" onchange="changeFontSize(this.value)" title="字号">
           <option value="1">小</option>
           <option value="3" selected>正常</option>
@@ -1587,7 +997,6 @@
         <button class="toolbar-btn" onclick="execCmd('removeFormat')" title="清除格式">✕</button>
       </div>
       <div class="toolbar-group">
-        <button class="toolbar-btn dialogue-btn" id="dialogueToggleBtn" onclick="toggleAllDialogues()" title="展开/收起所有台词记录">🎭</button>
         <button class="toolbar-btn" onclick="addComment()" title="添加评论">💬</button>
       </div>
       <div class="toolbar-group">
@@ -1631,7 +1040,7 @@
             <div class="stat-number" id="totalRows">0</div>
             <div class="stat-label">序号行数</div>
           </div>
-          <div class="stat-card" style="cursor:pointer;transition:all 0.2s;" onclick="showAllComments()" title="点击查看所有评论">
+          <div class="stat-card">
             <div class="stat-number" id="totalComments">0</div>
             <div class="stat-label">评论数</div>
           </div>
@@ -1642,10 +1051,6 @@
         </div>
         <div class="panel-section">
           <h3>📌 事件列表（可编辑）</h3>
-          <div class="event-view-toggle">
-            <button class="event-view-btn active" id="viewBtnGroup" onclick="switchEventView('group')">按事件分组</button>
-            <button class="event-view-btn" id="viewBtnRow" onclick="switchEventView('row')">按序号逐行</button>
-          </div>
           <div id="eventList"></div>
         </div>
       </div>
@@ -1656,22 +1061,8 @@
 <!-- 合并事件操作栏 -->
 <div class="merge-action-bar" id="mergeActionBar">
   <span id="selectedCount">已选 0 项</span>
-  <button class="btn" onclick="openMergeEventModal()">合并为新事件</button>
-  <button class="btn" id="mergeToExistingBtn" style="display:none;" onclick="openMergeToExistingModal()">合并到已有事件</button>
+  <button class="btn" onclick="openMergeEventModal()">合并为事件</button>
   <button class="btn btn-secondary" onclick="clearRowSelection()">取消选择</button>
-</div>
-
-<!-- 合并到已有事件模态框 -->
-<div class="modal-overlay" id="mergeToExistingModal">
-  <div class="modal">
-    <h2>合并到已有事件</h2>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">将选中的未分组行合并到以下事件中：</div>
-    <select class="modal-input" id="existingEventSelect" style="width:100%;"></select>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('mergeToExistingModal')">取消</button>
-      <button class="btn btn-primary" onclick="confirmMergeToExisting()">确认合并</button>
-    </div>
-  </div>
 </div>
 
 <!-- 新建影片模态框 -->
@@ -1679,7 +1070,6 @@
   <div class="modal">
     <h2>新建拉片文档</h2>
     <input type="text" class="modal-input" id="newFilmName" placeholder="请输入影片名称" onkeydown="if(event.key==='Enter')createNewFilm()">
-    <input type="text" class="modal-input" id="newFilmDuration" placeholder="影片时长（如：120分钟）" style="margin-top: 8px;" onkeydown="if(event.key==='Enter')createNewFilm()">
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newFilmModal')">取消</button>
       <button class="btn btn-primary" onclick="createNewFilm()">创建</button>
@@ -1691,25 +1081,12 @@
 <div class="modal-overlay" id="mergeEventModal">
   <div class="modal merge-event-modal">
     <h2>合并为事件</h2>
-    <input type="text" class="modal-input" id="eventNameInput" placeholder="输入事件名称（如：入狱与适应）" onkeydown="if(event.key==='Enter')confirmMergeEvent()">
+    <input type="text" class="modal-input" id="eventNameInput" placeholder="输入事件名称（如：入狱与适应）">
     <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">选择背景颜色：</div>
-    <select id="mergeColorSelect" class="modal-input" style="margin-bottom:16px;cursor:pointer;">
-    </select>
+    <div class="merge-event-colors" id="mergeColorGrid"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('mergeEventModal')">取消</button>
       <button class="btn btn-primary" onclick="confirmMergeEvent()">确认合并</button>
-    </div>
-  </div>
-</div>
-
-<!-- 事件管理模态框（增删改段落） -->
-<div class="modal-overlay" id="eventManageModal">
-  <div class="modal event-manage-modal">
-    <h2 id="eventManageTitle">管理事件段落</h2>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">勾选/取消序号行来添加或移除段落：</div>
-    <div class="event-manage-row-list" id="eventManageRowList"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('eventManageModal')">关闭</button>
     </div>
   </div>
 </div>
@@ -1718,23 +1095,11 @@
 <div class="modal-overlay" id="commentModal">
   <div class="modal">
     <h2>💬 评论</h2>
-    <div id="commentContextInfo" style="font-size:12px;color:var(--muted);margin-bottom:8px;padding:4px 8px;background:var(--bg3);border-radius:4px;"></div>
     <div class="comment-list-panel" id="commentListPanel"></div>
-    <textarea class="comment-textarea" id="commentTextarea" placeholder="输入你的评论...（Ctrl+Enter提交）" onkeydown="if(event.key==='Enter'&&event.ctrlKey)submitComment()"></textarea>
+    <textarea class="comment-textarea" id="commentTextarea" placeholder="输入你的评论..."></textarea>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('commentModal')">关闭</button>
       <button class="btn btn-primary" onclick="submitComment()">添加评论</button>
-    </div>
-  </div>
-</div>
-
-<!-- 全部评论列表模态框 -->
-<div class="modal-overlay" id="allCommentsModal">
-  <div class="modal" style="max-width:600px;max-height:80vh;">
-    <h2>💬 全部评论</h2>
-    <div id="allCommentsList" style="max-height:55vh;overflow-y:auto;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('allCommentsModal')">关闭</button>
     </div>
   </div>
 </div>
@@ -1762,103 +1127,20 @@
   </div>
 </div>
 
-<!-- 历史预览浮动窗口 -->
-<div class="modal-overlay" id="historyPreviewModal">
-  <div class="floating-window" id="previewWindow">
-    <div class="floating-window-header" id="previewWindowHeader">
-      <span id="previewTitle">📋 版本预览</span>
-      <button class="floating-window-close" onclick="closeModal('historyPreviewModal')">✕</button>
-    </div>
-    <div class="floating-window-toolbar">
-      <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;">
-        <input type="checkbox" id="showDiff" onchange="toggleDiff()" style="cursor:pointer;"> 高亮差异
-      </label>
-      <div style="flex:1;"></div>
-      <span style="font-size:11px;color:var(--muted);">可拖动窗口 | 与当前版本对照</span>
-    </div>
-    <div id="previewContent" class="floating-window-body"></div>
-    <div class="floating-window-footer">
-      <button class="btn btn-secondary" onclick="closeModal('historyPreviewModal')">取消</button>
-      <button class="btn btn-primary" id="confirmRestoreBtn">✓ 确认恢复</button>
-    </div>
-  </div>
-</div>
-
-<!-- 数据版本容斥检查弹窗 -->
-<div class="modal-overlay" id="freshnessModal" style="z-index:10001;">
-  <div class="modal" style="max-width:420px;">
-    <h2>⚠ 数据版本检查</h2>
-    <div style="padding:12px 0;font-size:14px;line-height:1.6;color:var(--ink);">
-      检测到其他设备有更新的数据（云端更新时间: <span id="freshnessCloudTime" style="font-weight:600;color:var(--accent);">未知</span>），<br>
-      当前页面可能不是最新版本。继续操作可能导致数据互相覆盖丢失。
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="freshnessSyncNow()">🔄 立即同步</button>
-      <button class="btn btn-secondary" onclick="freshnessContinue()">继续操作</button>
-    </div>
-  </div>
-</div>
-
-<!-- 版本对比弹窗 -->
-<div class="modal-overlay" id="versionCompareModal" style="z-index:10001;">
-  <div class="modal" style="max-width:700px;">
-    <h2>📋 版本对比</h2>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;">
-      检测到两个不同的数据版本，请对比后选择恢复。左侧为<b>版本A</b>（较新），右侧为<b>版本B</b>（较旧）。
-    </div>
-    <div style="display:flex;gap:12px;margin-bottom:16px;">
-      <div style="flex:1;border:1px solid var(--rule);border-radius:8px;overflow:hidden;">
-        <div style="padding:8px 12px;background:var(--bg3);font-weight:600;font-size:13px;border-bottom:1px solid var(--rule);">
-          版本A <span id="versionATime" style="font-weight:400;color:var(--muted);"></span>
-        </div>
-        <div id="versionAContent" style="max-height:300px;overflow-y:auto;padding:12px;font-size:12px;line-height:1.5;"></div>
-      </div>
-      <div style="flex:1;border:1px solid var(--rule);border-radius:8px;overflow:hidden;">
-        <div style="padding:8px 12px;background:var(--bg3);font-weight:600;font-size:13px;border-bottom:1px solid var(--rule);">
-          版本B <span id="versionBTime" style="font-weight:400;color:var(--muted);"></span>
-        </div>
-        <div id="versionBContent" style="max-height:300px;overflow-y:auto;padding:12px;font-size:12px;line-height:1.5;"></div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="restoreVersionA()">恢复版本A</button>
-      <button class="btn btn-secondary" onclick="restoreVersionB()">恢复版本B</button>
-      <button class="btn btn-secondary" onclick="closeModal('versionCompareModal')">跳过</button>
-    </div>
-  </div>
-</div>
-
 <!-- 导出格式选择模态框 -->
 <div class="modal-overlay" id="exportFormatModal">
   <div class="modal" style="max-width:380px;">
     <h2>📤 选择导出格式</h2>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-      <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="openExportFilmSelect()">📄 Word文档</button>
+      <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="exportAsWord()">📄 Word文档</button>
       <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="exportAsPDF()">📋 PDF格式（打印另存）</button>
       <button class="btn btn-secondary" style="justify-content:center;padding:12px;" onclick="exportData()">💾 JSON数据备份</button>
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
-      Word导出可选影片，以序号换行排列（非表格）；PDF导出含表格格式
+      Word/PDF导出包含：影片名称、序号行、事件统计、剧情梗概
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('exportFormatModal')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- 导出影片选择模态框 -->
-<div class="modal-overlay" id="exportFilmSelectModal">
-  <div class="modal" style="max-width:460px;">
-    <h2>📄 选择导出影片</h2>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">勾选要导出的影片（可单选或多选），未选则默认导出全部。</div>
-    <div id="exportFilmList" style="max-height:320px;overflow-y:auto;margin-bottom:16px;"></div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="selectAllExportFilms(true)">全选</button>
-      <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px;" onclick="selectAllExportFilms(false)">取消全选</button>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('exportFilmSelectModal')">取消</button>
-      <button class="btn btn-primary" onclick="confirmExportWord()">📄 导出Word</button>
     </div>
   </div>
 </div>
@@ -1910,12 +1192,6 @@ let formatBrushActive = false;
 let formatBrushStyles = null;
 let currentCommentRowId = null;
 let currentCommentMarkerId = null;
-let currentCommentEventId = null;
-let currentCommentMode = 'row'; // 'row', 'marker', 'event'
-let dataDirty = false; // 标记用户是否手动修改了数据（区别于程序内部保存）
-let lastCloudVersion = 0; // 最后一次已知的云端数据版本时间戳
-let localDataVersion = 0; // 本地数据版本时间戳（数据加载/同步时设置）
-let freshnessAcknowledged = false; // 用户是否已知晓数据过期并选择继续
 let selectedMergeColor = null;
 let renameFilmId = null;
 
@@ -1928,46 +1204,18 @@ const colors = [
 ];
 
 const highlightColors = [
-  'transparent',
-  '#fde047', // 亮黄
-  '#4ade80', // 亮绿
-  '#22d3ee', // 亮青
-  '#60a5fa', // 亮蓝
-  '#c084fc', // 亮紫
-  '#f472b6', // 亮粉
-  '#fb923c', // 亮橙
-  '#f87171', // 亮红
-  '#a3e635', // 黄绿
-  '#2dd4bf', // 青绿
-  '#38bdf8', // 天蓝
-  '#a78bfa', // 紫蓝
-  '#f472b6', // 粉红
-  '#fbbf24'  // 金黄
+  'transparent','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff','#ff0000','#ff9900',
+  '#ffe599','#b6d7a8','#a4c2f4','#d9d2e9','#ea9999','#f9cb9c','#d0e0e3','#fff2cc'
 ];
 
 const eventColors = [
-  // 暖色系
-  '#fef3c7','#fed7aa','#fecaca','#fbcfe8','#fae8ff','#f3e5f5',
-  // 蓝绿系
-  '#dbeafe','#cffafe','#ccfbf1','#d1fae5','#bbf7d0','#dcfce7',
-  // 紫蓝系
-  '#ddd6fe','#e9d5ff','#e0e7ff','#e8eaf6','#ede9fe','#f3e8ff',
-  // 大地色系
-  '#ffedd5','#fde68a','#fef9c3','#ecfcc8','#d9f99d','#a7f3d0',
-  // 柔和饱和色
-  '#fce7f3','#fbcfe8','#f9a8d4','#fda4af','#fecdd3','#fecaca',
-  // 清新色
-  '#a5f3fc','#67e8f9','#7dd3fc','#93c5fd','#a5b4fc','#c4b5fd',
-  // 柔和自然色
-  '#bbf7d0','#86efac','#6ee7b7','#5eead4','#6ee7d6','#a7f3d0',
-  // 暖柔色
-  '#fed7aa','#fdba74','#fb923c','#fcd34d','#fbbf24','#facc15',
-  // 粉紫柔色
-  '#f9a8d4','#e879f9','#d8b4fe','#c084fc','#a78bfa','#818cf8',
-  // 薄荷与天空
-  '#5eead4','#2dd4bf','#7dd3fc','#38bdf8','#60a5fa','#818cf8',
-  // 柔和暖色
-  '#fde047','#facc15','#fbbf24','#fb923c','#f87171','#fca5a5'
+  '#fef3c7','#dbeafe','#d1fae5','#fce7f3','#fed7aa','#e9d5ff',
+  '#cffafe','#fee2e2','#fef9c3','#ddd6fe','#bbf7d0','#fbcfe8',
+  '#fecaca','#fde68a','#bfdbfe','#a7f3d0','#fbcfe8','#ddd6fe',
+  '#ffedd5','#ddd6fe','#ccfbf1','#fae8ff','#fef3c7','#e0e7ff',
+  '#dcfce7','#fce7f3','#ffeee0','#e6e6fa','#f0fff0','#fff0f5',
+  '#e8f5e9','#fff3e0','#f3e5f5','#e8eaf6','#e0f2f1','#fff8e1',
+  '#f1f8e9','#fffde7','#e8eaf6','#fbe9e7','#e0f7fa','#f8bbd0'
 ];
 
 // ==================== 初始化 ====================
@@ -1994,32 +1242,13 @@ function init() {
     this.classList.remove('show');
   });
 
-  // 启动自动保存（每3分钟，仅当有修改时才保存）
-  setInterval(function() { if (dataDirty) autoSave(); }, AUTOSAVE_INTERVAL);
-  // 全局监听用户输入，标记数据已修改
-  document.addEventListener('input', function() { dataDirty = true; });
-  document.addEventListener('change', function() { dataDirty = true; });
-  // 页面关闭前保存（仅当有未保存的修改时）
+  // 启动自动保存（每3分钟）
+  setInterval(autoSave, AUTOSAVE_INTERVAL);
+  // 页面关闭前保存
   window.addEventListener('beforeunload', function() {
-    if (dataDirty) {
-      // 检查是否与最近的版本不同
-      var history = loadHistory();
-      if (history.length > 0) {
-        var lastDataStr = JSON.stringify(history[0].data);
-        var currentDataStr = JSON.stringify(appData);
-        if (lastDataStr !== currentDataStr) {
-          // 与最近版本不同，保存当前版本
-          saveToHistory('关闭时自动保存');
-        }
-      } else {
-        saveToHistory('关闭时自动保存');
-      }
-      saveData();
-    }
+    saveData();
   });
   updateSaveStatus();
-  // 页面加载后检查版本冲突
-  setTimeout(checkVersionConflict, 500);
 }
 
 // ==================== 数据持久化 ====================
@@ -2028,18 +1257,6 @@ function loadData() {
   if (saved) {
     try {
       appData = JSON.parse(saved);
-      // 数据迁移：确保所有行都有 dialogue 字段
-      if (appData.films && appData.films.length > 0) {
-        appData.films.forEach(function(film) {
-          if (film.rows && film.rows.length > 0) {
-            film.rows.forEach(function(row) {
-              if (typeof row.dialogue === 'undefined') {
-                row.dialogue = [];
-              }
-            });
-          }
-        });
-      }
     } catch(e) {
       initDefaultData();
     }
@@ -2049,20 +1266,12 @@ function loadData() {
   if (appData.films.length > 0 && !appData.currentFilmId) {
     appData.currentFilmId = appData.films[0].id;
   }
-  localDataVersion = Date.now(); // 记录本地数据加载时间
 }
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-  // 只有用户实际操作触发的保存才更新修改时间（避免beforeunload误标记）
-  if (dataDirty) {
-    localStorage.setItem('xfy_lapian_modified', String(Date.now()));
-    dataDirty = false;
-  }
   updateStats();
   if (activeTab === 'stats') renderEventList();
-  // 通知父页面数据已变化，触发云端自动备份
-  try { window.parent.postMessage({ type: 'dataChanged' }, '*'); } catch(e) {}
 }
 
 function initDefaultData() {
@@ -2071,13 +1280,11 @@ function initDefaultData() {
     films: [{
       id: id,
       name: '示例 - 肖申克的救赎',
-      duration: '142分钟',
-      createTime: Date.now(),
       rows: [
-        { id: generateId(), number: 1, startTime: '00:00:00', endTime: '00:05:30', content: '<p><strong>开场 - 法庭审判</strong></p><p>影片开场以法庭审判场景切入，通过安迪的面部特写与法官的全景镜头交替，建立起主人公被冤枉的核心冲突。</p>', eventId: null, comments: [], dialogue: [] },
-        { id: generateId(), number: 2, startTime: '00:05:30', endTime: '00:15:00', content: '<p>安迪初入肖申克监狱，镜头语言从冷色调的外部环境逐渐过渡到暖色调的监狱内部，暗示人物命运的转变。</p>', eventId: null, comments: [], dialogue: [] },
-        { id: generateId(), number: 3, startTime: '00:15:00', endTime: '00:25:00', content: '<p>安迪与瑞德初次相遇，两人在操场上的对话奠定了全片友谊的基调。</p>', eventId: null, comments: [], dialogue: [] },
-        { id: generateId(), number: 4, startTime: '00:25:00', endTime: '00:40:00', content: '<p>安迪利用税务知识帮助狱警，开始在监狱中建立自己的地位。</p>', eventId: null, comments: [], dialogue: [] }
+        { id: generateId(), number: 1, startTime: '00:00:00', endTime: '00:05:30', content: '<p><strong>开场 - 法庭审判</strong></p><p>影片开场以法庭审判场景切入，通过安迪的面部特写与法官的全景镜头交替，建立起主人公被冤枉的核心冲突。</p>', eventId: null, comments: [] },
+        { id: generateId(), number: 2, startTime: '00:05:30', endTime: '00:15:00', content: '<p>安迪初入肖申克监狱，镜头语言从冷色调的外部环境逐渐过渡到暖色调的监狱内部，暗示人物命运的转变。</p>', eventId: null, comments: [] },
+        { id: generateId(), number: 3, startTime: '00:15:00', endTime: '00:25:00', content: '<p>安迪与瑞德初次相遇，两人在操场上的对话奠定了全片友谊的基调。</p>', eventId: null, comments: [] },
+        { id: generateId(), number: 4, startTime: '00:25:00', endTime: '00:40:00', content: '<p>安迪利用税务知识帮助狱警，开始在监狱中建立自己的地位。</p>', eventId: null, comments: [] }
       ],
       events: [],
       plotSummary: '<p>银行家安迪被冤枉杀害妻子及其情人，被判终身监禁。在肖申克监狱中，他结识了瑞德，并用智慧和毅力展开了一场长达十九年的越狱计划，最终重获自由。</p>',
@@ -2101,34 +1308,16 @@ function renderFilmList() {
     renderCurrentFilm();
     return;
   }
-  listEl.innerHTML = appData.films.map(film => {
-    var ct = film.createTime ? new Date(film.createTime) : null;
-    var dateStr = ct ? String(ct.getMonth()+1).padStart(2,'0') + '-' + String(ct.getDate()).padStart(2,'0') + ' ' + String(ct.getHours()).padStart(2,'0') + ':' + String(ct.getMinutes()).padStart(2,'0') : '';
-    var dur = film.duration || '';
-    return `
+  listEl.innerHTML = appData.films.map(film => `
     <div class="film-item ${film.id === appData.currentFilmId ? 'active' : ''}" onclick="selectFilm('${film.id}')">
-      <div class="film-item-main">
-        <span class="film-item-title">🎬 ${film.name}</span>
-        <input class="film-item-duration" type="text" value="${dur}" placeholder="时长" onclick="event.stopPropagation()" oninput="updateFilmDuration('${film.id}', this.value)" title="影片时长">
-        <span class="film-item-duration-unit">分钟</span>
-        <div class="film-item-actions">
-          <button class="btn-icon" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="重命名">✏️</button>
-          <button class="btn-icon" onclick="event.stopPropagation();deleteFilm('${film.id}')" title="删除">🗑️</button>
-        </div>
+      <span class="film-item-title">🎬 ${film.name}</span>
+      <div class="film-item-actions">
+        <button class="btn-icon" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="重命名">✏️</button>
+        <button class="btn-icon" onclick="event.stopPropagation();deleteFilm('${film.id}')" title="删除">🗑️</button>
       </div>
-      ${dateStr ? '<div class="film-item-meta">📅 创建: ' + dateStr + '</div>' : ''}
     </div>
-    `;
-  }).join('');
+  `).join('');
   renderCurrentFilm();
-}
-
-function updateFilmDuration(filmId, duration) {
-  // 兼容左侧列表的调用方式
-  if (filmId) {
-    var film = appData.films.find(f => f.id === filmId);
-    if (film) { film.duration = duration; dataDirty = true; saveData(); }
-  }
 }
 
 function selectFilm(filmId) {
@@ -2149,7 +1338,6 @@ function updateFilmTitle() {
   const film = getCurrentFilm();
   if (film) {
     film.name = document.getElementById('filmTitleInput').value || '未命名影片';
-    dataDirty = true;
     saveData();
     // 更新左侧列表显示但不重渲染中间
     const items = document.querySelectorAll('.film-item');
@@ -2163,7 +1351,6 @@ function updateFilmTitle() {
 
 function openNewFilmModal() {
   document.getElementById('newFilmName').value = '';
-  document.getElementById('newFilmDuration').value = '';
   document.getElementById('newFilmModal').classList.add('show');
   document.getElementById('newFilmName').focus();
 }
@@ -2171,14 +1358,10 @@ function openNewFilmModal() {
 function createNewFilm() {
   const name = document.getElementById('newFilmName').value.trim();
   if (!name) { showToast('请输入影片名称'); return; }
-  dataDirty = true;
-  const duration = document.getElementById('newFilmDuration').value.trim();
   const newFilm = {
     id: generateId(),
     name: name,
-    duration: duration,
-    createTime: Date.now(),
-    rows: [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [], dialogue: [] }],
+    rows: [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [] }],
     events: [],
     plotSummary: '',
     characters: '',
@@ -2209,7 +1392,6 @@ function confirmRename() {
 }
 
 function deleteFilm(filmId) {
-  dataDirty = true;
   if (!confirm('确定要删除这个拉片文档吗？此操作不可恢复。')) return;
   const index = appData.films.findIndex(f => f.id === filmId);
   if (index > -1) {
@@ -2245,7 +1427,7 @@ function renderCurrentFilm() {
   document.getElementById('theme').innerHTML = film.theme || '';
 
   if (!film.rows || film.rows.length === 0) {
-    film.rows = [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [], dialogue: [] }];
+    film.rows = [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [] }];
     saveData();
   }
 
@@ -2266,62 +1448,21 @@ function createRowElement(rowData, film) {
   div.className = 'lapian-row';
   div.setAttribute('data-row-id', rowData.id);
 
-  // 应用事件背景色（半透明，确保文字高亮可见）
-  let rowEvent = null;
+  // 应用事件背景色
   if (rowData.eventId) {
-    rowEvent = film.events.find(e => e.id === rowData.eventId);
-    if (rowEvent) {
-      // 将纯色转为半透明rgba
-      var evtColor = rowEvent.color;
-      if (evtColor.startsWith('#')) {
-        var r = parseInt(evtColor.slice(1,3), 16);
-        var g = parseInt(evtColor.slice(3,5), 16);
-        var b = parseInt(evtColor.slice(5,7), 16);
-        div.style.backgroundColor = 'rgba(' + r + ',' + g + ',' + b + ',0.25)';
-      } else {
-        div.style.backgroundColor = evtColor;
-      }
+    const event = film.events.find(e => e.id === rowData.eventId);
+    if (event) {
+      div.style.backgroundColor = event.color;
       div.classList.add('has-event');
     }
   }
 
   const isFirst = rowData.number === 1;
-  const commentCount = (rowData.comments || []).length;
-  const dialogueCount = (rowData.dialogue || []).length;
-
-  // 事件名标签HTML
-  let eventTagHtml = '';
-  if (rowEvent) {
-    eventTagHtml = '<span class="row-event-tag" style="background:' + rowEvent.color + ';color:#333;" onclick="jumpToEventFirstRow(\'' + rowEvent.id + '\')" title="点击跳转到事件">' + escapeHtml(rowEvent.name) + '</span>';
-  }
-
-  // 台词列表HTML
-  let dialogueListHtml = '';
-  const dialogues = rowData.dialogue || [];
-  if (dialogues.length > 0) {
-    dialogueListHtml = dialogues.map(d => `
-      <div class="dialogue-item" data-dialogue-id="${d.id}">
-        <div class="dialogue-character" contenteditable="true" 
-             oninput="saveDialogue('${rowData.id}', '${d.id}', 'character', this.textContent)"
-             onkeydown="handleDialogueKeydown(event, '${rowData.id}', '${d.id}')"
-             title="点击编辑角色名">${escapeHtml(d.character || '角色')}</div>
-        <div class="dialogue-text" contenteditable="true"
-             data-placeholder="输入台词内容..."
-             oninput="saveDialogue('${rowData.id}', '${d.id}', 'text', this.innerHTML)"
-             onkeydown="handleDialogueKeydown(event, '${rowData.id}', '${d.id}')">${d.text || ''}</div>
-        <button class="dialogue-delete-btn" onclick="deleteDialogue('${rowData.id}', '${d.id}')" title="删除此条台词">×</button>
-      </div>
-    `).join('');
-  }
 
   div.innerHTML = `
     <div class="row-left">
       <input type="checkbox" class="row-checkbox" onchange="updateMergeButton()">
       <span class="row-number">${rowData.number}</span>
-      <button class="dialogue-toggle-btn ${dialogueCount > 0 ? 'has-dialogue' : ''}" 
-              onclick="toggleRowDialogue('${rowData.id}')" 
-              title="展开/收起台词记录">🎭</button>
-      ${eventTagHtml}
     </div>
     <div class="row-time">
       <input class="time-input time-start ${isFirst ? 'editable' : ''}" value="${rowData.startTime || ''}" placeholder="开始" ${isFirst ? '' : 'readonly'} onchange="updateRowStartTime('${rowData.id}', this.value)">
@@ -2332,24 +1473,10 @@ function createRowElement(rowData, film) {
          data-placeholder="输入拉片内容，按Enter新建下一序号行..."
          onkeydown="handleRowKeydown(event, this)"
          oninput="saveRowContent('${rowData.id}', this.innerHTML)"
-         onfocus="trackRowFocus(this)"
          onclick="handleEditorClick(event)"
-         onmouseup="saveSelection(); checkFormatBrush(event)"
-         onkeyup="saveSelection()"
+         onmouseup="checkFormatBrush(event)"
          id="editor-${rowData.id}">${rowData.content || ''}</div>
-    <button class="row-comment-btn ${commentCount > 0 ? 'has-comments' : ''}" onclick="showRowComments('${rowData.id}')" title="查看/添加评论">
-      💬${commentCount > 0 ? `<span class="comment-count-badge">${commentCount}</span>` : ''}
-    </button>
     <button class="row-delete" onclick="deleteRow('${rowData.id}')" title="删除此行">×</button>
-    <div class="dialogue-panel">
-      <div class="dialogue-label">🎬 台词拉片记录</div>
-      <div class="dialogue-list" id="dialogueList-${rowData.id}">
-        ${dialogueListHtml}
-      </div>
-      <button class="dialogue-add-btn" onclick="addDialogue('${rowData.id}')">
-        <span>＋</span> 添加台词
-      </button>
-    </div>
   `;
   return div;
 }
@@ -2377,7 +1504,6 @@ function handleRowKeydown(e, editor) {
 }
 
 function addNewRowAfter(rowId) {
-  dataDirty = true;
   const film = getCurrentFilm();
   if (!film) return;
 
@@ -2392,8 +1518,7 @@ function addNewRowAfter(rowId) {
     endTime: '',
     content: '',
     eventId: null,
-    comments: [],
-    dialogue: []
+    comments: []
   };
 
   film.rows.splice(rowIndex + 1, 0, newRow);
@@ -2434,7 +1559,6 @@ function renderRowsOnly() {
 }
 
 function deleteRow(rowId) {
-  dataDirty = true;
   const film = getCurrentFilm();
   if (!film) return;
   if (film.rows.length <= 1) {
@@ -2527,26 +1651,6 @@ function updateMergeButton() {
   document.getElementById('selectedCount').textContent = `已选 ${checked.length} 项`;
   if (checked.length >= 1) {
     bar.classList.add('show');
-    // 检查是否有已分组的行，决定是否显示"合并到已有事件"按钮
-    const film = getCurrentFilm();
-    if (film && film.events && film.events.length > 0) {
-      const selectedIds = getSelectedRowIds();
-      const hasGrouped = selectedIds.some(rid => {
-        const row = film.rows.find(r => r.id === rid);
-        return row && row.eventId;
-      });
-      const hasUnGrouped = selectedIds.some(rid => {
-        const row = film.rows.find(r => r.id === rid);
-        return row && !row.eventId;
-      });
-      // 只要有未分组的行且存在事件，就显示按钮
-      const mergeToExistingBtn = document.getElementById('mergeToExistingBtn');
-      if (mergeToExistingBtn) {
-        mergeToExistingBtn.style.display = hasUnGrouped ? '' : 'none';
-      }
-    } else {
-      document.getElementById('mergeToExistingBtn').style.display = 'none';
-    }
   } else {
     bar.classList.remove('show');
   }
@@ -2570,26 +1674,33 @@ function openMergeEventModal() {
     return;
   }
 
-  // 渲染颜色下拉选择
-  const select = document.getElementById('mergeColorSelect');
-  const colorLabels = ['暖黄','暖橙','暖红','粉红','淡紫','薰衣草','天蓝','青色','薄荷','浅绿','嫩绿','草绿','淡蓝','紫蓝','靛蓝','淡紫罗兰','冰蓝','粉紫','蜜桃','柠檬','奶油','青柠','嫩黄','翠绿','玫红','樱粉','珊瑚','浅粉','草莓','樱桃','湖蓝','碧蓝','天空蓝','薰衣草蓝','紫罗兰','淡紫','薄荷绿','苹果绿','翡翠','青绿','碧玉','橙黄','橘子','南瓜','金黄','琥珀','日落','紫红','兰花紫','葡萄紫','紫水晶','蓝紫','电蓝','薄荷','海洋','蔚蓝','金黄','琥珀','日落','珊瑚','砖红'];
-  select.innerHTML = eventColors.map((color, i) => {
-    var label = colorLabels[i] || ('颜色' + (i + 1));
-    return '<option value="' + color + '" style="background:' + color + ';">' + label + '</option>';
-  }).join('');
-  select.selectedIndex = 0;
-  selectedMergeColor = eventColors[0];
+  // 渲染颜色选择
+  const grid = document.getElementById('mergeColorGrid');
+  grid.innerHTML = eventColors.map(color => `
+    <div class="merge-color-option" style="background:${color};" onclick="selectMergeColor('${color}', this)"></div>
+  `).join('');
 
   document.getElementById('eventNameInput').value = '';
+  selectedMergeColor = null;
   document.getElementById('mergeEventModal').classList.add('show');
+
+  // 默认选中第一个颜色
+  const firstColor = grid.querySelector('.merge-color-option');
+  if (firstColor) {
+    selectMergeColor(eventColors[0], firstColor);
+  }
   document.getElementById('eventNameInput').focus();
+}
+
+function selectMergeColor(color, el) {
+  selectedMergeColor = color;
+  document.querySelectorAll('.merge-color-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
 function confirmMergeEvent() {
   const name = document.getElementById('eventNameInput').value.trim();
   if (!name) { showToast('请输入事件名称'); return; }
-  const select = document.getElementById('mergeColorSelect');
-  selectedMergeColor = select.value;
   if (!selectedMergeColor) { showToast('请选择背景颜色'); return; }
 
   const film = getCurrentFilm();
@@ -2633,47 +1744,6 @@ function confirmMergeEvent() {
   showToast('事件已创建');
 }
 
-function openMergeToExistingModal() {
-  const film = getCurrentFilm();
-  if (!film || !film.events || film.events.length === 0) {
-    showToast('暂无已有事件');
-    return;
-  }
-  const select = document.getElementById('existingEventSelect');
-  select.innerHTML = film.events.map(e =>
-    '<option value="' + e.id + '" style="background:' + e.color + ';">' + escapeHtml(e.name) + '（' + (e.rowIds || []).length + '行）</option>'
-  ).join('');
-  document.getElementById('mergeToExistingModal').classList.add('show');
-}
-
-function confirmMergeToExisting() {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const eventId = document.getElementById('existingEventSelect').value;
-  if (!eventId) { showToast('请选择事件'); return; }
-  const event = film.events.find(e => e.id === eventId);
-  if (!event) { showToast('事件不存在'); return; }
-
-  const selectedIds = getSelectedRowIds();
-  let mergedCount = 0;
-  selectedIds.forEach(rowId => {
-    const row = film.rows.find(r => r.id === rowId);
-    if (row && !row.eventId) {
-      row.eventId = eventId;
-      if (!event.rowIds) event.rowIds = [];
-      event.rowIds.push(rowId);
-      mergedCount++;
-    }
-  });
-
-  saveData();
-  renderRowsOnly();
-  renderEventList();
-  clearRowSelection();
-  closeModal('mergeToExistingModal');
-  showToast('已合并 ' + mergedCount + ' 行到事件「' + event.name + '」');
-}
-
 function deleteEvent(eventId) {
   const film = getCurrentFilm();
   if (!film) return;
@@ -2714,13 +1784,6 @@ function updateEventColor(eventId, color) {
 }
 
 // ==================== 事件列表渲染（可编辑）====================
-function switchEventView(mode) {
-  eventViewMode = mode;
-  document.getElementById('viewBtnGroup').classList.toggle('active', mode === 'group');
-  document.getElementById('viewBtnRow').classList.toggle('active', mode === 'row');
-  renderEventList();
-}
-
 function renderEventList() {
   const film = getCurrentFilm();
   const listEl = document.getElementById('eventList');
@@ -2730,30 +1793,6 @@ function renderEventList() {
     return;
   }
 
-  // 自动排序（不触发saveData，避免渲染循环）
-  if (!film.eventManualOrder) film.eventManualOrder = [];
-  film.events.sort((a, b) => {
-    if (film.eventManualOrder && film.eventManualOrder.length > 0) {
-      const idxA = film.eventManualOrder.indexOf(a.id);
-      const idxB = film.eventManualOrder.indexOf(b.id);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-    }
-    const minRowA = getMinRowNum(a, film);
-    const minRowB = getMinRowNum(b, film);
-    return minRowA - minRowB;
-  });
-
-  if (eventViewMode === 'row') {
-    renderEventListByRow(film, listEl);
-  } else {
-    renderEventListByGroup(film, listEl);
-  }
-}
-
-// 按事件分组显示
-function renderEventListByGroup(film, listEl) {
   listEl.innerHTML = film.events.map(event => {
     const rowNums = event.rowIds.map(rid => {
       const r = film.rows.find(row => row.id === rid);
@@ -2762,291 +1801,30 @@ function renderEventListByGroup(film, listEl) {
 
     let rowText = '';
     if (rowNums.length > 0) {
+      // 合并连续的序号
       const ranges = [];
       let start = rowNums[0], end = rowNums[0];
       for (let i = 1; i < rowNums.length; i++) {
         if (rowNums[i] === end + 1) {
           end = rowNums[i];
         } else {
-          ranges.push(start === end ? '#' + start : '#' + start + '-' + end);
+          ranges.push(start === end ? `#${start}` : `#${start}-${end}`);
           start = end = rowNums[i];
         }
       }
-      ranges.push(start === end ? '#' + start : '#' + start + '-' + end);
-      rowText = ranges.join(', ') + ' (' + rowNums.length + '行)';
+      ranges.push(start === end ? `#${start}` : `#${start}-${end}`);
+      rowText = ranges.join(', ') + ` (${rowNums.length}行)`;
     }
 
     return `
-      <div class="event-item-editable" draggable="true"
-           ondragstart="onEventDragStart(event, '${event.id}')"
-           ondragover="onEventDragOver(event)"
-           ondrop="onEventDrop(event, '${event.id}')"
-           ondragend="onEventDragEnd(event)"
-           ondragleave="onEventDragLeave(event)">
-        <div class="event-item-row1">
-          <span class="event-drag-handle" title="拖拽排序">⠿</span>
-          <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
-          <input type="text" class="event-name-edit" value="${event.name}"
-                 oninput="updateEventName('${event.id}', this.value)"
-                 onclick="jumpToEventFirstRow('${event.id}')"
-                 placeholder="事件名称" title="点击跳转到首个序号">
-          <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
-        </div>
-        <div class="event-item-row2">
-          <span class="event-rows-info">${rowText}</span>
-          <button class="event-manage-btn" onclick="openEventManageModal('${event.id}')" title="管理段落">段落</button>
-        </div>
+      <div class="event-item-editable">
+        <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
+        <input type="text" class="event-name-edit" value="${event.name}" oninput="updateEventName('${event.id}', this.value)" placeholder="事件名称">
+        <span class="event-rows-info">${rowText}</span>
+        <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
       </div>
     `;
   }).join('');
-}
-
-// 按序号逐行显示
-function renderEventListByRow(film, listEl) {
-  // 遍历所有行，显示每行对应的事件
-  const rowsWithEvents = film.rows.map(row => {
-    let eventName = '';
-    let eventColor = '';
-    let eventId = '';
-    if (row.eventId) {
-      const event = film.events.find(e => e.id === row.eventId);
-      if (event) {
-        eventName = event.name;
-        eventColor = event.color;
-        eventId = event.id;
-      }
-    }
-    return { row, eventName, eventColor, eventId };
-  });
-
-  listEl.innerHTML = rowsWithEvents.map(item => {
-    const { row, eventName, eventColor, eventId } = item;
-    const timeRange = (row.startTime || '') + '-' + (row.endTime || '');
-    const borderLeft = eventColor ? 'border-left:3px solid ' + eventColor + ';' : '';
-    // 使用深色文字 + 彩色背景标签，确保可读性
-    var eventBgStyle = eventColor
-      ? 'background:' + eventColor + ';color:#1a1a1a;padding:1px 6px;border-radius:3px;font-size:11px;'
-      : '';
-    const nameDisplay = eventName
-      ? '<span class="event-row-name" style="' + eventBgStyle + '">' + escapeHtml(eventName) + '</span>'
-      : '<span class="event-row-name" style="color:var(--muted);">（未分配事件）</span>';
-
-    return `
-      <div class="event-row-item" style="${borderLeft}" onclick="jumpToRow('${row.id}')" title="点击跳转到正文">
-        <span class="event-row-number">${row.number}</span>
-        ${nameDisplay}
-        <span class="event-row-time">${timeRange}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-function jumpToRow(rowId) {
-  const rowEl = document.querySelector('.lapian-row[data-row-id="' + rowId + '"]');
-  if (rowEl) {
-    rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    rowEl.style.transition = 'background-color 0.3s';
-    const origBg = rowEl.style.backgroundColor;
-    rowEl.style.backgroundColor = 'rgba(79,70,229,0.15)';
-    setTimeout(() => { rowEl.style.backgroundColor = origBg; }, 1000);
-  }
-}
-
-// ==================== 事件自动排序 ====================
-function autoSortEvents() {
-  const film = getCurrentFilm();
-  if (!film || !film.events) return;
-
-  film.events.sort((a, b) => {
-    // 如果存在手动排序，优先按手动排序
-    if (film.eventManualOrder && film.eventManualOrder.length > 0) {
-      const idxA = film.eventManualOrder.indexOf(a.id);
-      const idxB = film.eventManualOrder.indexOf(b.id);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-    }
-    // 否则按最小行号排序
-    const minRowA = getMinRowNum(a, film);
-    const minRowB = getMinRowNum(b, film);
-    return minRowA - minRowB;
-  });
-  saveData();
-}
-
-function getMinRowNum(event, film) {
-  if (!event.rowIds || event.rowIds.length === 0) return 9999;
-  const nums = event.rowIds.map(rid => {
-    const r = film.rows.find(row => row.id === rid);
-    return r ? r.number : 9999;
-  });
-  return Math.min(...nums);
-}
-
-// ==================== 事件拖拽排序 ====================
-let draggedEventId = null;
-let eventViewMode = 'group'; // 'group' or 'row'
-
-function onEventDragStart(e, eventId) {
-  draggedEventId = eventId;
-  e.target.closest('.event-item-editable').classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', eventId);
-}
-
-function onEventDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const target = e.currentTarget;
-  if (target.classList.contains('event-item-editable') && !target.classList.contains('dragging')) {
-    target.classList.add('drag-over');
-  }
-}
-
-function onEventDragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
-}
-
-function onEventDrop(e, targetEventId) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if (!draggedEventId || draggedEventId === targetEventId) return;
-
-  const film = getCurrentFilm();
-  if (!film || !film.events) return;
-
-  // 获取事件ID数组
-  const eventIds = film.events.map(ev => ev.id);
-  const fromIdx = eventIds.indexOf(draggedEventId);
-  const toIdx = eventIds.indexOf(targetEventId);
-  if (fromIdx === -1 || toIdx === -1) return;
-
-  // 移动事件
-  const movedEvent = film.events.splice(fromIdx, 1)[0];
-  film.events.splice(toIdx, 0, movedEvent);
-
-  // 记录手动排序
-  film.eventManualOrder = film.events.map(ev => ev.id);
-
-  saveData();
-  renderEventList();
-  showToast('排序已更新');
-}
-
-function onEventDragEnd(e) {
-  document.querySelectorAll('.event-item-editable').forEach(el => {
-    el.classList.remove('dragging', 'drag-over');
-  });
-  draggedEventId = null;
-}
-
-// ==================== 点击事件名跳转 ====================
-function jumpToEventFirstRow(eventId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const event = film.events.find(e => e.id === eventId);
-  if (!event || !event.rowIds || event.rowIds.length === 0) {
-    showToast('该事件暂无关联行');
-    return;
-  }
-
-  // 找到最小序号的行
-  let minRow = null;
-  let minNum = Infinity;
-  event.rowIds.forEach(rid => {
-    const r = film.rows.find(row => row.id === rid);
-    if (r && r.number < minNum) {
-      minNum = r.number;
-      minRow = r;
-    }
-  });
-
-  if (minRow) {
-    const rowEl = document.querySelector('.lapian-row[data-row-id="' + minRow.id + '"]');
-    if (rowEl) {
-      rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // 高亮闪烁
-      rowEl.style.transition = 'background-color 0.3s';
-      const origBg = rowEl.style.backgroundColor;
-      rowEl.style.backgroundColor = 'rgba(79,70,229,0.15)';
-      setTimeout(() => {
-        rowEl.style.backgroundColor = origBg;
-      }, 1000);
-    }
-  }
-}
-
-// ==================== 事件段落管理 ====================
-let currentManageEventId = null;
-
-function openEventManageModal(eventId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const event = film.events.find(e => e.id === eventId);
-  if (!event) return;
-
-  currentManageEventId = eventId;
-  document.getElementById('eventManageTitle').textContent = '管理「' + event.name + '」段落';
-  renderEventManageRows();
-  document.getElementById('eventManageModal').classList.add('show');
-}
-
-function renderEventManageRows() {
-  const film = getCurrentFilm();
-  if (!film || !currentManageEventId) return;
-  const event = film.events.find(e => e.id === currentManageEventId);
-  if (!event) return;
-
-  const listEl = document.getElementById('eventManageRowList');
-  listEl.innerHTML = film.rows.map(row => {
-    const isInEvent = event.rowIds.includes(row.id);
-    const textContent = (row.content || '').replace(/<[^>]*>/g, '').trim().substring(0, 40);
-    return `
-      <div class="event-manage-row-item ${isInEvent ? 'in-event' : ''}">
-        <span class="event-manage-row-num">#${row.number}</span>
-        <span class="event-manage-row-content">${escapeHtml(textContent) || '(空行)'}</span>
-        <button class="event-manage-toggle-btn ${isInEvent ? 'remove' : 'add'}"
-                onclick="toggleEventRow('${row.id}')">
-          ${isInEvent ? '移除' : '添加'}
-        </button>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleEventRow(rowId) {
-  const film = getCurrentFilm();
-  if (!film || !currentManageEventId) return;
-  const event = film.events.find(e => e.id === currentManageEventId);
-  if (!event) return;
-  const row = film.rows.find(r => r.id === rowId);
-  if (!row) return;
-
-  if (event.rowIds.includes(rowId)) {
-    // 移除
-    event.rowIds = event.rowIds.filter(id => id !== rowId);
-    row.eventId = null;
-    // 如果行之前属于其他事件，不处理
-  } else {
-    // 添加：先从旧事件移除
-    if (row.eventId) {
-      const oldEvent = film.events.find(e => e.id === row.eventId);
-      if (oldEvent) {
-        oldEvent.rowIds = oldEvent.rowIds.filter(id => id !== rowId);
-        if (oldEvent.rowIds.length === 0) {
-          film.events = film.events.filter(e => e.id !== oldEvent.id);
-        }
-      }
-    }
-    event.rowIds.push(rowId);
-    row.eventId = event.id;
-  }
-
-  saveData();
-  renderEventManageRows();
-  renderRowsOnly();
-  renderEventList();
-  updateStats();
 }
 
 // ==================== 统计 ====================
@@ -3124,69 +1902,13 @@ function saveTheme() {
 }
 
 // ==================== 富文本编辑 ====================
-// 跟踪最后聚焦的行和选区
-var lastFocusedRowId = null;
-var savedSelection = null;
-
-function saveSelection() {
-  const sel = window.getSelection();
-  if (sel.rangeCount > 0 && !sel.isCollapsed) {
-    let node = sel.anchorNode;
-    let editor = null;
-    while (node) {
-      if (node.classList?.contains('row-content')) { editor = node; break; }
-      node = node.parentNode;
-    }
-    if (editor) {
-      savedSelection = {
-        editorId: editor.id,
-        range: sel.getRangeAt(0).cloneRange()
-      };
-    }
-  }
-}
-
-function restoreSelection() {
-  if (savedSelection && savedSelection.range) {
-    const ed = document.getElementById(savedSelection.editorId);
-    if (ed) {
-      ed.focus();
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      try { sel.addRange(savedSelection.range); } catch(e) {}
-      return true;
-    }
-  }
-  return false;
-}
-
-function trackRowFocus(editor) {
-  lastFocusedRowId = editor.id.replace('editor-', '');
-}
-
 function execCmd(command, value = null) {
-  // 恢复保存的选区
-  restoreSelection();
   document.execCommand(command, false, value);
   saveCurrentRowContent();
 }
 
 function changeFontSize(size) {
-  restoreSelection();
   document.execCommand('fontSize', false, size);
-  saveCurrentRowContent();
-}
-
-function changeFontFamily(font) {
-  restoreSelection();
-  if (font === 'inherit' || font === '') {
-    const sel = window.getSelection();
-    if (sel.rangeCount > 0 && !sel.isCollapsed) {
-      document.execCommand('removeFormat', false, null);
-    }
-  } else {
-    document.execCommand('fontName', false, font);
-  }
   saveCurrentRowContent();
 }
 
@@ -3208,7 +1930,6 @@ function toggleColorPicker(type) {
 }
 
 function applyColor(type, color) {
-  restoreSelection();
   if (type === 'hiliteColor' && color === 'transparent') {
     document.execCommand('removeFormat', false, null);
   } else {
@@ -3307,109 +2028,43 @@ function checkFormatBrush(e) {
 // ==================== 评论 ====================
 function addComment() {
   const sel = window.getSelection();
-  let rowId = null;
-  let isMarkerComment = false;
-
-  // 模式1：选中了文字 → 标记评论
-  if (sel.rangeCount > 0 && !sel.isCollapsed) {
-    let node = sel.anchorNode;
-    let editor = null;
-    while (node) {
-      if (node.classList?.contains('row-content')) { editor = node; break; }
-      node = node.parentNode;
-    }
-    if (editor) {
-      rowId = editor.id.replace('editor-', '');
-      const text = sel.getRangeAt(0).toString();
-      if (text.trim()) {
-        isMarkerComment = true;
-      }
-    }
-  }
-
-  // 模式2：光标在某行 → 行级评论（用跟踪的最后聚焦行）
-  if (!rowId) {
-    const focused = document.activeElement;
-    if (focused && focused.classList?.contains('row-content')) {
-      rowId = focused.id.replace('editor-', '');
-    }
-  }
-
-  // 模式3：用跟踪的最后聚焦行
-  if (!rowId && lastFocusedRowId) {
-    rowId = lastFocusedRowId;
-  }
-
-  // 模式4：找不到行，提示用户
-  if (!rowId) {
-    showToast('请将光标放在某一行中，或选中文字后再添加评论');
+  if (sel.rangeCount === 0 || sel.isCollapsed) {
+    showToast('请先选中要添加评论的文字');
     return;
   }
-
-  if (isMarkerComment) {
-    // 标记评论：创建marker
-    const commentId = 'c_' + generateId();
-    const range = sel.getRangeAt(0);
-    const text = range.toString();
-    const marker = document.createElement('span');
-    marker.className = 'comment-marker';
-    marker.setAttribute('data-comment-id', commentId);
-    marker.innerHTML = text + '<span class="comment-bubble">💬 点击查看评论</span>';
-    range.deleteContents();
-    range.insertNode(marker);
-
-    const film = getCurrentFilm();
-    const row = film.rows.find(r => r.id === rowId);
-    if (row) {
-      row.comments = row.comments || [];
-      row.content = document.getElementById('editor-' + rowId).innerHTML;
-      saveData();
-    }
-    currentCommentRowId = rowId;
-    currentCommentMarkerId = commentId;
-    currentCommentMode = 'marker';
-  } else {
-    // 行级评论
-    currentCommentRowId = rowId;
-    currentCommentMarkerId = null;
-    currentCommentMode = 'row';
+  let node = sel.anchorNode;
+  let editor = null;
+  while (node) {
+    if (node.classList?.contains('row-content')) { editor = node; break; }
+    node = node.parentNode;
   }
+  if (!editor) { showToast('请在编辑区内选择文字'); return; }
 
-  // 显示评论模态框
-  openCommentModal();
-}
+  const rowId = editor.id.replace('editor-', '');
+  const commentId = 'c_' + generateId();
+  const range = sel.getRangeAt(0);
+  const text = range.toString();
+  if (!text.trim()) { showToast('请选中要添加评论的文字'); return; }
 
-function openCommentModal() {
+  const marker = document.createElement('span');
+  marker.className = 'comment-marker';
+  marker.setAttribute('data-comment-id', commentId);
+  marker.innerHTML = text + '<span class="comment-bubble">点击查看评论</span>';
+  range.deleteContents();
+  range.insertNode(marker);
+
   const film = getCurrentFilm();
-  if (!film) return;
-  const ctxEl = document.getElementById('commentContextInfo');
-
-  if (currentCommentMode === 'event' && currentCommentEventId) {
-    // 事件级评论
-    const event = film.events.find(e => e.id === currentCommentEventId);
-    if (!event) return;
-    event.comments = event.comments || [];
-    const rowNums = (event.rowIds || []).map(rid => {
-      const r = film.rows.find(row => row.id === rid);
-      return r ? r.number : null;
-    }).filter(n => n !== null).sort((a, b) => a - b);
-    ctxEl.innerHTML = '📋 事件：<strong>' + escapeHtml(event.name) + '</strong>（序号 ' + (rowNums.join(', ') || '无') + '）';
-    renderCommentList(event.comments, null, true);
-  } else if (currentCommentMode === 'marker' && currentCommentMarkerId) {
-    // 标记评论
-    const row = film.rows.find(r => r.id === currentCommentRowId);
-    const comments = (row?.comments || []).filter(c => c.markerId === currentCommentMarkerId);
-    ctxEl.textContent = '📍 序号' + (row?.number || '') + ' - 选中文字评论';
-    renderCommentList(comments, currentCommentRowId, false, row?.number);
-  } else {
-    // 行级评论
-    const row = film.rows.find(r => r.id === currentCommentRowId);
-    const comments = (row?.comments || []).filter(c => !c.markerId);
-    ctxEl.textContent = '📍 序号' + (row?.number || '') + ' - 行级评论';
-    renderCommentList(comments, currentCommentRowId, false, row?.number);
+  const row = film.rows.find(r => r.id === rowId);
+  if (row) {
+    row.comments = row.comments || [];
+    row.content = editor.innerHTML;
+    saveData();
   }
 
+  currentCommentRowId = rowId;
+  currentCommentMarkerId = commentId;
   document.getElementById('commentTextarea').value = '';
+  renderCommentList([]);
   document.getElementById('commentModal').classList.add('show');
   document.getElementById('commentTextarea').focus();
 }
@@ -3421,302 +2076,47 @@ function showCommentModal(commentId) {
     if (row.content && row.content.includes(commentId)) {
       currentCommentRowId = row.id;
       currentCommentMarkerId = commentId;
-      currentCommentMode = 'marker';
-      openCommentModal();
+      const comments = (row.comments || []).filter(c => c.markerId === commentId);
+      renderCommentList(comments);
+      document.getElementById('commentTextarea').value = '';
+      document.getElementById('commentModal').classList.add('show');
       return;
     }
   }
 }
 
-function showRowComments(rowId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const row = film.rows.find(r => r.id === rowId);
-  if (!row) return;
-  currentCommentRowId = rowId;
-  currentCommentMarkerId = null;
-  currentCommentEventId = null;
-  currentCommentMode = 'row';
-  openCommentModal();
-}
-
-function showAllComments() {
-  const film = getCurrentFilm();
-  if (!film) return;
-  let allComments = [];
-  film.rows.forEach(row => {
-    if (row.comments && row.comments.length > 0) {
-      row.comments.forEach(c => {
-        allComments.push({
-          rowId: row.id,
-          rowNum: row.number,
-          rowEventId: row.eventId,
-          comment: c
-        });
-      });
-    }
-  });
-  const listEl = document.getElementById('allCommentsList');
-  if (allComments.length === 0) {
-    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;">暂无评论</div>';
-  } else {
-    // 按行号排序
-    allComments.sort((a, b) => a.rowNum - b.rowNum);
-    listEl.innerHTML = allComments.map(item => {
-      var c = item.comment;
-      var time = c.time || '';
-      var evtName = '';
-      if (item.rowEventId) {
-        var evt = film.events.find(e => e.id === item.rowEventId);
-        if (evt) evtName = '<span style="font-size:10px;background:' + evt.color + ';padding:1px 4px;border-radius:2px;margin-left:4px;">' + escapeHtml(evt.name) + '</span>';
-      }
-      return '<div style="padding:8px 12px;border-bottom:1px solid var(--rule);cursor:pointer;" onclick="jumpToRowAndCloseComments(\'' + item.rowId + '\')">' +
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">序号 ' + item.rowNum + evtName + (time ? ' · ' + time : '') + '</div>' +
-        '<div style="font-size:13px;line-height:1.6;">' + escapeHtml(c.text || '') + '</div>' +
-        '</div>';
-    }).join('');
-  }
-  document.getElementById('allCommentsModal').classList.add('show');
-}
-
-function jumpToRowAndCloseComments(rowId) {
-  closeModal('allCommentsModal');
-  var rowEl = document.querySelector('.lapian-row[data-row-id="' + rowId + '"]');
-  if (rowEl) {
-    rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    rowEl.style.transition = 'background-color 0.3s';
-    rowEl.style.backgroundColor = 'rgba(79,70,229,0.15)';
-    setTimeout(function() { rowEl.style.backgroundColor = ''; }, 1500);
-  }
-}
-
-function showEventComments(eventId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const event = film.events.find(e => e.id === eventId);
-  if (!event) return;
-  currentCommentRowId = null;
-  currentCommentMarkerId = null;
-  currentCommentEventId = eventId;
-  currentCommentMode = 'event';
-  openCommentModal();
-}
-
-function renderCommentList(comments, rowId, isEvent, rowNum) {
+function renderCommentList(comments) {
   const panel = document.getElementById('commentListPanel');
-  if (!comments || comments.length === 0) {
-    panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px;">暂无评论，在下方输入框添加第一条评论</div>';
+  if (comments.length === 0) {
+    panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">暂无评论</div>';
     return;
   }
-  panel.innerHTML = comments.map(c => {
-    const rowNumLabel = (isEvent && c.rowNum)
-      ? '<span class="comment-meta-row">序号' + c.rowNum + '</span>'
-      : (rowNum ? '<span class="comment-meta-row">序号' + rowNum + '</span>' : '');
-    return `
+  panel.innerHTML = comments.map(c => `
     <div class="comment-item">
-      <div class="comment-meta">
-        <span>${rowNumLabel} ${c.author || '匿名'}</span>
-        <span>${new Date(c.time).toLocaleString()}</span>
-      </div>
-      <div>${escapeHtml(c.text)}</div>
-      <button class="comment-delete-btn" onclick="deleteComment('${rowId || ''}', '${c.id}')" title="删除评论">✕</button>
+      <div class="comment-meta"><span>${c.author || '匿名'}</span><span>${new Date(c.time).toLocaleString()}</span></div>
+      <div>${c.text}</div>
     </div>
-  `;
-  }).join('');
-}
-
-function deleteComment(rowId, commentId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-
-  if (currentCommentMode === 'event' && currentCommentEventId) {
-    // 删除事件级评论
-    const event = film.events.find(e => e.id === currentCommentEventId);
-    if (!event || !event.comments) return;
-    event.comments = event.comments.filter(c => c.id !== commentId);
-    saveData();
-    renderCommentList(event.comments, null, true);
-  } else {
-    // 删除行级或标记评论
-    const row = film.rows.find(r => r.id === rowId);
-    if (!row || !row.comments) return;
-    row.comments = row.comments.filter(c => c.id !== commentId);
-    saveData();
-    if (currentCommentMarkerId) {
-      const remaining = row.comments.filter(c => c.markerId === currentCommentMarkerId);
-      renderCommentList(remaining, rowId, false, row.number);
-    } else {
-      const remaining = row.comments.filter(c => !c.markerId);
-      renderCommentList(remaining, rowId, false, row.number);
-    }
-  }
-  updateStats();
-  renderRowsOnly();
-  renderEventList();
-  showToast('评论已删除');
+  `).join('');
 }
 
 function submitComment() {
   const text = document.getElementById('commentTextarea').value.trim();
   if (!text) { showToast('请输入评论内容'); return; }
   const film = getCurrentFilm();
-
-  if (currentCommentMode === 'event' && currentCommentEventId) {
-    // 事件级评论
-    const event = film.events.find(e => e.id === currentCommentEventId);
-    if (!event) return;
-    event.comments = event.comments || [];
-    event.comments.push({
-      id: generateId(),
-      text: text,
-      author: '我',
-      time: Date.now()
-    });
-    saveData();
-    renderCommentList(event.comments, null, true);
-    updateStats();
-    renderEventList();
-    document.getElementById('commentTextarea').value = '';
-    showToast('评论已添加到事件');
-  } else {
-    // 行级或标记评论
-    const row = film.rows.find(r => r.id === currentCommentRowId);
-    if (!row) return;
-    row.comments = row.comments || [];
-    row.comments.push({
-      id: generateId(),
-      markerId: currentCommentMarkerId,
-      text: text,
-      author: '我',
-      time: Date.now()
-    });
-    saveData();
-    if (currentCommentMarkerId) {
-      const relevant = row.comments.filter(c => c.markerId === currentCommentMarkerId);
-      renderCommentList(relevant, currentCommentRowId, false, row.number);
-    } else {
-      const relevant = row.comments.filter(c => !c.markerId);
-      renderCommentList(relevant, currentCommentRowId, false, row.number);
-    }
-    updateStats();
-    renderRowsOnly();
-    document.getElementById('commentTextarea').value = '';
-    showToast('评论已添加');
-  }
-}
-
-// ==================== 台词拉片记录 ====================
-let allDialoguesVisible = false;
-
-function toggleAllDialogues() {
-  allDialoguesVisible = !allDialoguesVisible;
-  const rows = document.querySelectorAll('.lapian-row');
-  rows.forEach(row => {
-    if (allDialoguesVisible) {
-      row.classList.add('show-dialogue');
-    } else {
-      row.classList.remove('show-dialogue');
-    }
-  });
-  const btn = document.getElementById('dialogueToggleBtn');
-  if (btn) {
-    btn.classList.toggle('active', allDialoguesVisible);
-  }
-}
-
-function toggleRowDialogue(rowId) {
-  const rowEl = document.querySelector('.lapian-row[data-row-id="' + rowId + '"]');
-  if (rowEl) {
-    rowEl.classList.toggle('show-dialogue');
-  }
-}
-
-function addDialogue(rowId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const row = film.rows.find(r => r.id === rowId);
+  const row = film.rows.find(r => r.id === currentCommentRowId);
   if (!row) return;
-  row.dialogue = row.dialogue || [];
-  const newDialogue = {
+  row.comments = row.comments || [];
+  row.comments.push({
     id: generateId(),
-    character: '',
-    text: ''
-  };
-  row.dialogue.push(newDialogue);
+    markerId: currentCommentMarkerId,
+    text: text,
+    author: '我',
+    time: Date.now()
+  });
   saveData();
-  renderRowsOnly();
-  // 展开该行的台词面板
-  const rowEl = document.querySelector('.lapian-row[data-row-id="' + rowId + '"]');
-  if (rowEl) {
-    rowEl.classList.add('show-dialogue');
-    // 聚焦到新添加的角色名
-    setTimeout(() => {
-      const charEl = rowEl.querySelector('.dialogue-item:last-child .dialogue-character');
-      if (charEl) {
-        charEl.focus();
-        // 选中全部内容方便直接输入
-        const range = document.createRange();
-        range.selectNodeContents(charEl);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-    }, 50);
-  }
-  updateStats();
-}
-
-function saveDialogue(rowId, dialogueId, field, value) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const row = film.rows.find(r => r.id === rowId);
-  if (!row || !row.dialogue) return;
-  const dialogue = row.dialogue.find(d => d.id === dialogueId);
-  if (!dialogue) return;
-  dialogue[field] = value;
-  dataDirty = true;
-  // 不频繁保存，用延迟保存
-  if (window._dialogueSaveTimer) clearTimeout(window._dialogueSaveTimer);
-  window._dialogueSaveTimer = setTimeout(() => {
-    saveData();
-  }, 500);
-}
-
-function deleteDialogue(rowId, dialogueId) {
-  const film = getCurrentFilm();
-  if (!film) return;
-  const row = film.rows.find(r => r.id === rowId);
-  if (!row || !row.dialogue) return;
-  row.dialogue = row.dialogue.filter(d => d.id !== dialogueId);
-  saveData();
-  renderRowsOnly();
-  updateStats();
-  showToast('台词已删除');
-}
-
-function handleDialogueKeydown(e, rowId, dialogueId) {
-  // Enter 键：如果是角色名输入框，跳到台词内容；如果是台词内容，新建一条台词
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    const target = e.target;
-    if (target.classList.contains('dialogue-character')) {
-      // 从角色名跳到台词内容
-      const item = target.closest('.dialogue-item');
-      const textEl = item.querySelector('.dialogue-text');
-      if (textEl) textEl.focus();
-    } else if (target.classList.contains('dialogue-text')) {
-      // 在台词末尾按Enter，新建一条台词
-      addDialogue(rowId);
-    }
-  }
-  // Backspace 在空行时删除
-  if (e.key === 'Backspace' && !e.shiftKey && !e.ctrlKey) {
-    const target = e.target;
-    if (target.textContent.trim() === '') {
-      e.preventDefault();
-      deleteDialogue(rowId, dialogueId);
-    }
-  }
+  renderCommentList(row.comments.filter(c => c.markerId === currentCommentMarkerId));
+  document.getElementById('commentTextarea').value = '';
+  showToast('评论已添加');
 }
 
 // ==================== 面板开关与大小调节 ====================
@@ -3822,60 +2222,34 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-function generateExportHTML(filmList) {
-  var films = filmList || appData.films;
+function generateExportHTML() {
   var html = '';
   html += '<h1 style="font-size:24px;text-align:center;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:32px;">XFY工作坊 - 拉片笔记导出</h1>';
 
-  films.forEach(function(film, idx) {
-    // 影片标题：片名 + 时长
-    var rawDur = (film.duration || '').toString().replace(/分钟$/, '').trim();
-    var durText = rawDur ? rawDur + '分钟' : '未设置时长';
-    html += '<h2 style="font-size:20px;color:#4f46e5;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-top:' + (idx > 0 ? '40px' : '0') + ';">🎬 ' + escapeHtml(film.name) + '（' + escapeHtml(durText) + '）</h2>';
+  appData.films.forEach(function(film, idx) {
+    html += '<h2 style="font-size:20px;color:#4f46e5;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-top:' + (idx > 0 ? '40px' : '0') + ';">🎬 ' + escapeHtml(film.name) + '</h2>';
 
-    // 序号行：非表格格式，序号换行间隔，按事件颜色标记
     if (film.rows && film.rows.length > 0) {
       html += '<h3 style="font-size:15px;margin:20px 0 10px;">序号行（共' + film.rows.length + '行）</h3>';
-      html += '<div style="font-size:13px;line-height:2;">';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      html += '<tr style="background:#f5f6f8;">';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;text-align:center;width:60px;">序号</th>';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;text-align:center;width:200px;">时间码</th>';
+      html += '<th style="border:1px solid #ddd;padding:8px 12px;">内容</th>';
+      html += '</tr>';
       film.rows.forEach(function(row) {
         var timeRange = (row.startTime || '') + ' → ' + (row.endTime || '');
-        // 查找行所属事件
-        var rowEvent = null;
-        if (row.eventId) {
-          rowEvent = film.events.find(function(ev) { return ev.id === row.eventId; });
-        }
-        var rowBg = rowEvent ? rowEvent.color : '';
-        var borderColor = rowEvent ? rowEvent.color : '#e5e7eb';
-        var eventNameTag = rowEvent ? '<span style="display:inline-block;padding:1px 6px;background:' + rowEvent.color + ';border:1px solid #ccc;border-radius:3px;font-size:11px;margin-right:6px;">' + escapeHtml(rowEvent.name) + '</span>' : '';
-        var pStyle = 'margin:0 0 12px 0;padding:8px 12px;border-left:4px solid ' + borderColor + ';';
-        if (rowBg) pStyle += 'background:' + rowBg + ';border-radius:4px;';
-        else pStyle += 'padding-left:8px;';
-        html += '<p style="' + pStyle + '">';
-        html += '<strong>' + row.number + '.</strong> ';
-        if (timeRange.trim() !== '→ ') {
-          html += '<span style="color:#6b7280;">[' + escapeHtml(timeRange) + ']</span> ';
-        }
-        html += eventNameTag;
-        html += (row.content || '');
-        html += '</p>';
-        // 台词记录导出
-        if (row.dialogue && row.dialogue.length > 0) {
-          html += '<div style="margin:-8px 0 12px 28px;padding:8px 12px;background:#fef3c7;border-radius:6px;border-left:3px solid #f59e0b;font-size:12px;line-height:1.8;">';
-          html += '<div style="font-weight:600;color:#92400e;margin-bottom:4px;">🎬 台词记录</div>';
-          row.dialogue.forEach(function(d) {
-            var charText = d.character ? '<strong style="color:#7c2d12;">' + escapeHtml(d.character) + '：</strong>' : '';
-            html += '<div style="margin:2px 0;">' + charText + escapeHtml(d.text || '') + '</div>';
-          });
-          html += '</div>';
-        }
+        html += '<tr>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;font-weight:600;">' + row.number + '</td>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;white-space:nowrap;">' + escapeHtml(timeRange) + '</td>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;">' + (row.content || '') + '</td>';
+        html += '</tr>';
       });
-      html += '</div>';
+      html += '</table>';
     }
 
-    // 事件统计
     if (film.events && film.events.length > 0) {
       html += '<h3 style="font-size:15px;margin:20px 0 10px;">事件统计（共' + film.events.length + '个事件）</h3>';
-      html += '<div style="font-size:13px;line-height:1.8;">';
       film.events.forEach(function(event) {
         var rowNums = event.rowIds.map(function(rid) {
           var r = film.rows.find(function(row) { return row.id === rid; });
@@ -3894,12 +2268,11 @@ function generateExportHTML(filmList) {
           rowText = ranges.join(', ') + ' (' + rowNums.length + '行)';
         }
 
-        html += '<p style="margin:0 0 6px 0;">';
+        html += '<div style="padding:6px 0;font-size:13px;">';
         html += '<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:' + event.color + ';vertical-align:middle;margin-right:8px;border:1px solid #ccc;"></span>';
         html += '<strong>' + escapeHtml(event.name) + '</strong> — ' + rowText;
-        html += '</p>';
+        html += '</div>';
       });
-      html += '</div>';
     }
 
     if (film.plotSummary && film.plotSummary.trim()) {
@@ -3919,51 +2292,9 @@ function generateExportHTML(filmList) {
   return html;
 }
 
-// 打开导出影片选择模态框
-function openExportFilmSelect() {
+function exportAsWord() {
   closeModal('exportFormatModal');
-  var listEl = document.getElementById('exportFilmList');
-  if (appData.films.length === 0) {
-    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">暂无影片，无法导出</div>';
-    openModal('exportFilmSelectModal');
-    return;
-  }
-  var currentId = appData.currentFilmId;
-  listEl.innerHTML = appData.films.map(function(film) {
-    var checked = (film.id === currentId) ? 'checked' : '';
-    var rawDur = (film.duration || '').toString().replace(/分钟$/, '').trim();
-    var durText = rawDur ? rawDur + '分钟' : '';
-    return '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;margin-bottom:6px;cursor:pointer;">' +
-      '<input type="checkbox" class="export-film-check" value="' + film.id + '" ' + checked + ' style="width:18px;height:18px;">' +
-      '<span style="flex:1;font-size:14px;">🎬 ' + escapeHtml(film.name) + (durText ? ' <span style="color:var(--muted);font-size:12px;">' + escapeHtml(durText) + '</span>' : '') + '</span>' +
-    '</label>';
-  }).join('');
-  openModal('exportFilmSelectModal');
-}
-
-// 全选/取消全选
-function selectAllExportFilms(selectAll) {
-  var checks = document.querySelectorAll('.export-film-check');
-  checks.forEach(function(cb) { cb.checked = selectAll; });
-}
-
-// 确认导出Word
-function confirmExportWord() {
-  var checks = document.querySelectorAll('.export-film-check:checked');
-  var selectedIds = Array.from(checks).map(function(cb) { return cb.value; });
-  var films;
-  if (selectedIds.length === 0) {
-    films = appData.films;
-  } else {
-    films = appData.films.filter(function(f) { return selectedIds.indexOf(f.id) !== -1; });
-  }
-  closeModal('exportFilmSelectModal');
-  exportAsWord(films);
-}
-
-function exportAsWord(filmList) {
-  var films = filmList || appData.films;
-  var content = generateExportHTML(films);
+  var content = generateExportHTML();
   var header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
   header += '<head><meta charset="utf-8"><title>拉片笔记导出</title></head><body>';
   var footer = '</body></html>';
@@ -3971,11 +2302,7 @@ function exportAsWord(filmList) {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  if (films.length === 1) {
-    a.download = films[0].name + '_拉片笔记.doc';
-  } else {
-    a.download = '拉片笔记_' + new Date().toLocaleDateString() + '.doc';
-  }
+  a.download = '拉片笔记_' + new Date().toLocaleDateString() + '.doc';
   a.click();
   URL.revokeObjectURL(url);
   showToast('Word文档导出成功');
@@ -4017,7 +2344,6 @@ function exportData() {
 }
 
 function importData(event) {
-  dataDirty = true;
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -4041,7 +2367,6 @@ function importData(event) {
 
 // ==================== 保存与历史记录 ====================
 function manualSave() {
-  dataDirty = true;
   saveData();
   saveToHistory('手动保存');
   showToast('已保存');
@@ -4127,24 +2452,18 @@ function openHistoryModal() {
         time.getSeconds().toString().padStart(2,'0');
       var filmCount = h.data.films ? h.data.films.length : 0;
       var rowCount = 0;
-      var filmNames = [];
       if (h.data.films) {
         h.data.films.forEach(function(f) {
           if (f.rows) rowCount += f.rows.length;
-          if (f.name) filmNames.push(f.name + (f.duration ? ' (' + f.duration + ')' : ''));
         });
       }
-      var namesStr = filmNames.length > 0 ? filmNames.join('、') : '无影片';
-      if (namesStr.length > 60) namesStr = namesStr.substring(0, 60) + '...';
       return '<div class="history-item">' +
         '<div class="history-info">' +
           '<div class="history-time">' + timeStr + '</div>' +
           '<div class="history-detail">' + h.type + ' · ' + filmCount + '部影片 · ' + rowCount + '行</div>' +
-          '<div class="history-detail" style="margin-top:2px;font-size:11px;">影片: ' + namesStr + '</div>' +
         '</div>' +
         '<div class="history-actions">' +
-          '<button class="btn btn-secondary" onclick="previewHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">👁 预览</button>' +
-          '<button class="btn btn-primary" onclick="previewHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">恢复</button>' +
+          '<button class="btn btn-secondary" onclick="restoreHistory(\'' + h.id + '\')" style="font-size:12px;padding:4px 10px;">恢复</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -4153,9 +2472,7 @@ function openHistoryModal() {
   document.getElementById('historyModal').classList.add('show');
 }
 
-var currentPreviewHistoryId = null;
-
-function previewHistory(historyId) {
+function restoreHistory(historyId) {
   var history = loadHistory();
   var item = history.find(function(h) { return h.id === historyId; });
   if (!item) {
@@ -4163,352 +2480,7 @@ function previewHistory(historyId) {
     return;
   }
 
-  currentPreviewHistoryId = historyId;
-  var time = new Date(item.timestamp);
-  var timeStr = time.getFullYear() + '-' +
-    (time.getMonth()+1).toString().padStart(2,'0') + '-' +
-    time.getDate().toString().padStart(2,'0') + ' ' +
-    time.getHours().toString().padStart(2,'0') + ':' +
-    time.getMinutes().toString().padStart(2,'0') + ':' +
-    time.getSeconds().toString().padStart(2,'0');
-
-  document.getElementById('previewTitle').textContent = '📋 版本预览 - ' + timeStr + ' (' + item.type + ')';
-  
-  // 重置diff复选框
-  document.getElementById('showDiff').checked = false;
-  
-  renderPreviewContent(item, false);
-
-  // 设置确认恢复按钮
-  var confirmBtn = document.getElementById('confirmRestoreBtn');
-  confirmBtn.onclick = function() {
-    confirmRestoreHistory(historyId);
-  };
-
-  // 显示窗口并初始化拖动
-  var win = document.getElementById('previewWindow');
-  win.style.left = '';
-  win.style.top = '';
-  win.style.right = '';
-  document.getElementById('historyPreviewModal').classList.add('show');
-  initFloatingDrag();
-}
-
-function toggleDiff() {
-  if (!currentPreviewHistoryId) return;
-  var history = loadHistory();
-  var item = history.find(function(h) { return h.id === currentPreviewHistoryId; });
-  if (!item) return;
-  var showDiff = document.getElementById('showDiff').checked;
-  renderPreviewContent(item, showDiff);
-}
-
-function renderPreviewContent(item, showDiff) {
-  var contentEl = document.getElementById('previewContent');
-  var html = '';
-  
-  // 获取当前数据用于diff比较
-  var currentFilms = appData.films || [];
-  var previewFilms = item.data.films || [];
-  
-  if (showDiff) {
-    html += '<div style="margin-bottom:10px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;line-height:1.5;">';
-    html += '<span class="diff-badge diff-badge-added">新增</span> <span class="diff-badge diff-badge-removed">删除</span> <span class="diff-badge diff-badge-changed">修改</span>';
-    html += ' 与当前正文对比</div>';
-  }
-  
-  if (previewFilms.length > 0) {
-    // 找出当前版本有但预览版本没有的影片（已删除）
-    var deletedFilms = currentFilms.filter(function(cf) {
-      return !previewFilms.find(function(pf) { return pf.id === cf.id || pf.name === cf.name; });
-    });
-    // 找出预览版本有但当前版本没有的影片（新增）
-    var addedFilms = previewFilms.filter(function(pf) {
-      return !currentFilms.find(function(cf) { return cf.id === pf.id || cf.name === pf.name; });
-    });
-    
-    html += '<div style="margin-bottom:8px;font-size:13px;color:var(--muted);">预览版本: ' + previewFilms.length + ' 部影片';
-    if (showDiff) {
-      html += ' | 当前版本: ' + currentFilms.length + ' 部影片';
-      if (addedFilms.length > 0) html += ' | <span style="color:#22c55e;">+' + addedFilms.length + ' 新增</span>';
-      if (deletedFilms.length > 0) html += ' | <span style="color:#ef4444;">-' + deletedFilms.length + ' 删除</span>';
-    }
-    html += '</div>';
-    
-    // 渲染已删除的影片（当前有，预览没有）
-    if (showDiff && deletedFilms.length > 0) {
-      deletedFilms.forEach(function(film) {
-        html += '<div class="diff-removed" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
-        html += '<span class="diff-badge diff-badge-removed">删除</span> ';
-        html += '<span style="font-weight:700;font-size:14px;background:rgba(239,68,68,0.2);padding:2px 6px;border-radius:4px;text-decoration:line-through;">' + (film.name || '未命名') + '</span>';
-        html += '<span style="font-size:11px;color:#ef4444;font-weight:600;margin-left:4px;">（已删除）</span>';
-        html += '<span style="font-size:11px;margin-left:6px;color:var(--muted);">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
-        html += '</div>';
-      });
-    }
-    
-    previewFilms.forEach(function(film, idx) {
-      // 查找对应的当前版本影片
-      var currentFilm = currentFilms.find(function(cf) { return cf.id === film.id || cf.name === film.name; });
-      var isAdded = !currentFilm;
-      var isChanged = false;
-      var changes = [];
-      
-      if (showDiff && currentFilm) {
-        // 比较影片属性
-        if (currentFilm.name !== film.name) changes.push('名称');
-        if (currentFilm.duration !== film.duration) changes.push('时长');
-        if ((currentFilm.rows || []).length !== (film.rows || []).length) changes.push('行数(' + (currentFilm.rows||[]).length + '→' + (film.rows||[]).length + ')');
-        // 比较行内容
-        var curRows = currentFilm.rows || [];
-        var preRows = film.rows || [];
-        var maxRows = Math.max(curRows.length, preRows.length);
-        var rowChanges = 0;
-        for (var i = 0; i < maxRows; i++) {
-          var cr = curRows[i], pr = preRows[i];
-          if (!cr && pr) { rowChanges++; continue; }
-          if (cr && !pr) { rowChanges++; continue; }
-          if (cr && pr) {
-            if (cr.content !== pr.content || cr.startTime !== pr.startTime || cr.endTime !== pr.endTime) rowChanges++;
-          }
-        }
-        if (rowChanges > 0) changes.push(rowChanges + '行内容变化');
-        // 比较面板内容
-        if ((currentFilm.plotSummary || '') !== (film.plotSummary || '')) changes.push('剧情梗概');
-        if ((currentFilm.characters || '') !== (film.characters || '')) changes.push('人物');
-        if ((currentFilm.theme || '') !== (film.theme || '')) changes.push('主题');
-        if ((currentFilm.events || []).length !== (film.events || []).length) changes.push('事件(' + (currentFilm.events||[]).length + '→' + (film.events||[]).length + ')');
-        isChanged = changes.length > 0;
-      }
-      
-      var diffClass = '';
-      var diffBadge = '';
-      var nameHighlight = '';
-      var nameAnnotation = '';
-      if (showDiff) {
-        if (isAdded) { 
-          diffClass = 'diff-added'; 
-          diffBadge = '<span class="diff-badge diff-badge-added">新增</span> '; 
-          nameHighlight = 'background:rgba(34,197,94,0.25);padding:2px 6px;border-radius:4px;';
-          nameAnnotation = ' <span style="font-size:11px;color:#22c55e;font-weight:600;">（新增片名）</span>';
-        }
-        else if (isChanged) { 
-          diffClass = 'diff-changed'; 
-          diffBadge = '<span class="diff-badge diff-badge-changed">修改</span> '; 
-          nameHighlight = 'background:rgba(251,191,36,0.25);padding:2px 6px;border-radius:4px;';
-          if (currentFilm && currentFilm.name !== film.name) {
-            nameAnnotation = ' <span style="font-size:11px;color:#fbbf24;">（当前名: ' + (currentFilm.name || '无') + '）</span>';
-          }
-        }
-      }
-      
-      html += '<div class="' + diffClass + '" style="margin-bottom:12px;padding:10px;border:1px solid var(--rule);border-radius:6px;background:var(--bg2);">';
-      html += diffBadge;
-      html += '<span style="font-weight:700;font-size:15px;color:var(--ink);' + nameHighlight + '">' + (film.name || '未命名') + '</span>';
-      html += nameAnnotation;
-      if (film.duration) html += ' <span style="font-size:12px;color:var(--muted);">⏱ ' + film.duration + '</span>';
-      if (showDiff && currentFilm && currentFilm.duration !== film.duration) {
-        html += ' <span style="font-size:11px;color:#fbbf24;">(当前: ' + (currentFilm.duration || '无') + ')</span>';
-      }
-      if (film.createTime) {
-        var ct = new Date(film.createTime);
-        html += ' <span style="font-size:11px;color:var(--muted);">创建: ' + ct.toLocaleDateString() + '</span>';
-      }
-      if (showDiff && isChanged) {
-        html += '<div style="font-size:11px;color:#fbbf24;margin-top:2px;">变更: ' + changes.join('、') + '</div>';
-      }
-      html += '</div>';
-      
-      // 行内容对比
-      if (film.rows && film.rows.length > 0) {
-        if (showDiff && currentFilm) {
-          // Diff模式：逐行对比
-          var curRows = currentFilm.rows || [];
-          var preRows = film.rows;
-          var maxR = Math.max(curRows.length, preRows.length);
-          html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">拉片行对比:</div>';
-          for (var ri = 0; ri < maxR; ri++) {
-            var cr = curRows[ri], pr = preRows[ri];
-            if (!pr && cr) {
-              // 当前有，预览没有 → 删除
-              html += '<div class="diff-removed" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
-              html += '<span class="diff-badge diff-badge-removed">删</span> ';
-              html += '<span style="color:var(--accent);font-weight:500;">' + (cr.number || '?') + '.</span> ';
-              if (cr.startTime) html += '<span style="font-family:monospace;">' + cr.startTime + '</span> ';
-              html += (cr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
-              html += '</div>';
-            } else if (pr && !cr) {
-              // 预览有，当前没有 → 新增
-              html += '<div class="diff-added" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
-              html += '<span class="diff-badge diff-badge-added">增</span> ';
-              html += '<span style="color:var(--accent);font-weight:500;">' + (pr.number || '?') + '.</span> ';
-              if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
-              html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
-              html += '</div>';
-            } else if (pr && cr) {
-              var contentChanged = (cr.content !== pr.content);
-              var timeChanged = (cr.startTime !== pr.startTime || cr.endTime !== pr.endTime);
-              if (contentChanged || timeChanged) {
-                html += '<div class="diff-changed" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
-                html += '<span class="diff-badge diff-badge-changed">改</span> ';
-                html += '<span style="color:var(--accent);font-weight:500;">' + (pr.number || '?') + '.</span> ';
-                if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
-                if (timeChanged) html += '<span style="color:#fbbf24;font-size:10px;">(时间变化)</span> ';
-                html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
-                html += '</div>';
-              } else if (ri < 3) {
-                // 前3行未变化的显示为灰色
-                html += '<div class="diff-same" style="font-size:11px;padding:2px 4px 2px 12px;margin-bottom:2px;">';
-                html += '<span style="color:var(--muted);font-weight:500;">' + (pr.number || '?') + '.</span> ';
-                if (pr.startTime) html += '<span style="font-family:monospace;">' + pr.startTime + '</span> ';
-                html += (pr.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 60);
-                html += '</div>';
-              }
-            }
-          }
-        } else {
-          // 普通模式：显示前5行
-          html += '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">共 ' + film.rows.length + ' 行拉片</div>';
-          film.rows.slice(0, 5).forEach(function(row) {
-            var plainText = row.content ? row.content.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) : '';
-            html += '<div style="font-size:11px;color:var(--muted);padding:2px 0 2px 12px;border-left:2px solid var(--rule);margin-bottom:2px;">';
-            html += '<span style="color:var(--accent);font-weight:500;">' + (row.number || '?') + '.</span> ';
-            if (row.startTime) html += '<span style="font-family:monospace;">' + row.startTime + '</span> ';
-            html += plainText + (row.content && row.content.length > 80 ? '...' : '');
-            html += '</div>';
-          });
-          if (film.rows.length > 5) {
-            html += '<div style="font-size:11px;color:var(--muted);padding-left:12px;">... 还有 ' + (film.rows.length - 5) + ' 行</div>';
-          }
-        }
-      }
-      
-      // 面板内容diff
-      if (showDiff && currentFilm) {
-        if ((currentFilm.plotSummary || '') !== (film.plotSummary || '')) {
-          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
-          html += '<span class="diff-badge diff-badge-changed">改</span> <b>剧情梗概:</b> ';
-          html += (film.plotSummary || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 100);
-          html += '</div>';
-        }
-        if ((currentFilm.characters || '') !== (film.characters || '')) {
-          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
-          html += '<span class="diff-badge diff-badge-changed">改</span> <b>人物:</b> ';
-          html += (film.characters || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 80);
-          html += '</div>';
-        }
-        if ((currentFilm.theme || '') !== (film.theme || '')) {
-          html += '<div class="diff-changed" style="font-size:12px;margin-top:6px;padding:6px;border-radius:4px;">';
-          html += '<span class="diff-badge diff-badge-changed">改</span> <b>主题:</b> ';
-          html += (film.theme || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 80);
-          html += '</div>';
-        }
-      } else if (!showDiff) {
-        if (film.plotSummary || film.characters || film.theme) {
-          html += '<div style="font-size:12px;margin-top:6px;padding:6px;background:var(--bg3);border-radius:4px;">';
-          if (film.plotSummary) html += '<div style="margin-bottom:3px;"><b>剧情梗概:</b> ' + film.plotSummary.replace(/<[^>]+>/g, ' ').trim().substring(0, 100) + '...</div>';
-          if (film.characters) html += '<div style="margin-bottom:3px;"><b>人物:</b> ' + film.characters.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
-          if (film.theme) html += '<div><b>主题:</b> ' + film.theme.replace(/<[^>]+>/g, ' ').trim().substring(0, 80) + '</div>';
-          html += '</div>';
-        }
-      }
-      
-      // 事件统计
-      if (film.events && film.events.length > 0) {
-        var eventBadge = '';
-        if (showDiff && currentFilm && (currentFilm.events || []).length !== film.events.length) {
-          eventBadge = '<span class="diff-badge diff-badge-changed">改</span> ';
-        }
-        html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;">' + eventBadge + '📌 事件: ' + film.events.length + ' 个';
-        if (showDiff && currentFilm) html += ' (当前: ' + (currentFilm.events || []).length + ' 个)';
-        html += '</div>';
-      }
-      html += '</div>';
-    });
-    
-    // 新增的影片（预览有，当前没有）
-    if (showDiff && addedFilms.length > 0) {
-      addedFilms.forEach(function(film) {
-        html += '<div class="diff-added" style="margin-bottom:8px;padding:8px;border-radius:6px;">';
-        html += '<span class="diff-badge diff-badge-added">新增</span> ';
-        html += '<span style="font-weight:700;font-size:14px;background:rgba(34,197,94,0.25);padding:2px 6px;border-radius:4px;">' + (film.name || '未命名') + '</span>';
-        html += '<span style="font-size:11px;color:#22c55e;font-weight:600;margin-left:4px;">（新增片名）</span>';
-        html += '<span style="font-size:11px;margin-left:6px;color:var(--muted);">' + (film.rows ? film.rows.length : 0) + ' 行</span>';
-        html += '</div>';
-      });
-    }
-  } else {
-    html = '<div style="text-align:center;color:var(--muted);padding:40px;">该版本无影片数据</div>';
-  }
-
-  contentEl.innerHTML = html;
-}
-
-// 浮动窗口拖动
-function initFloatingDrag() {
-  var header = document.getElementById('previewWindowHeader');
-  var win = document.getElementById('previewWindow');
-  var isDragging = false;
-  var startX, startY, startLeft, startTop;
-
-  // 鼠标拖动
-  header.onmousedown = function(e) {
-    if (e.target.classList.contains('floating-window-close')) return;
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    var rect = win.getBoundingClientRect();
-    win.style.right = 'auto';
-    startLeft = rect.left;
-    startTop = rect.top;
-    e.preventDefault();
-  };
-  document.onmousemove = function(e) {
-    if (!isDragging) return;
-    var dx = e.clientX - startX;
-    var dy = e.clientY - startY;
-    var newLeft = Math.max(0, startLeft + dx);
-    var newTop = Math.max(0, startTop + dy);
-    win.style.left = newLeft + 'px';
-    win.style.top = newTop + 'px';
-  };
-  document.onmouseup = function() { isDragging = false; };
-
-  // 触摸拖动
-  header.ontouchstart = function(e) {
-    if (e.target.classList.contains('floating-window-close')) return;
-    var touch = e.touches[0];
-    isDragging = true;
-    startX = touch.clientX;
-    startY = touch.clientY;
-    var rect = win.getBoundingClientRect();
-    win.style.right = 'auto';
-    startLeft = rect.left;
-    startTop = rect.top;
-  };
-  document.ontouchmove = function(e) {
-    if (!isDragging) return;
-    var touch = e.touches[0];
-    var dx = touch.clientX - startX;
-    var dy = touch.clientY - startY;
-    var newLeft = Math.max(0, startLeft + dx);
-    var newTop = Math.max(0, startTop + dy);
-    win.style.left = newLeft + 'px';
-    win.style.top = newTop + 'px';
-    e.preventDefault();
-  };
-  document.ontouchend = function() { isDragging = false; };
-}
-
-function confirmRestoreHistory(historyId) {
-  var history = loadHistory();
-  var item = history.find(function(h) { return h.id === historyId; });
-  if (!item) {
-    showToast('未找到该历史记录');
-    return;
-  }
-
-  if (!confirm('确认恢复到此版本？当前内容将被覆盖（当前状态已自动保存到历史记录）')) return;
+  if (!confirm('恢复后将覆盖当前内容，确定继续吗？')) return;
 
   // 先保存当前状态到历史
   saveToHistory('恢复前自动保存');
@@ -4518,14 +2490,8 @@ function confirmRestoreHistory(historyId) {
   saveData();
   renderFilmList();
   renderRightPanel();
-  closeModal('historyPreviewModal');
   closeModal('historyModal');
   showToast('已恢复到: ' + new Date(item.timestamp).toLocaleString());
-}
-
-function restoreHistory(historyId) {
-  // 统一走预览流程
-  previewHistory(historyId);
 }
 
 // ==================== Toast ====================
@@ -4596,9 +2562,8 @@ function parseDocumentText(text, fileName) {
     return null;
   }
 
-  // 策略：第一行默认是片名
-  var filmName = lines[0];
-  var startIdx = 1;
+  var filmName = '';
+  var startIdx = 0;
 
   var numPatterns = [
     /^(\d+)\s*[.、）)\]:：]\s*(.*)/,
@@ -4615,13 +2580,21 @@ function parseDocumentText(text, fileName) {
     return null;
   }
 
+  for (var i = 0; i < Math.min(5, lines.length); i++) {
+    var nm = matchNumbered(lines[i]);
+    if (nm) break;
+    filmName += (filmName ? ' ' : '') + lines[i];
+    startIdx = i + 1;
+  }
+
+  if (!filmName) filmName = fileName.replace(/\.(docx?|txt)$/i, '');
+
   var rows = [];
   var timeRegex = /(\d{1,2}:\d{2}(?::\d{2})?)/g;
 
-  // 策略：每一行都是一个序号行，去掉行首的编号前缀
+  // 每行换行都创建新的序号行
   for (var i = startIdx; i < lines.length; i++) {
     var line = lines[i];
-    // 尝试去掉行首的编号前缀（如 "1." "1、" "(1)" "第1段" 等）
     var nm = matchNumbered(line);
     var content = nm ? nm.rest : line;
 
@@ -4643,8 +2616,7 @@ function parseDocumentText(text, fileName) {
       endTime: endTime,
       content: textContent ? '<p>' + textContent + '</p>' : '',
       eventId: null,
-      comments: [],
-      dialogue: []
+      comments: []
     });
   }
 
@@ -4656,8 +2628,7 @@ function parseDocumentText(text, fileName) {
       endTime: '',
       content: '<p>' + lines.slice(startIdx).join('</p><p>') + '</p>',
       eventId: null,
-      comments: [],
-      dialogue: []
+      comments: []
     });
   }
 
@@ -4741,178 +2712,8 @@ window.addEventListener('message', function(e) {
   } else if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem('xfy_theme_mode', e.data.mode);
     applyPageTheme();
-  } else if (e.data.type === 'cloudVersion') {
-    // 收到父页面推送的云端版本时间戳
-    lastCloudVersion = e.data.timestamp || 0;
-    checkFreshness();
-  } else if (e.data.type === 'cloudRestored') {
-    // 云端数据已更新，重新加载
-    try { appData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
-    if (!appData.films) initDefaultData();
-    // 更新本地版本和修改时间，避免恢复后被当作新修改覆盖云端
-    var restoredTs = e.data.timestamp || Date.now();
-    localDataVersion = restoredTs;
-    lastCloudVersion = restoredTs;
-    dataStale = false;
-    freshnessAcknowledged = false;
-    localStorage.setItem('xfy_lapian_modified', String(Date.now()));
-    dataDirty = false;
-    renderFilmList();
-    renderCurrentFilm();
-    showToast('已从云端同步最新数据');
   }
 });
-
-// ==================== 数据版本容斥检查 ====================
-let dataStale = false;
-
-function checkFreshness() {
-  // 如果云端版本比本地数据版本新，且用户尚未知晓
-  if (lastCloudVersion > localDataVersion && !freshnessAcknowledged) {
-    dataStale = true;
-    showFreshnessWarning();
-  }
-}
-
-function showFreshnessWarning() {
-  // 避免重复弹窗
-  if (document.getElementById('freshnessModal').classList.contains('show')) return;
-  var cloudTime = lastCloudVersion ? new Date(lastCloudVersion).toLocaleString() : '未知';
-  document.getElementById('freshnessCloudTime').textContent = cloudTime;
-  document.getElementById('freshnessModal').classList.add('show');
-}
-
-function freshnessSyncNow() {
-  document.getElementById('freshnessModal').classList.remove('show');
-  // 请求父页面立即同步
-  try { window.parent.postMessage({ type: 'requestSync' }, '*'); } catch(e) {}
-  showToast('正在同步云端数据...');
-}
-
-function freshnessContinue() {
-  document.getElementById('freshnessModal').classList.remove('show');
-  freshnessAcknowledged = true;
-  dataStale = false;
-  showToast('已继续操作，请注意当前数据可能非最新');
-}
-
-// 页面重新可见时检查数据版本
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden && lastCloudVersion > 0) {
-    checkFreshness();
-  }
-});
-
-// ==================== 关闭时版本对比 ====================
-var pendingVersionA = null;
-var pendingVersionB = null;
-
-function checkVersionConflict() {
-  var history = loadHistory();
-  if (history.length < 2) return;
-  
-  var v1 = history[0]; // 最新
-  var v2 = history[1]; // 次新
-  
-  // 只在24小时内的版本之间对比
-  var now = Date.now();
-  if (now - v1.timestamp > 24 * 60 * 60 * 1000) return;
-  if (now - v2.timestamp > 24 * 60 * 60 * 1000) return;
-  
-  // 如果两个版本数据相同，不弹窗
-  if (JSON.stringify(v1.data) === JSON.stringify(v2.data)) return;
-  
-  // 如果已经检查过，不重复弹窗
-  var lastChecked = localStorage.getItem('xfy_version_compare_checked');
-  if (lastChecked && parseInt(lastChecked) >= v1.timestamp) return;
-  
-  pendingVersionA = v1;
-  pendingVersionB = v2;
-  showVersionCompareDialog(v1, v2);
-}
-
-function showVersionCompareDialog(vA, vB) {
-  document.getElementById('versionATime').textContent = '(' + new Date(vA.timestamp).toLocaleString() + ' - ' + vA.type + ')';
-  document.getElementById('versionBTime').textContent = '(' + new Date(vB.timestamp).toLocaleString() + ' - ' + vB.type + ')';
-  document.getElementById('versionAContent').innerHTML = renderVersionSummary(vA.data, vB.data);
-  document.getElementById('versionBContent').innerHTML = renderVersionSummary(vB.data, vA.data);
-  document.getElementById('versionCompareModal').classList.add('show');
-}
-
-function renderVersionSummary(data, compareData) {
-  var films = data.films || [];
-  var compareFilms = compareData.films || [];
-  var html = '';
-  
-  if (films.length === 0) return '<div style="color:var(--muted);text-align:center;padding:20px;">无影片</div>';
-  
-  films.forEach(function(film, idx) {
-    // 检查此影片在对比版本中是否存在
-    var compareFilm = compareFilms.find(function(f) { return f.id === film.id || f.name === film.name; });
-    var isNew = !compareFilm;
-    var isChanged = compareFilm && JSON.stringify(film) !== JSON.stringify(compareFilm);
-    
-    var badge = '';
-    var bgStyle = '';
-    if (isNew) { badge = '<span class="diff-badge diff-badge-added">新增</span> '; bgStyle = 'background:rgba(34,197,94,0.08);'; }
-    else if (isChanged) { badge = '<span class="diff-badge diff-badge-changed">修改</span> '; bgStyle = 'background:rgba(251,191,36,0.08);'; }
-    
-    html += '<div style="margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid var(--rule);' + bgStyle + '">';
-    html += badge;
-    html += '<span style="font-weight:600;font-size:13px;color:var(--ink);">' + (idx+1) + '. ' + (film.name || '未命名') + '</span>';
-    if (film.duration) html += ' <span style="font-size:11px;color:var(--muted);">⏱' + film.duration + '</span>';
-    html += '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + (film.rows ? film.rows.length : 0) + ' 行';
-    if (film.events && film.events.length > 0) html += ' · ' + film.events.length + ' 事件';
-    html += '</div>';
-    // 显示前3行内容
-    if (film.rows && film.rows.length > 0) {
-      film.rows.slice(0, 3).forEach(function(row) {
-        var text = (row.content || '').replace(/<[^>]+>/g, ' ').trim().substring(0, 50);
-        html += '<div style="font-size:10px;color:var(--muted);padding:1px 0 1px 8px;border-left:2px solid var(--rule);margin:2px 0;">';
-        html += (row.number || '?') + '. ' + text + '</div>';
-      });
-      if (film.rows.length > 3) html += '<div style="font-size:10px;color:var(--muted);">...还有' + (film.rows.length - 3) + '行</div>';
-    }
-    html += '</div>';
-  });
-  
-  // 显示对比版本中有但当前版本没有的影片（已删除）
-  var deletedFilms = compareFilms.filter(function(cf) {
-    return !films.find(function(f) { return f.id === cf.id || f.name === cf.name; });
-  });
-  deletedFilms.forEach(function(film) {
-    html += '<div style="margin-bottom:8px;padding:8px;border-radius:6px;border:1px solid var(--rule);background:rgba(239,68,68,0.06);">';
-    html += '<span class="diff-badge diff-badge-removed">已删除</span> ';
-    html += '<span style="font-weight:600;font-size:13px;color:var(--muted);text-decoration:line-through;">' + (film.name || '未命名') + '</span>';
-    html += '</div>';
-  });
-  
-  return html;
-}
-
-function restoreVersionA() {
-  if (!pendingVersionA) return;
-  saveToHistory('恢复前自动保存');
-  appData = JSON.parse(JSON.stringify(pendingVersionA.data));
-  saveData();
-  renderFilmList();
-  renderCurrentFilm();
-  closeModal('versionCompareModal');
-  localStorage.setItem('xfy_version_compare_checked', String(Date.now()));
-  showToast('已恢复版本A: ' + new Date(pendingVersionA.timestamp).toLocaleString());
-}
-
-function restoreVersionB() {
-  if (!pendingVersionB) return;
-  saveToHistory('恢复前自动保存');
-  appData = JSON.parse(JSON.stringify(pendingVersionB.data));
-  saveData();
-  renderFilmList();
-  renderCurrentFilm();
-  closeModal('versionCompareModal');
-  localStorage.setItem('xfy_version_compare_checked', String(Date.now()));
-  showToast('已恢复版本B: ' + new Date(pendingVersionB.timestamp).toLocaleString());
-}
 </script>
 </body>
 </html>
