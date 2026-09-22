@@ -8,7 +8,7 @@
 <script>
 // 强制版本检测：如果URL中没有版本参数，自动添加并刷新
 (function(){
-  var REQUIRED_VERSION = '20260919-v4';
+  var REQUIRED_VERSION = '20260921-v5';
   var url = new URL(window.location.href);
   var currentV = url.searchParams.get('v');
   if (currentV !== REQUIRED_VERSION) {
@@ -35,6 +35,50 @@
     --shadow: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
     --glass: rgba(255,255,255,0.75);
+  }
+
+  /* 深色模式 */
+  :root[data-theme="dark"] {
+    --bg: #1a1a2e;
+    --bg2: #16213e;
+    --bg3: #0f3460;
+    --ink: #e0e0e0;
+    --muted: #8e9aaf;
+    --rule: #2d3142;
+    --accent: #7c83fd;
+    --accent2: #06b6d4;
+    --accent-light: rgba(124,131,253,0.15);
+    --glass: rgba(22,33,62,0.75);
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  /* 背景图片支持 */
+  .app-container.has-bg {
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  .app-container.has-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glass);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app-container.has-bg > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 跟随背景自动主题 */
+  :root[data-theme="auto"] {
+    --bg: rgba(245,246,248,0.9);
+    --bg2: rgba(255,255,255,0.85);
+    --bg3: rgba(240,242,245,0.8);
+    --glass: rgba(255,255,255,0.6);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -269,6 +313,19 @@
     outline: none;
   }
 
+  .font-family-select {
+    padding: 4px 6px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--bg2);
+    cursor: pointer;
+    outline: none;
+    max-width: 100px;
+  }
+
+  .dialogue-btn.active { background: var(--accent-light); color: var(--accent); }
+
   /* 拉片内容区 - 序号行 */
   .lapian-content {
     flex: 1;
@@ -382,6 +439,43 @@
 
   .row-content:focus { border-color: var(--accent); }
   .row-content:empty:before { content: attr(data-placeholder); color: var(--muted); }
+
+  /* 台词记录 */
+  .row-dialogue {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: rgba(79, 70, 229, 0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    line-height: 1.7;
+    display: none;
+  }
+  .row-dialogue.show { display: block; }
+  .row-dialogue-header {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .row-dialogue-content {
+    outline: none;
+    min-height: 20px;
+    color: var(--ink);
+  }
+  .row-dialogue-content:empty:before { content: '点击输入台词内容...'; color: var(--muted); }
+  .dialogue-add-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
 
   .row-delete {
     opacity: 0;
@@ -660,6 +754,20 @@
     flex-shrink: 0;
   }
   .event-delete-btn:hover { opacity: 1; background: rgba(239,68,68,0.1); }
+
+  .event-jump-btn {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .event-jump-btn:hover { opacity: 1; background: rgba(79,70,229,0.1); }
 
   /* 分隔条 */
   .resizer {
@@ -982,6 +1090,20 @@
         <button class="toolbar-btn" onclick="execCmd('strikeThrough')" title="删除线"><s>S</s></button>
       </div>
       <div class="toolbar-group">
+        <select class="font-family-select" onchange="changeFontFamily(this.value)" title="字体">
+          <option value="inherit">默认字体</option>
+          <option value="SimSun">宋体</option>
+          <option value="SimHei">黑体</option>
+          <option value="KaiTi">楷体</option>
+          <option value="FangSong">仿宋</option>
+          <option value="Microsoft YaHei">微软雅黑</option>
+          <option value="STXihei">细黑</option>
+          <option value="STKaiti">华文楷体</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Arial">Arial</option>
+          <option value="Courier New">Courier New</option>
+        </select>
         <select class="font-size-select" onchange="changeFontSize(this.value)" title="字号">
           <option value="1">小</option>
           <option value="3" selected>正常</option>
@@ -1019,6 +1141,7 @@
         <button class="toolbar-btn" onclick="execCmd('removeFormat')" title="清除格式">✕</button>
       </div>
       <div class="toolbar-group">
+        <button class="toolbar-btn dialogue-btn" id="dialogueToggleBtn" onclick="toggleAllDialogues()" title="展开/收起所有台词记录">🎭</button>
         <button class="toolbar-btn" onclick="addComment()" title="添加评论">💬</button>
       </div>
       <div class="toolbar-group">
@@ -1186,6 +1309,44 @@
   </div>
 </div>
 
+<!-- 版本对比弹窗 -->
+<div class="modal-overlay" id="versionCompareModal" style="z-index:9999;">
+  <div class="modal" style="max-width:480px;">
+    <h2>📋 版本更新说明</h2>
+    <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;max-height:400px;overflow-y:auto;">
+      <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-light);border-radius:6px;">
+        <b style="color:var(--accent);">当前版本: 20260921-v5</b>
+      </div>
+      <div style="margin-bottom:10px;">
+        <b>🆕 新增功能</b>
+        <ul style="margin:6px 0 0 20px;padding:0;">
+          <li>字体选择器（宋体/黑体/楷体/微软雅黑等）</li>
+          <li>台词记录功能（每行可展开添加台词）</li>
+          <li>一键展开/收起所有台词</li>
+          <li>事件列表编号显示</li>
+          <li>事件跳转功能（点击↗跳转到对应行）</li>
+          <li>事件颜色自动按顺序选择下一个</li>
+          <li>强制导出提醒（每15天）</li>
+          <li>数据新鲜度检查（7天未保存提醒）</li>
+          <li>导出文档包含台词内容</li>
+          <li>深色模式 + 背景图片支持</li>
+        </ul>
+      </div>
+      <div style="margin-bottom:10px;">
+        <b>🔧 优化修复</b>
+        <ul style="margin:6px 0 0 20px;padding:0;">
+          <li>修复事件名称输入时每输一个字就失去焦点</li>
+          <li>优化自动保存机制，追踪数据修改时间</li>
+          <li>版本号强制缓存刷新</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModal('versionCompareModal')">知道了</button>
+    </div>
+  </div>
+</div>
+
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script>
 // ==================== 数据管理 ====================
@@ -1292,6 +1453,16 @@ function init() {
 
   // 检查是否需要强制导出提醒（每15天）
   checkExportReminder();
+  // 检查数据新鲜度
+  checkDataFreshness();
+  // 首次加载此版本时显示更新说明
+  var seenVersion = localStorage.getItem('xfy_seen_version');
+  if (seenVersion !== '20260921-v5') {
+    setTimeout(function() {
+      document.getElementById('versionCompareModal').classList.add('show');
+      localStorage.setItem('xfy_seen_version', '20260921-v5');
+    }, 1000);
+  }
   updateSaveStatus();
 }
 
@@ -1314,6 +1485,7 @@ function loadData() {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  localStorage.setItem('xfy_lapian_modified', String(Date.now()));
   updateStats();
   if (activeTab === 'stats') renderEventList();
 }
@@ -1520,7 +1692,18 @@ function createRowElement(rowData, film) {
          onclick="handleEditorClick(event)"
          onmouseup="checkFormatBrush(event)"
          id="editor-${rowData.id}">${rowData.content || ''}</div>
+    <button class="dialogue-add-btn" onclick="toggleDialogue('${rowData.id}')" title="台词记录">🎭</button>
     <button class="row-delete" onclick="deleteRow('${rowData.id}')" title="删除此行">×</button>
+    <div class="row-dialogue ${rowData.dialogue ? 'show' : ''}">
+      <div class="row-dialogue-header">
+        <span>台词记录</span>
+        <button class="dialogue-add-btn" onclick="toggleDialogue('${rowData.id}')" title="收起台词">收起</button>
+      </div>
+      <div class="row-dialogue-content" contenteditable="true"
+           data-row-id="${rowData.id}"
+           oninput="saveDialogueContent('${rowData.id}')"
+           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('editor-${rowData.id}').focus();}">${rowData.dialogue || ''}</div>
+    </div>
   `;
   return div;
 }
@@ -1562,7 +1745,8 @@ function addNewRowAfter(rowId) {
     endTime: '',
     content: '',
     eventId: null,
-    comments: []
+    comments: [],
+    dialogue: ''
   };
 
   film.rows.splice(rowIndex + 1, 0, newRow);
@@ -1879,10 +2063,27 @@ function renderEventList() {
         <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
         <input type="text" class="event-name-edit" value="${event.name}" oninput="updateEventName('${event.id}', this.value)" placeholder="事件名称">
         <span class="event-rows-info">${rowText}</span>
+        <button class="event-jump-btn" onclick="jumpToEvent('${event.id}')" title="跳转到事件">↗</button>
         <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
       </div>
     `;
   }).join('');
+}
+
+function jumpToEvent(eventId) {
+  const film = getCurrentFilm();
+  if (!film) return;
+  const event = film.events.find(e => e.id === eventId);
+  if (!event || !event.rowIds || event.rowIds.length === 0) return;
+  
+  const firstRowId = event.rowIds[0];
+  const rowEl = document.querySelector(`[data-row-id="${firstRowId}"]`);
+  if (rowEl) {
+    rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    rowEl.style.transition = 'box-shadow 0.3s';
+    rowEl.style.boxShadow = '0 0 0 2px var(--accent)';
+    setTimeout(() => { rowEl.style.boxShadow = ''; }, 2000);
+  }
 }
 
 // ==================== 统计 ====================
@@ -1968,6 +2169,53 @@ function execCmd(command, value = null) {
 function changeFontSize(size) {
   document.execCommand('fontSize', false, size);
   saveCurrentRowContent();
+}
+
+function changeFontFamily(font) {
+  if (font === 'inherit') {
+    document.execCommand('fontName', false, 'inherit');
+  } else {
+    document.execCommand('fontName', false, font);
+  }
+  saveCurrentRowContent();
+}
+
+// ==================== 台词记录功能 ====================
+let allDialoguesExpanded = false;
+
+function toggleAllDialogues() {
+  allDialoguesExpanded = !allDialoguesExpanded;
+  const btn = document.getElementById('dialogueToggleBtn');
+  if (allDialoguesExpanded) {
+    btn.classList.add('active');
+    document.querySelectorAll('.row-dialogue').forEach(el => el.classList.add('show'));
+  } else {
+    btn.classList.remove('active');
+    document.querySelectorAll('.row-dialogue').forEach(el => el.classList.remove('show'));
+  }
+}
+
+function toggleDialogue(rowId) {
+  const el = document.querySelector(`[data-row-id="${rowId}"] .row-dialogue`);
+  if (el) {
+    el.classList.toggle('show');
+    if (el.classList.contains('show')) {
+      const content = el.querySelector('.row-dialogue-content');
+      if (content) setTimeout(() => content.focus(), 50);
+    }
+  }
+}
+
+function saveDialogueContent(rowId) {
+  const el = document.querySelector(`[data-row-id="${rowId}"] .row-dialogue-content`);
+  if (!el) return;
+  const film = getCurrentFilm();
+  if (!film) return;
+  const row = film.rows.find(r => r.id === rowId);
+  if (row) {
+    row.dialogue = el.innerHTML;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  }
 }
 
 function initColorPickers() {
@@ -2300,7 +2548,11 @@ function generateExportHTML() {
         html += '<tr>';
         html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;font-weight:600;">' + row.number + '</td>';
         html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;white-space:nowrap;">' + escapeHtml(timeRange) + '</td>';
-        html += '<td style="border:1px solid #ddd;padding:8px 12px;">' + (row.content || '') + '</td>';
+        html += '<td style="border:1px solid #ddd;padding:8px 12px;">' + (row.content || '');
+        if (row.dialogue && row.dialogue.trim()) {
+          html += '<div style="margin-top:6px;padding:6px 10px;background:rgba(79,70,229,0.06);border-left:3px solid #4f46e5;border-radius:0 4px 4px 0;font-size:12px;"><b>台词:</b> ' + row.dialogue + '</div>';
+        }
+        html += '</td>';
         html += '</tr>';
       });
       html += '</table>';
@@ -2470,6 +2722,7 @@ function importData(event) {
 function manualSave() {
   saveData();
   saveToHistory('手动保存');
+  localStorage.setItem('xfy_last_manual_save', String(Date.now()));
   showToast('已保存');
   updateSaveStatus(true);
 }
@@ -2478,6 +2731,23 @@ function autoSave() {
   saveData();
   saveToHistory('自动保存');
   updateSaveStatus(true);
+}
+
+// ==================== 数据新鲜度检查 ====================
+function checkDataFreshness() {
+  const lastModified = parseInt(localStorage.getItem('xfy_lapian_modified') || '0');
+  const lastSaved = parseInt(localStorage.getItem('xfy_last_manual_save') || '0');
+  const now = Date.now();
+
+  // 如果距离上次修改超过7天没有保存，提醒用户
+  const STALE_THRESHOLD = 7 * 24 * 60 * 60 * 1000;
+  if (lastModified > 0 && (now - lastModified) > STALE_THRESHOLD && lastModified > lastSaved) {
+    const statusEl = document.getElementById('saveStatus');
+    if (statusEl) {
+      statusEl.style.color = 'var(--warning)';
+      statusEl.textContent = '⚠ 数据有未保存的更改';
+    }
+  }
 }
 
 function saveToHistory(saveType) {
