@@ -1,4 +1,4 @@
-<html lang="zh-CN" data-trae-theme="light" class=""><head>
+<html lang="zh-CN" data-trae-theme="light"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>XFY工作坊</title>
@@ -19,8 +19,11 @@
     }
     body.dark-mode .top-nav { background: #131826; border-color: #2a3344; }
     .nav-left { display: flex; align-items: center; gap: 16px; }
+    .brand-wrap { display: flex; flex-direction: column; line-height: 1.2; }
     .brand-title { font-size: 16px; font-weight: 700; color: #4f46e5; white-space: nowrap; }
     body.dark-mode .brand-title { color: #5b8def; }
+    .brand-version { font-size: 10px; color: #6b7280; font-weight: 400; margin-top: 1px; }
+    body.dark-mode .brand-version { color: #8a96b0; }
     .nav-tabs { display: flex; gap: 2px; }
     .nav-tab {
       padding: 6px 14px; font-size: 13px; font-weight: 500; color: #6b7280;
@@ -93,6 +96,7 @@
       .top-nav { height: 44px; padding: 0 8px; gap: 6px; }
       .nav-left { gap: 8px; }
       .brand-title { font-size: 13px; }
+      .brand-version { font-size: 9px; }
       .nav-tab { padding: 5px 10px; font-size: 12px; }
       .nav-btn { padding: 5px 10px; font-size: 12px; }
       .app-container { height: calc(100dvh - 44px); }
@@ -861,8 +865,11 @@ body.dark-mode { background: rgb(10, 14, 26); color: rgb(232, 237, 245); }
 .top-nav { display: flex; align-items: center; height: 48px; background: rgb(255, 255, 255); border-bottom: 1px solid rgb(229, 231, 235); padding: 0px 16px; position: relative; z-index: 100; flex-shrink: 0; box-shadow: rgba(0, 0, 0, 0.06) 0px 1px 4px; gap: 12px; }
 body.dark-mode .top-nav { background: rgb(19, 24, 38); border-color: rgb(42, 51, 68); }
 .nav-left { display: flex; align-items: center; gap: 16px; }
+.brand-wrap { display: flex; flex-direction: column; line-height: 1.2; }
 .brand-title { font-size: 16px; font-weight: 700; color: rgb(79, 70, 229); white-space: nowrap; }
 body.dark-mode .brand-title { color: rgb(91, 141, 239); }
+.brand-version { font-size: 10px; color: rgb(107, 114, 128); font-weight: 400; margin-top: 1px; }
+body.dark-mode .brand-version { color: rgb(138, 150, 176); }
 .nav-tabs { display: flex; gap: 2px; }
 .nav-tab { padding: 6px 14px; font-size: 13px; font-weight: 500; color: rgb(107, 114, 128); background: transparent; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
 body.dark-mode .nav-tab { color: rgb(138, 150, 176); }
@@ -918,6 +925,7 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
   .top-nav { height: 44px; padding: 0px 8px; gap: 6px; }
   .nav-left { gap: 8px; }
   .brand-title { font-size: 13px; }
+  .brand-version { font-size: 9px; }
   .nav-tab { padding: 5px 10px; font-size: 12px; }
   .nav-btn { padding: 5px 10px; font-size: 12px; }
   .app-container { height: calc(-44px + 100dvh); }
@@ -1032,9 +1040,12 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
 <body>
   <div class="top-nav">
     <div class="nav-left">
-      <span class="brand-title">XFY工作坊</span>
+      <div class="brand-wrap">
+        <span class="brand-title">XFY工作坊</span>
+        <span class="brand-version" id="brandVersion">v20260925-v7</span>
+      </div>
       <div class="nav-tabs">
-        <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">剧作-xfy的拉片笔记</button>
+        <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">拉片笔记-剧作</button>
         <button class="nav-tab" data-app="ai" onclick="switchApp('ai')">AI短片创作</button>
       </div>
     </div>
@@ -1044,8 +1055,8 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
   </div>
 
   <div class="app-container">
-    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20260923-v6"></iframe>
-    <iframe class="app-frame" id="app-ai" src="ai-platform.html?v=20260923-v6"></iframe>
+    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20260925-v7"></iframe>
+    <iframe class="app-frame" id="app-ai" src="ai-platform.html?v=20260925-v7"></iframe>
   </div>
 
   <div class="settings-overlay" id="settingsOverlay">
@@ -1060,6 +1071,25 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
         <div class="settings-item">
           <div><div class="settings-label">记住当前页面</div><div class="settings-desc">刷新后保持上次打开的页面</div></div>
           <div class="toggle-switch on" id="toggleRememberPage" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">拉片笔记设置</div>
+        <div class="settings-item">
+          <div><div class="settings-label">导出备份提醒</div><div class="settings-desc">距离上次导出超过设定天数时提醒</div></div>
+          <div class="toggle-switch" id="toggleExportReminder" onclick="toggleExportReminder()"></div>
+        </div>
+        <div class="settings-item">
+          <div><div class="settings-label">提醒间隔</div><div class="settings-desc" id="exportReminderDaysDesc">当前：15天</div></div>
+          <select class="settings-input" id="exportReminderDays" style="width:100px;" onchange="changeExportReminderDays()">
+            <option value="7">7天</option>
+            <option value="15" selected="">15天</option>
+            <option value="30">30天</option>
+            <option value="60">60天</option>
+          </select>
+        </div>
+        <div class="settings-item">
+          <div><div class="settings-label">上次导出</div><div class="settings-desc" id="lastExportInfo">从未导出</div></div>
         </div>
       </div>
       <div class="settings-section">
@@ -1110,8 +1140,12 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
     const BG_KEY = 'xfy_workshop_bg';
     const TOKEN_KEY = 'xfy_github_token';
     const THEME_KEY = 'xfy_theme_mode';
+    const EXPORT_REMINDER_KEY = 'xfy_export_reminder_enabled';
+    const EXPORT_REMINDER_DAYS_KEY = 'xfy_export_reminder_days';
+    const LAST_EXPORT_KEY = 'xfy_last_export_time';
     const REPO = 'xuefy987/lapian-diary';
     const CLOUD_FILE = 'cloud-backup.json';
+    const APP_VERSION = '20260925-v7';
 
     function loadSettings() {
       try { const raw = localStorage.getItem(LAYOUT_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
@@ -1136,9 +1170,48 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
       if (bg) document.getElementById('bgPreview').style.backgroundImage = 'url(' + bg + ')';
       const theme = localStorage.getItem(THEME_KEY) || 'light';
       document.getElementById('themeMode').value = theme;
+
+      // 拉片设置
+      const reminderEnabled = localStorage.getItem(EXPORT_REMINDER_KEY) !== 'false';
+      document.getElementById('toggleExportReminder').classList.toggle('on', reminderEnabled);
+      const days = localStorage.getItem(EXPORT_REMINDER_DAYS_KEY) || '15';
+      document.getElementById('exportReminderDays').value = days;
+      document.getElementById('exportReminderDaysDesc').textContent = '当前：' + days + '天';
+
+      const lastExport = parseInt(localStorage.getItem(LAST_EXPORT_KEY) || '0');
+      if (lastExport === 0) {
+        document.getElementById('lastExportInfo').textContent = '从未导出';
+      } else {
+        const daysPassed = Math.floor((Date.now() - lastExport) / (24 * 60 * 60 * 1000));
+        const date = new Date(lastExport);
+        document.getElementById('lastExportInfo').textContent = daysPassed + ' 天前（' + date.toLocaleDateString() + '）';
+      }
+
       document.getElementById('settingsOverlay').classList.add('show');
     }
+
     function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+
+    function toggleExportReminder() {
+      const toggle = document.getElementById('toggleExportReminder');
+      const isOn = toggle.classList.toggle('on');
+      localStorage.setItem(EXPORT_REMINDER_KEY, isOn ? 'true' : 'false');
+      // 通知lapian页面
+      try {
+        document.getElementById('app-lapian').contentWindow.postMessage({ type: 'exportReminderChanged', enabled: isOn }, '*');
+      } catch(e) {}
+    }
+
+    function changeExportReminderDays() {
+      const days = document.getElementById('exportReminderDays').value;
+      localStorage.setItem(EXPORT_REMINDER_DAYS_KEY, days);
+      document.getElementById('exportReminderDaysDesc').textContent = '当前：' + days + '天';
+      // 通知lapian页面
+      try {
+        document.getElementById('app-lapian').contentWindow.postMessage({ type: 'exportReminderDaysChanged', days: days }, '*');
+      } catch(e) {}
+    }
+
     function saveSettings() {
       const s = { lockLayout: document.getElementById('toggleLayout').classList.contains('on'), rememberPage: document.getElementById('toggleRememberPage').classList.contains('on'), activeApp: loadSettings().activeApp || 'lapian' };
       saveSettingsData(s);
@@ -1248,13 +1321,33 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
       } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }
     }
 
+    // 监听来自iframe的消息
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ready') {
+        applyBgToAll();
+        applyTheme();
+      } else if (e.data && e.data.type === 'openSettings') {
+        openSettings();
+      } else if (e.data && e.data.type === 'exported') {
+        // 更新上次导出信息
+        const lastExport = parseInt(localStorage.getItem(LAST_EXPORT_KEY) || '0');
+        if (lastExport === 0) {
+          document.getElementById('lastExportInfo').textContent = '从未导出';
+        } else {
+          const daysPassed = Math.floor((Date.now() - lastExport) / (24 * 60 * 60 * 1000));
+          const date = new Date(lastExport);
+          document.getElementById('lastExportInfo').textContent = daysPassed + ' 天前（' + date.toLocaleDateString() + '）';
+        }
+      }
+    });
+
     // 初始化
     const settings = loadSettings();
     if (settings.activeApp) switchApp(settings.activeApp);
     applyTheme();
     applyBgToAll();
+    document.getElementById('brandVersion').textContent = 'v' + APP_VERSION;
     window.addEventListener('load', function() { setTimeout(function() { applyBgToAll(); applyTheme(); }, 1500); });
-    window.addEventListener('message', function(e) { if (e.data && e.data.type === 'ready') { applyBgToAll(); applyTheme(); } });
   </script>
 
 

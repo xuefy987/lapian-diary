@@ -1,11 +1,11 @@
-<html lang="zh-CN" data-trae-theme="light" style="--bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --glass: rgba(255,255,255,0.75);" class=""><head>
+<html lang="zh-CN" data-trae-theme="light" style="--bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --accent: #4f46e5; --accent2: #06b6d4; --accent-light: #eef2ff; --glass: rgba(255,255,255,0.75);" class=""><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>剧作-xfy的拉片笔记</title>
 <script>
 // 强制版本检测：如果URL中没有版本参数，自动添加并刷新
 (function(){
-  var REQUIRED_VERSION = '20260923-v6';
+  var REQUIRED_VERSION = '20260925-v7';
   var url = new URL(window.location.href);
   var currentV = url.searchParams.get('v');
   if (currentV !== REQUIRED_VERSION) {
@@ -111,33 +111,11 @@
   }
 
   .sidebar-header {
-    padding: 16px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--rule);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .sidebar-header-top {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .sidebar-brand {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .sidebar-version {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 400;
-    margin-top: 2px;
+    justify-content: center;
   }
 
   .btn {
@@ -251,6 +229,21 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .film-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .film-duration {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .film-duration:hover { color: var(--accent); text-decoration: underline; }
+  .film-duration-empty { color: var(--accent); opacity: 0.7; }
 
   .film-item-actions { display: none; gap: 2px; }
   .film-item:hover .film-item-actions { display: flex; }
@@ -750,17 +743,32 @@
 
   .event-item-editable {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
     border-radius: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     background: var(--bg3);
     border: 1px solid transparent;
     transition: border-color 0.15s;
   }
 
   .event-item-editable:hover { border-color: var(--rule); }
+
+  .event-item-row1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .event-item-row2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding-left: 34px;
+  }
 
   .event-number {
     font-size: 12px;
@@ -792,6 +800,9 @@
     font-size: 13px;
     color: var(--ink);
     min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
   }
   .event-name-edit:focus { border-bottom: 1px solid var(--accent); }
 
@@ -950,8 +961,11 @@
     font-size: 14px;
     margin-bottom: 16px;
     outline: none;
+    background: var(--bg);
+    color: var(--ink);
   }
   .modal-input:focus { border-color: var(--accent); }
+  .modal-input::placeholder { color: var(--muted); }
 
   .modal-actions {
     display: flex;
@@ -2095,10 +2109,7 @@ html { height: 100%; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); height: 100%; overflow: hidden; font-size: 14px; line-height: 1.6; }
 .app-container { display: flex; height: 100%; width: 100%; }
 .sidebar-left { width: 260px; min-width: 200px; max-width: 400px; background: var(--bg2); border-right: 1px solid var(--rule); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s; }
-.sidebar-header { padding: 16px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; flex-direction: column; gap: 8px; }
-.sidebar-header-top { width: 100%; display: flex; align-items: center; justify-content: space-between; }
-.sidebar-brand { font-size: 15px; font-weight: 700; color: var(--accent); }
-.sidebar-version { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.sidebar-header { padding: 12px 16px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; }
 .btn { cursor: pointer; border: none; border-radius: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
 .btn-primary { background: var(--accent); color: white; }
 .btn-primary:hover { background: rgb(67, 56, 202); }
@@ -2122,6 +2133,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .film-item.active .film-number { color: var(--accent); }
 .film-pin-icon { font-size: 10px; color: var(--warning); flex-shrink: 0; }
 .film-item-title { flex: 1 1 0%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.film-item-info { flex: 1 1 0%; min-width: 0px; }
+.film-duration { font-size: 11px; color: var(--muted); margin-top: 2px; cursor: pointer; display: inline-block; }
+.film-duration:hover { color: var(--accent); text-decoration: underline; }
+.film-duration-empty { color: var(--accent); opacity: 0.7; }
 .film-item-actions { display: none; gap: 2px; }
 .film-item:hover .film-item-actions { display: flex; }
 .film-item .btn-icon { padding: 2px 4px; font-size: 12px; }
@@ -2203,12 +2218,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .stat-number { font-size: 24px; font-weight: 700; color: var(--accent); }
 .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .event-list { list-style: none; }
-.event-item-editable { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; background: var(--bg3); border: 1px solid transparent; transition: border-color 0.15s; }
+.event-item-editable { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; background: var(--bg3); border: 1px solid transparent; transition: border-color 0.15s; }
 .event-item-editable:hover { border-color: var(--rule); }
+.event-item-row1 { display: flex; align-items: center; gap: 8px; width: 100%; }
+.event-item-row2 { display: flex; align-items: center; gap: 8px; width: 100%; padding-left: 34px; }
 .event-number { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 18px; text-align: center; flex-shrink: 0; }
 .event-color-input { width: 24px; height: 24px; border: none; border-radius: 4px; cursor: pointer; padding: 0px; flex-shrink: 0; background: none; }
 .event-color-input::-webkit-color-swatch { border: 1px solid var(--rule); border-radius: 4px; }
-.event-name-edit { flex: 1 1 0%; border: none; background: transparent; outline: none; font-size: 13px; color: var(--ink); min-width: 0px; }
+.event-name-edit { flex: 1 1 0%; border: none; background: transparent; outline: none; font-size: 13px; color: var(--ink); min-width: 0px; white-space: normal; word-break: break-word; line-height: 1.4; }
 .event-name-edit:focus { border-bottom: 1px solid var(--accent); }
 .event-rows-info { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
 .event-delete-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 16px; padding: 2px 4px; border-radius: 4px; opacity: 0.5; transition: opacity 0.15s; flex-shrink: 0; }
@@ -2230,8 +2247,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .modal-overlay.show { display: flex; }
 .modal { background: var(--bg2); border-radius: 10px; padding: 24px; width: 90%; max-width: 480px; box-shadow: var(--shadow-lg); }
 .modal h2 { font-size: 18px; margin-bottom: 16px; }
-.modal-input { width: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 14px; margin-bottom: 16px; outline: none; }
+.modal-input { width: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 14px; margin-bottom: 16px; outline: none; background: var(--bg); color: var(--ink); }
 .modal-input:focus { border-color: var(--accent); }
+.modal-input::placeholder { color: var(--muted); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0px; border-bottom: 1px solid var(--rule); gap: 12px; }
 .settings-item:last-child { border-bottom: none; }
@@ -2434,7 +2452,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .trae-success-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 400; line-height: 18px; color: var(--trae-text-default); user-select: none; }</style></head>
 <body>
 
-<div class="toast" id="toast">导出成功</div>
+<div class="toast" id="toast"></div>
 <div class="format-brush-indicator" id="formatBrushIndicator">🖌️ 格式刷已激活，选中目标文字应用（ESC取消）</div>
 <div class="mobile-overlay" id="mobileOverlay"></div>
 
@@ -2442,20 +2460,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   <!-- ========== 左侧片名栏 ========== -->
   <aside class="sidebar-left" id="sidebarLeft">
     <div class="sidebar-header">
-      <div class="sidebar-header-top">
-        <div>
-          <div class="sidebar-brand">xfy工作坊</div>
-          <div class="sidebar-version">v20260923-v6</div>
-        </div>
-        <button class="btn btn-primary" onclick="openNewFilmModal()">+ 新建</button>
-      </div>
+      <button class="btn btn-primary" onclick="openNewFilmModal()">+ 新建</button>
     </div>
     <div class="film-list" id="filmList">
     <div class="film-item active " data-film-id="mudbcdhbu7xg4w8di" draggable="true" ondragstart="handleFilmDragStart(event, 'mudbcdhbu7xg4w8di')" ondragover="handleFilmDragOver(event, 'mudbcdhbu7xg4w8di')" ondragleave="handleFilmDragLeave(event)" ondrop="handleFilmDrop(event, 'mudbcdhbu7xg4w8di')" ondragend="handleFilmDragEnd(event)" onclick="selectFilm('mudbcdhbu7xg4w8di')">
       <div class="film-item-left">
         <span class="film-number">1</span>
         
-        <span class="film-item-title">🎬 示例 - 肖申克的救赎</span>
+        <div class="film-item-info">
+          <div class="film-item-title">🎬 示例 - 肖申克的救赎</div>
+          <div class="film-duration film-duration-empty" onclick="event.stopPropagation();openRenameModal('mudbcdhbu7xg4w8di')" title="点击添加片长">+ 添加片长</div>
+        </div>
       </div>
       <div class="film-item-actions">
         <button class="btn-icon" onclick="event.stopPropagation();togglePinFilm('mudbcdhbu7xg4w8di')" title="置顶">📍</button>
@@ -2484,7 +2499,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
         <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
         <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
-        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">尚未保存</span>
+        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">上次保存: 07:40:42</span>
       </div>
     </div>
 
@@ -2554,7 +2569,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <div class="toolbar-group">
         <button class="toolbar-btn" onclick="execCmd('undo')" title="撤销">↶</button>
         <button class="toolbar-btn" onclick="execCmd('redo')" title="重做">↷</button>
-        <button class="toolbar-btn" onclick="openLapianSettings()" title="设置">⚙️</button>
       </div>
     </div>
 
@@ -2677,7 +2691,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
             <div class="stat-number" id="totalRows">4</div>
             <div class="stat-label">序号行数</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" style="cursor:pointer;" onclick="toggleCommentList()" title="点击查看评论列表">
             <div class="stat-number" id="totalComments">0</div>
             <div class="stat-label">评论数</div>
           </div>
@@ -2685,6 +2699,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
             <div class="stat-number" id="totalChars">162</div>
             <div class="stat-label">总字数</div>
           </div>
+        </div>
+        <div class="panel-section" id="commentListSection" style="display:none;">
+          <h3>💬 评论列表</h3>
+          <div id="commentsListContent"></div>
         </div>
         <div class="panel-section">
           <h3>📌 事件列表 <div class="event-view-toggle">
@@ -2764,8 +2782,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 <!-- 重命名模态框 -->
 <div class="modal-overlay" id="renameModal">
   <div class="modal">
-    <h2>重命名影片</h2>
+    <h2>影片信息</h2>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">影片名称</div>
     <input type="text" class="modal-input" id="renameInput" placeholder="请输入新名称" onkeydown="if(event.key==='Enter')confirmRename()">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">影片时长（如：120分钟）</div>
+    <input type="text" class="modal-input" id="renameDurationInput" placeholder="请输入影片时长" onkeydown="if(event.key==='Enter')confirmRename()">
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('renameModal')">取消</button>
       <button class="btn btn-primary" onclick="confirmRename()">确定</button>
@@ -2793,6 +2814,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <button class="btn btn-primary" style="justify-content:center;padding:12px;" onclick="exportAsPDF()">📋 PDF格式（打印另存）</button>
       <button class="btn btn-secondary" style="justify-content:center;padding:12px;" onclick="exportData()">💾 JSON数据备份</button>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:6px;">
+      <input type="checkbox" id="exportCurrentOnly" style="accent-color:var(--accent);cursor:pointer;">
+      <label for="exportCurrentOnly" style="font-size:13px;color:var(--ink);cursor:pointer;">仅导出当前影片</label>
+    </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
       Word/PDF导出包含：影片名称、序号行、事件统计、剧情梗概
     </div>
@@ -2807,7 +2832,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   <div class="modal" style="max-width:420px;">
     <h2>⚠️ 定期备份提醒</h2>
     <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;">
-      <p>您还从未导出过备份</p>
+      <p>距离上次导出备份已超过 <b style="color:var(--danger);">15 天</b>。</p>
       <p style="margin-top:8px;">为防止数据丢失，请导出一份备份文件保存到本地或云端。</p>
       <p style="margin-top:8px;color:var(--muted);font-size:12px;">建议：导出后可上传到网盘，确保数据安全。</p>
     </div>
@@ -2821,40 +2846,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   </div>
 </div>
 
-<!-- 拉片设置模态框 -->
-<div class="modal-overlay" id="lapianSettingsModal">
-  <div class="modal" style="max-width:420px;">
-    <h2>⚙️ 拉片设置</h2>
-    <div class="settings-item">
-      <div>
-        <div class="settings-label">15天强制导出提醒</div>
-        <div class="settings-desc">距离上次导出超过15天时提醒备份</div>
-      </div>
-      <div class="toggle-switch" id="toggleExportReminder" onclick="toggleExportReminderSetting()"></div>
-    </div>
-    <div class="settings-item">
-      <div>
-        <div class="settings-label">导出提醒间隔</div>
-        <div class="settings-desc" id="exportReminderDaysText">当前：15天</div>
-      </div>
-      <select class="settings-input" id="exportReminderDays" style="width:100px;" onchange="changeExportReminderDays()">
-        <option value="7">7天</option>
-        <option value="15" selected="">15天</option>
-        <option value="30">30天</option>
-        <option value="60">60天</option>
-      </select>
-    </div>
-    <div class="settings-item">
-      <div>
-        <div class="settings-label">距离上次导出</div>
-        <div class="settings-desc" id="lastExportInfo">从未导出</div>
-      </div>
-    </div>
-    <div class="modal-actions" style="margin-top:20px;">
-      <button class="btn btn-primary" onclick="closeModal('lapianSettingsModal')">确定</button>
-    </div>
-  </div>
-</div>
 
 <!-- 版本对比弹窗 -->
 <div class="modal-overlay" id="versionCompareModal" style="z-index:9999;">
@@ -2862,30 +2853,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
     <h2>📋 版本更新说明</h2>
     <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;max-height:400px;overflow-y:auto;">
       <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-light);border-radius:6px;">
-        <b style="color:var(--accent);">当前版本: 20260923-v6</b>
+        <b style="color:var(--accent);">当前版本: 20260925-v7</b>
       </div>
       <div style="margin-bottom:10px;">
         <b>🆕 新增功能</b>
         <ul style="margin:6px 0 0 20px;padding:0;">
-          <li>序号行可加入已有事件（新建事件/加入已有事件双模式）</li>
-          <li>台词默认关闭，点击展开显示</li>
-          <li>事件列表支持两种显示模式：按事件排序 / 按行号排序</li>
-          <li>版本号显示在左上角xfy工作坊下方</li>
-          <li>深色模式字体对比度优化</li>
-          <li>15天导出提醒可自定义间隔天数，可在设置中开关</li>
-          <li>事件颜色选择改为上下滑动形式，增加更多备选色</li>
-          <li>左侧影片列表增加序号显示</li>
-          <li>影片支持拖动排序</li>
-          <li>影片支持置顶功能</li>
-          <li>平板横屏模式适配优化</li>
+          <li>设置面板合并到整体页面右上角，导出提醒可开关并自定义间隔天数</li>
+          <li>版本号统一显示在左上角 XFY工作坊 下方</li>
+          <li>左侧影片新增片长信息，点击可编辑</li>
+          <li>导出支持"仅导出当前影片"</li>
+          <li>评论功能优化：光标停留在序号行即可添加评论</li>
+          <li>右侧点击评论数可展开评论列表，按行号顺序显示</li>
+          <li>事件颜色按互补色交错排布，相邻事件避免同色系</li>
+          <li>事件列表改为两行布局，事件名可换行完整显示</li>
+          <li>深色模式文字对比度大幅优化，新建事件文字清晰可读</li>
+          <li>标签"剧作-xfy的拉片笔记"更名为"拉片笔记-剧作"</li>
         </ul>
       </div>
       <div style="margin-bottom:10px;">
         <b>🔧 优化修复</b>
         <ul style="margin:6px 0 0 20px;padding:0;">
-          <li>修复事件名称输入时每输一个字就失去焦点</li>
-          <li>优化自动保存机制，追踪数据修改时间</li>
-          <li>版本号强制缓存刷新</li>
+          <li>修复导出时 notifyExported 未定义导致的错误</li>
+          <li>模态框输入框显式设置背景与文字色，确保深色模式可读</li>
+          <li>版本号强制缓存刷新至 v20260925-v7</li>
         </ul>
       </div>
     </div>
@@ -2958,31 +2948,23 @@ const highlightColors = [
   '#ffe599','#b6d7a8','#a4c2f4','#d9d2e9','#ea9999','#f9cb9c','#d0e0e3','#fff2cc'
 ];
 
-const eventColors = [
-  // 暖色系
-  '#fee2e2','#fecaca','#fca5a5','#f87171','#ef4444','#dc2626',
-  '#ffedd5','#fed7aa','#fdba74','#fb923c','#f97316','#ea580c',
-  '#fef3c7','#fde68a','#fcd34d','#fbbf24','#f59e0b','#d97706',
-  '#fef9c3','#fef08a','#fde047','#facc15','#eab308','#ca8a04',
-  // 绿色系
-  '#ecfccb','#d9f99d','#bef264','#a3e635','#84cc16','#65a30d',
-  '#dcfce7','#bbf7d0','#86efac','#4ade80','#22c55e','#16a34a',
-  '#d1fae5','#6ee7b7','#34d399','#10b981','#059669','#047857',
-  '#ccfbf1','#5eead4','#2dd4bf','#14b8a6','#0d9488','#0f766e',
-  // 蓝色系
-  '#cffafe','#67e8f9','#22d3ee','#06b6d4','#0891b2','#0e7490',
-  '#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb',
-  '#e0e7ff','#c7d2fe','#a5b4fc','#818cf8','#6366f1','#4f46e5',
-  // 紫色系
-  '#ede9fe','#ddd6fe','#c4b5fd','#a78bfa','#8b5cf6','#7c3aed',
-  '#f5f3ff','#ede9fe','#ddd6fe','#c4b5fd','#a78bfa','#8b5cf6',
-  // 粉色系
-  '#fdf2f8','#fce7f3','#fbcfe8','#f9a8d4','#ec4899','#db2777',
-  '#fdf4ff','#fae8ff','#f5d0fe','#f0abfc','#e879f9','#d946ef',
-  // 中性/灰色系
-  '#f3f4f6','#e5e7eb','#d1d5db','#9ca3af','#6b7280','#4b5563',
-  '#f0fdfa','#ccfbf1','#99f6e4','#5eead4','#2dd4bf','#14b8a6',
-];
+// 按互补色交错排布：相邻事件尽量使用不同色系
+const _warmColors = ['#fee2e2','#fecaca','#fca5a5','#f87171','#ef4444','#dc2626','#ffedd5','#fed7aa','#fdba74','#fb923c','#f97316','#ea580c','#fef3c7','#fde68a','#fcd34d','#fbbf24','#f59e0b','#d97706','#fef9c3','#fef08a','#fde047','#facc15','#eab308','#ca8a04'];
+const _greenColors = ['#ecfccb','#d9f99d','#bef264','#a3e635','#84cc16','#65a30d','#dcfce7','#bbf7d0','#86efac','#4ade80','#22c55e','#16a34a','#d1fae5','#6ee7b7','#34d399','#10b981','#059669','#047857','#ccfbf1','#5eead4','#2dd4bf','#14b8a6','#0d9488','#0f766e'];
+const _blueColors = ['#cffafe','#67e8f9','#22d3ee','#06b6d4','#0891b2','#0e7490','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#e0e7ff','#c7d2fe','#a5b4fc','#818cf8','#6366f1','#4f46e5'];
+const _purpleColors = ['#ede9fe','#ddd6fe','#c4b5fd','#a78bfa','#8b5cf6','#7c3aed','#f5f3ff','#ede9fe','#ddd6fe','#c4b5fd','#a78bfa','#8b5cf6'];
+const _pinkColors = ['#fdf2f8','#fce7f3','#fbcfe8','#f9a8d4','#ec4899','#db2777','#fdf4ff','#fae8ff','#f5d0fe','#f0abfc','#e879f9','#d946ef'];
+const _neutralColors = ['#f3f4f6','#e5e7eb','#d1d5db','#9ca3af','#6b7280','#4b5563','#f0fdfa','#ccfbf1','#99f6e4','#5eead4','#2dd4bf','#14b8a6'];
+
+const eventColors = (function() {
+  const families = [_warmColors, _blueColors, _greenColors, _purpleColors, _pinkColors, _neutralColors];
+  const maxLen = Math.max(...families.map(f => f.length));
+  const result = [];
+  for (let i = 0; i < maxLen; i++) {
+    families.forEach(fam => { if (fam[i]) result.push(fam[i]); });
+  }
+  return result;
+})();
 
 // ==================== 初始化 ====================
 function init() {
@@ -3021,10 +3003,10 @@ function init() {
   checkDataFreshness();
   // 首次加载此版本时显示更新说明
   var seenVersion = localStorage.getItem('xfy_seen_version');
-  if (seenVersion !== '20260923-v6') {
+  if (seenVersion !== '20260925-v7') {
     setTimeout(function() {
       document.getElementById('versionCompareModal').classList.add('show');
-      localStorage.setItem('xfy_seen_version', '20260923-v6');
+      localStorage.setItem('xfy_seen_version', '20260925-v7');
     }, 1000);
   }
   updateSaveStatus();
@@ -3060,6 +3042,7 @@ function initDefaultData() {
     films: [{
       id: id,
       name: '示例 - 肖申克的救赎',
+      duration: '142分钟',
       pinned: false,
       rows: [
         { id: generateId(), number: 1, startTime: '00:00:00', endTime: '00:05:30', content: '<p><strong>开场 - 法庭审判</strong></p><p>影片开场以法庭审判场景切入，通过安迪的面部特写与法官的全景镜头交替，建立起主人公被冤枉的核心冲突。</p>', eventId: null, comments: [] },
@@ -3108,7 +3091,10 @@ function renderFilmList() {
       <div class="film-item-left">
         <span class="film-number">${displayNum}</span>
         ${film.pinned ? '<span class="film-pin-icon">📌</span>' : ''}
-        <span class="film-item-title">🎬 ${film.name}</span>
+        <div class="film-item-info">
+          <div class="film-item-title">🎬 ${film.name}</div>
+          ${film.duration ? `<div class="film-duration" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="点击编辑片长">⏱ ${film.duration}</div>` : `<div class="film-duration film-duration-empty" onclick="event.stopPropagation();openRenameModal('${film.id}')" title="点击添加片长">+ 添加片长</div>`}
+        </div>
       </div>
       <div class="film-item-actions">
         <button class="btn-icon" onclick="event.stopPropagation();togglePinFilm('${film.id}')" title="${film.pinned ? '取消置顶' : '置顶'}">${film.pinned ? '📌' : '📍'}</button>
@@ -3245,6 +3231,7 @@ function createNewFilm() {
   const newFilm = {
     id: generateId(),
     name: name,
+    duration: '',
     pinned: false,
     rows: [{ id: generateId(), number: 1, startTime: '', endTime: '', content: '', eventId: null, comments: [] }],
     events: [],
@@ -3264,15 +3251,17 @@ function openRenameModal(filmId) {
   renameFilmId = filmId;
   const film = appData.films.find(f => f.id === filmId);
   document.getElementById('renameInput').value = film ? film.name : '';
+  document.getElementById('renameDurationInput').value = film ? (film.duration || '') : '';
   document.getElementById('renameModal').classList.add('show');
   document.getElementById('renameInput').focus();
 }
 
 function confirmRename() {
   const newName = document.getElementById('renameInput').value.trim();
+  const newDuration = document.getElementById('renameDurationInput').value.trim();
   if (!newName || !renameFilmId) return;
   const film = appData.films.find(f => f.id === renameFilmId);
-  if (film) { film.name = newName; saveData(); renderFilmList(); }
+  if (film) { film.name = newName; film.duration = newDuration; saveData(); renderFilmList(); }
   closeModal('renameModal');
 }
 
@@ -3854,12 +3843,16 @@ function renderEventList() {
 
       return `
         <div class="event-item-editable">
-          <span class="event-number">${idx + 1}</span>
-          <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
-          <input type="text" class="event-name-edit" value="${event.name}" oninput="updateEventName('${event.id}', this.value)" placeholder="事件名称">
-          <span class="event-rows-info">${rowText}</span>
-          <button class="event-jump-btn" onclick="jumpToEvent('${event.id}')" title="跳转到事件">↗</button>
-          <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
+          <div class="event-item-row1">
+            <span class="event-number">${idx + 1}</span>
+            <input type="color" class="event-color-input" value="${event.color}" onchange="updateEventColor('${event.id}', this.value)">
+            <input type="text" class="event-name-edit" value="${event.name}" oninput="updateEventName('${event.id}', this.value)" placeholder="事件名称">
+            <button class="event-jump-btn" onclick="jumpToEvent('${event.id}')" title="跳转到事件">↗</button>
+            <button class="event-delete-btn" onclick="deleteEvent('${event.id}')" title="删除事件">×</button>
+          </div>
+          <div class="event-item-row2">
+            <span class="event-rows-info">${rowText}</span>
+          </div>
         </div>
       `;
     }).join('');
@@ -3928,6 +3921,63 @@ function updateStats() {
 
   document.getElementById('totalComments').textContent = totalComments;
   document.getElementById('totalChars').textContent = totalChars.toLocaleString();
+
+  // 如果评论列表处于展开状态，刷新内容
+  const commentSection = document.getElementById('commentListSection');
+  if (commentSection && commentSection.style.display !== 'none') {
+    renderCommentsList();
+  }
+}
+
+// 切换评论列表显示
+function toggleCommentList() {
+  const section = document.getElementById('commentListSection');
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    renderCommentsList();
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+// 按序号行顺序渲染所有评论
+function renderCommentsList() {
+  const film = getCurrentFilm();
+  const container = document.getElementById('commentsListContent');
+  if (!film || !container) return;
+
+  const allComments = [];
+  film.rows.forEach(row => {
+    if (row.comments && row.comments.length > 0) {
+      row.comments.forEach(c => {
+        allComments.push({
+          rowNumber: row.number,
+          rowId: row.id,
+          text: c.text,
+          time: c.time,
+          markerId: c.markerId
+        });
+      });
+    }
+  });
+
+  if (allComments.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px;">暂无评论<br><span style="font-size:11px;">点击工具栏💬按钮添加评论</span></div>';
+    return;
+  }
+
+  // 按行号排序
+  allComments.sort((a, b) => a.rowNumber - b.rowNumber);
+
+  container.innerHTML = allComments.map(c => `
+    <div class="comment-item" style="cursor:pointer;" onclick="jumpToRow('${c.rowId}')">
+      <div class="comment-meta">
+        <span style="color:var(--accent);font-weight:600;">第 ${c.rowNumber} 行</span>
+        <span>${c.time ? new Date(c.time).toLocaleString() : ''}</span>
+      </div>
+      <div style="color:var(--ink);font-size:13px;line-height:1.6;word-break:break-word;">${c.text || ''}</div>
+    </div>
+  `).join('');
 }
 
 // ==================== 右侧面板管理 ====================
@@ -4076,6 +4126,14 @@ function saveCurrentRowContent() {
 }
 
 function handleEditorClick(e) {
+  // 记录当前点击的行ID
+  let node = e.target;
+  while (node && !node.classList?.contains('row-content')) {
+    node = node.parentNode;
+  }
+  if (node) {
+    currentCommentRowId = node.id.replace('editor-', '');
+  }
   if (e.target.classList.contains('comment-marker')) {
     e.stopPropagation();
     showCommentModal(e.target.getAttribute('data-comment-id'));
@@ -4150,43 +4208,85 @@ function checkFormatBrush(e) {
 // ==================== 评论 ====================
 function addComment() {
   const sel = window.getSelection();
-  if (sel.rangeCount === 0 || sel.isCollapsed) {
-    showToast('请先选中要添加评论的文字');
-    return;
+  let rowId = null;
+  let commentId = null;
+  let isRowComment = false;
+
+  // 尝试从选区获取行
+  if (sel.rangeCount > 0 && !sel.isCollapsed) {
+    let node = sel.anchorNode;
+    let editor = null;
+    while (node) {
+      if (node.classList?.contains('row-content')) { editor = node; break; }
+      node = node.parentNode;
+    }
+    if (editor) {
+      rowId = editor.id.replace('editor-', '');
+      const range = sel.getRangeAt(0);
+      const text = range.toString();
+      if (text.trim()) {
+        commentId = 'c_' + generateId();
+        const marker = document.createElement('span');
+        marker.className = 'comment-marker';
+        marker.setAttribute('data-comment-id', commentId);
+        marker.innerHTML = text + '<span class="comment-bubble">点击查看评论</span>';
+        range.deleteContents();
+        range.insertNode(marker);
+
+        const film = getCurrentFilm();
+        const row = film.rows.find(r => r.id === rowId);
+        if (row) {
+          row.comments = row.comments || [];
+          row.content = editor.innerHTML;
+          saveData();
+        }
+      }
+    }
   }
-  let node = sel.anchorNode;
-  let editor = null;
-  while (node) {
-    if (node.classList?.contains('row-content')) { editor = node; break; }
-    node = node.parentNode;
-  }
-  if (!editor) { showToast('请在编辑区内选择文字'); return; }
 
-  const rowId = editor.id.replace('editor-', '');
-  const commentId = 'c_' + generateId();
-  const range = sel.getRangeAt(0);
-  const text = range.toString();
-  if (!text.trim()) { showToast('请选中要添加评论的文字'); return; }
-
-  const marker = document.createElement('span');
-  marker.className = 'comment-marker';
-  marker.setAttribute('data-comment-id', commentId);
-  marker.innerHTML = text + '<span class="comment-bubble">点击查看评论</span>';
-  range.deleteContents();
-  range.insertNode(marker);
-
-  const film = getCurrentFilm();
-  const row = film.rows.find(r => r.id === rowId);
-  if (row) {
-    row.comments = row.comments || [];
-    row.content = editor.innerHTML;
-    saveData();
+  // 如果没有选中文本或选中文本为空，尝试添加整行评论
+  if (!commentId) {
+    // 使用当前点击的行
+    rowId = currentCommentRowId;
+    if (!rowId) {
+      // 如果没有当前行，尝试从选区获取
+      if (sel.rangeCount > 0) {
+        let node = sel.anchorNode;
+        let editor = null;
+        while (node) {
+          if (node.classList?.contains('row-content')) { editor = node; break; }
+          node = node.parentNode;
+        }
+        if (editor) {
+          rowId = editor.id.replace('editor-', '');
+        }
+      }
+    }
+    if (!rowId) {
+      showToast('请先点击要添加评论的行，或选中文字');
+      return;
+    }
+    isRowComment = true;
+    commentId = 'row_' + rowId;
   }
 
   currentCommentRowId = rowId;
   currentCommentMarkerId = commentId;
   document.getElementById('commentTextarea').value = '';
-  renderCommentList([]);
+
+  // 加载已有评论
+  const film = getCurrentFilm();
+  const row = film.rows.find(r => r.id === rowId);
+  const existingComments = row && row.comments ? row.comments.filter(c => c.markerId === commentId) : [];
+  renderCommentList(existingComments);
+
+  // 修改模态框标题
+  const modal = document.getElementById('commentModal');
+  const titleEl = modal.querySelector('h2');
+  if (titleEl) {
+    titleEl.textContent = isRowComment ? '💬 行评论' : '💬 评论';
+  }
+
   document.getElementById('commentModal').classList.add('show');
   document.getElementById('commentTextarea').focus();
 }
@@ -4348,7 +4448,10 @@ function generateExportHTML() {
   var html = '';
   html += '<h1 style="font-size:24px;text-align:center;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:32px;">XFY工作坊 - 拉片笔记导出</h1>';
 
-  appData.films.forEach(function(film, idx) {
+  var currentOnly = document.getElementById('exportCurrentOnly') && document.getElementById('exportCurrentOnly').checked;
+  var filmsToExport = currentOnly ? [getCurrentFilm()].filter(Boolean) : appData.films;
+
+  filmsToExport.forEach(function(film, idx) {
     html += '<h2 style="font-size:20px;color:#4f46e5;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-top:' + (idx > 0 ? '40px' : '0') + ';">🎬 ' + escapeHtml(film.name) + '</h2>';
 
     if (film.rows && film.rows.length > 0) {
@@ -4431,7 +4534,9 @@ function exportAsWord() {
   a.download = '拉片笔记_' + new Date().toLocaleDateString() + '.doc';
   a.click();
   URL.revokeObjectURL(url);
+  localStorage.setItem('xfy_last_export_time', String(Date.now()));
   showToast('Word文档导出成功');
+  notifyExported();
 }
 
 function exportAsPDF() {
@@ -4454,22 +4559,48 @@ function exportAsPDF() {
   printWin.document.write('</body></html>');
   printWin.document.close();
   setTimeout(function() { printWin.print(); }, 500);
+  localStorage.setItem('xfy_last_export_time', String(Date.now()));
   showToast('正在打开打印窗口，可另存为PDF');
+  notifyExported();
 }
 
 function exportData() {
   closeModal('exportFormatModal');
   closeModal('exportReminderModal');
-  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  var currentOnly = document.getElementById('exportCurrentOnly') && document.getElementById('exportCurrentOnly').checked;
+  var dataToExport = appData;
+  if (currentOnly) {
+    var film = getCurrentFilm();
+    if (film) {
+      dataToExport = {
+        films: [JSON.parse(JSON.stringify(film))],
+        currentFilmId: film.id
+      };
+    }
+  }
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `拉片数据_${new Date().toLocaleDateString()}.json`;
+  var filmName = '';
+  if (currentOnly) {
+    var curFilm = getCurrentFilm();
+    filmName = curFilm ? (curFilm.name + '_') : '';
+  }
+  a.download = `拉片数据_${filmName}${new Date().toLocaleDateString()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   // 记录上次导出时间
   localStorage.setItem('xfy_last_export_time', String(Date.now()));
   showToast('导出成功');
+  notifyExported();
+}
+
+// 通知父页面已导出，更新设置面板中的上次导出时间
+function notifyExported() {
+  try {
+    window.parent.postMessage({ type: 'exported' }, '*');
+  } catch(e) {}
 }
 
 // ==================== 强制导出提醒 ====================
@@ -4549,42 +4680,23 @@ function snoozeExportReminder() {
 }
 
 // ==================== 拉片设置 ====================
+// 设置已合并到整体页面右上角的设置面板
 function openLapianSettings() {
-  // 更新设置状态
-  const toggle = document.getElementById('toggleExportReminder');
-  toggle.classList.toggle('on', isExportReminderEnabled());
-  
-  const daysSelect = document.getElementById('exportReminderDays');
-  daysSelect.value = getExportReminderDays();
-  document.getElementById('exportReminderDaysText').textContent = `当前：${getExportReminderDays()}天`;
-  
-  // 更新上次导出信息
-  const lastExport = parseInt(localStorage.getItem(LAST_EXPORT_KEY) || '0');
-  const infoEl = document.getElementById('lastExportInfo');
-  if (lastExport === 0) {
-    infoEl.textContent = '从未导出';
-  } else {
-    const daysPassed = Math.floor((Date.now() - lastExport) / (24 * 60 * 60 * 1000));
-    const date = new Date(lastExport);
-    infoEl.textContent = `${daysPassed} 天前（${date.toLocaleDateString()}）`;
+  try {
+    window.parent.postMessage({ type: 'openSettings' }, '*');
+  } catch(e) {
+    showToast('设置面板在主页面中');
   }
-  
-  document.getElementById('lapianSettingsModal').classList.add('show');
 }
 
-function toggleExportReminderSetting() {
-  const toggle = document.getElementById('toggleExportReminder');
-  const isOn = toggle.classList.toggle('on');
-  localStorage.setItem(EXPORT_REMINDER_KEY, isOn ? 'true' : 'false');
-  showToast(isOn ? '导出提醒已开启' : '导出提醒已关闭');
-}
-
-function changeExportReminderDays() {
-  const days = document.getElementById('exportReminderDays').value;
-  localStorage.setItem(EXPORT_REMINDER_DAYS_KEY, days);
-  document.getElementById('exportReminderDaysText').textContent = `当前：${days}天`;
-  showToast(`导出提醒间隔已设为${days}天`);
-}
+// 监听来自父页面的设置变更消息
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'exportReminderChanged') {
+    // 父页面已更新 localStorage，无需额外操作
+  } else if (e.data && e.data.type === 'exportReminderDaysChanged') {
+    // 父页面已更新 localStorage
+  }
+});
 
 function importData(event) {
   const file = event.target.files[0];
@@ -4941,13 +5053,16 @@ function applyPageTheme() {
   var mode = localStorage.getItem('xfy_theme_mode') || 'light';
   var root = document.documentElement;
   if (mode === 'dark') {
-    root.style.setProperty('--bg', '#0a0e1a');
-    root.style.setProperty('--bg2', '#1c2333');
-    root.style.setProperty('--bg3', '#131826');
-    root.style.setProperty('--ink', '#e8edf5');
-    root.style.setProperty('--muted', '#8a96b0');
-    root.style.setProperty('--rule', '#2a3344');
-    root.style.setProperty('--glass', 'rgba(28,35,51,0.55)');
+    root.style.setProperty('--bg', '#0f1419');
+    root.style.setProperty('--bg2', '#1a1f2e');
+    root.style.setProperty('--bg3', '#242b3d');
+    root.style.setProperty('--ink', '#f0f2f5');
+    root.style.setProperty('--muted', '#9ca3af');
+    root.style.setProperty('--rule', '#374151');
+    root.style.setProperty('--accent', '#818cf8');
+    root.style.setProperty('--accent2', '#22d3ee');
+    root.style.setProperty('--accent-light', 'rgba(129, 140, 248, 0.2)');
+    root.style.setProperty('--glass', 'rgba(26, 31, 46, 0.85)');
   } else {
     root.style.setProperty('--bg', '#f5f6f8');
     root.style.setProperty('--bg2', '#ffffff');
@@ -4955,6 +5070,9 @@ function applyPageTheme() {
     root.style.setProperty('--ink', '#1a1a2e');
     root.style.setProperty('--muted', '#6b7280');
     root.style.setProperty('--rule', '#e5e7eb');
+    root.style.setProperty('--accent', '#4f46e5');
+    root.style.setProperty('--accent2', '#06b6d4');
+    root.style.setProperty('--accent-light', '#eef2ff');
     root.style.setProperty('--glass', 'rgba(255,255,255,0.75)');
   }
 }
