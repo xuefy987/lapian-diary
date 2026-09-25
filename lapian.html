@@ -5,7 +5,7 @@
 <script>
 // 强制版本检测：如果URL中没有版本参数，自动添加并刷新
 (function(){
-  var REQUIRED_VERSION = '20260925-v7';
+  var REQUIRED_VERSION = '20260926-v8';
   var url = new URL(window.location.href);
   var currentV = url.searchParams.get('v');
   if (currentV !== REQUIRED_VERSION) {
@@ -256,6 +256,209 @@
     flex-direction: column;
     min-width: 0;
     background: var(--bg);
+  }
+
+  /* ========== 剧本画布 ========== */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+    background: var(--bg);
+  }
+  .canvas-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .canvas-viewport {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 15%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .canvas-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3000px;
+    height: 2000px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .canvas-svg path.conn-path {
+    pointer-events: stroke;
+    cursor: pointer;
+  }
+  .canvas-svg path.conn-path.selected {
+    stroke: var(--danger) !important;
+    stroke-width: 3 !important;
+  }
+  .canvas-nodes-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3000px;
+    height: 2000px;
+    z-index: 2;
+  }
+  .canvas-node {
+    position: absolute;
+    min-width: 120px;
+    max-width: 220px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow);
+    cursor: grab;
+    user-select: none;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .canvas-node:active { cursor: grabbing; }
+  .canvas-node.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .canvas-node-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    word-break: break-word;
+    outline: none;
+    min-height: 18px;
+  }
+  .canvas-node-name[contenteditable="true"] {
+    background: rgba(255,255,255,0.85);
+    color: #1a1a2e !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+    cursor: text;
+  }
+  .canvas-node-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .canvas-node:hover .canvas-node-actions { opacity: 1; }
+  .canvas-node-actions button {
+    background: rgba(255,255,255,0.7);
+    border: none;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    color: #1a1a2e;
+  }
+  .canvas-node-actions button:hover { background: rgba(255,255,255,0.95); }
+  .canvas-port {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--bg2);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    cursor: crosshair;
+    z-index: 3;
+  }
+  .canvas-port:hover { background: var(--accent); }
+  .canvas-port.top { top: -6px; left: 50%; transform: translateX(-50%); }
+  .canvas-port.bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
+  .canvas-port.left { left: -6px; top: 50%; transform: translateY(-50%); }
+  .canvas-port.right { right: -6px; top: 50%; transform: translateY(-50%); }
+  .conn-label {
+    position: absolute;
+    background: var(--bg2);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    z-index: 4;
+  }
+  .conn-label.selected { border-color: var(--accent); }
+  /* 画布右侧面板 */
+  .canvas-side-panels {
+    position: absolute;
+    top: 50px;
+    right: 12px;
+    width: 220px;
+    max-height: calc(100% - 70px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .canvas-panel {
+    background: var(--bg2);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    max-height: 50%;
+    pointer-events: auto;
+  }
+  .canvas-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .canvas-panel-body {
+    padding: 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .canvas-item {
+    background: var(--bg3);
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .canvas-item-name {
+    font-weight: 600;
+    color: var(--ink);
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .canvas-item-desc {
+    color: var(--muted);
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 11px;
+    resize: none;
+    min-height: 28px;
+  }
+  .canvas-item-del {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
   }
 
   .main-header {
@@ -2141,6 +2344,39 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .film-item:hover .film-item-actions { display: flex; }
 .film-item .btn-icon { padding: 2px 4px; font-size: 12px; }
 .main-content { flex: 1 1 0%; display: flex; flex-direction: column; min-width: 0px; background: var(--bg); }
+.canvas-area { flex: 1 1 0%; display: flex; flex-direction: column; min-height: 0px; position: relative; background: var(--bg); }
+.canvas-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg2); border-bottom: 1px solid var(--rule); flex-shrink: 0; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.canvas-viewport { flex: 1 1 0%; position: relative; overflow: auto; background-color: var(--bg); background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 15%, transparent) 1px, transparent 1px); background-size: 24px 24px; }
+.canvas-svg { position: absolute; top: 0px; left: 0px; width: 3000px; height: 2000px; pointer-events: none; z-index: 1; }
+.canvas-svg path.conn-path { pointer-events: stroke; cursor: pointer; }
+.canvas-svg path.conn-path.selected { stroke: var(--danger) !important; stroke-width: 3 !important; }
+.canvas-nodes-layer { position: absolute; top: 0px; left: 0px; width: 3000px; height: 2000px; z-index: 2; }
+.canvas-node { position: absolute; min-width: 120px; max-width: 220px; border-radius: 10px; padding: 10px 12px; box-shadow: var(--shadow); cursor: grab; user-select: none; border: 2px solid transparent; transition: border-color 0.15s, box-shadow 0.15s; }
+.canvas-node:active { cursor: grabbing; }
+.canvas-node.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+.canvas-node-name { font-size: 13px; font-weight: 600; line-height: 1.4; word-break: break-word; outline: none; min-height: 18px; }
+.canvas-node-name[contenteditable="true"] { background: rgba(255, 255, 255, 0.85); border-radius: 4px; padding: 2px 4px; cursor: text; color: rgb(26, 26, 46) !important; }
+.canvas-node-actions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.15s; }
+.canvas-node:hover .canvas-node-actions { opacity: 1; }
+.canvas-node-actions button { background: rgba(255, 255, 255, 0.7); border: none; border-radius: 4px; width: 22px; height: 22px; cursor: pointer; font-size: 12px; line-height: 1; color: rgb(26, 26, 46); }
+.canvas-node-actions button:hover { background: rgba(255, 255, 255, 0.95); }
+.canvas-port { position: absolute; width: 12px; height: 12px; background: var(--bg2); border: 2px solid var(--accent); border-radius: 50%; cursor: crosshair; z-index: 3; }
+.canvas-port:hover { background: var(--accent); }
+.canvas-port.top { top: -6px; left: 50%; transform: translateX(-50%); }
+.canvas-port.bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
+.canvas-port.left { left: -6px; top: 50%; transform: translateY(-50%); }
+.canvas-port.right { right: -6px; top: 50%; transform: translateY(-50%); }
+.conn-label { position: absolute; background: var(--bg2); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; padding: 2px 8px; font-size: 11px; cursor: pointer; transform: translate(-50%, -50%); white-space: nowrap; z-index: 4; }
+.conn-label.selected { border-color: var(--accent); }
+.canvas-side-panels { position: absolute; top: 50px; right: 12px; width: 220px; max-height: calc(100% - 70px); display: flex; flex-direction: column; gap: 10px; z-index: 10; pointer-events: none; }
+.canvas-panel { background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; max-height: 50%; pointer-events: auto; }
+.canvas-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--rule); font-weight: 600; font-size: 13px; }
+.canvas-panel-body { padding: 8px; overflow-y: auto; flex: 1 1 0%; }
+.canvas-item { background: var(--bg3); border-radius: 6px; padding: 8px; margin-bottom: 6px; font-size: 12px; }
+.canvas-item-name { font-weight: 600; color: var(--ink); border: none; background: transparent; width: 100%; outline: none; font-size: 13px; margin-bottom: 4px; }
+.canvas-item-desc { color: var(--muted); border: none; background: transparent; width: 100%; outline: none; font-size: 11px; resize: none; min-height: 28px; }
+.canvas-item-del { float: right; background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; line-height: 1; }
 .main-header { padding: 12px 20px; background: var(--bg2); border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .film-title-input { font-size: 18px; font-weight: 600; border: none; outline: none; background: transparent; color: var(--ink); width: 100%; max-width: 400px; }
 .film-title-input:focus { border-bottom: 2px solid var(--accent); }
@@ -2492,6 +2728,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
         <button class="btn-icon mobile-menu-btn" onclick="toggleRightSidebar()">📊 面板</button>
+        <button class="btn btn-secondary" id="canvasToggleBtn" onclick="toggleCanvasMode()">🎬 画布</button>
         <button class="btn btn-secondary" onclick="document.getElementById('wpsFile').click()">📄 导入WPS</button>
         <input type="file" id="wpsFile" style="display: none;" accept=".docx,.doc,.txt" onchange="importWPSDocument(event)">
         <button class="btn btn-primary" onclick="manualSave()">💾 保存</button>
@@ -2499,7 +2736,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
         <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
         <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
-        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">上次保存: 07:40:42</span>
+        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">上次保存: 00:37:18</span>
       </div>
     </div>
 
@@ -2654,6 +2891,46 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <div class="row-dialogue-content" contenteditable="true" data-row-id="mudbcdhc9r513lu7s" oninput="saveDialogueContent('mudbcdhc9r513lu7s')" onkeydown="if(event.key==='Enter'&amp;&amp;!event.shiftKey){event.preventDefault();document.getElementById('editor-mudbcdhc9r513lu7s').focus();}"></div>
     </div>
   </div></div></div>
+
+    <!-- 剧本画布区 -->
+    <div class="canvas-area" id="canvasArea" style="display:none;">
+      <div class="canvas-toolbar">
+        <span style="font-size:12px;color:var(--muted);">💡 拖动框移动 · 双击框改名 · 拖动连接点连线 · 空白处画圆新增事件</span>
+        <div style="flex:1;"></div>
+        <button class="btn btn-secondary btn-sm" onclick="canvasAutoLayout()">↻ 自动布局</button>
+        <button class="btn btn-secondary btn-sm" onclick="canvasClearAll()">🗑 清空画布</button>
+      </div>
+      <div class="canvas-viewport" id="canvasViewport">
+        <svg class="canvas-svg" id="canvasSvg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="var(--ink)"></polygon>
+            </marker>
+          </defs>
+          <g id="canvasConnectionsLayer"></g>
+          <path id="canvasTempPath" d="" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 4" style="pointer-events:none;display:none;"></path>
+          <path id="canvasFreehandPath" d="" fill="none" stroke="var(--accent2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;display:none;"></path>
+        </svg>
+        <div class="canvas-nodes-layer" id="canvasNodesLayer"></div>
+      </div>
+      <!-- 画布右侧：角色栏 + 线索栏 -->
+      <div class="canvas-side-panels" id="canvasSidePanels">
+        <div class="canvas-panel">
+          <div class="canvas-panel-header">
+            <span>👥 角色</span>
+            <button class="btn-icon btn-sm" onclick="addCanvasCharacter()" title="新增角色">+</button>
+          </div>
+          <div class="canvas-panel-body" id="canvasCharactersList"></div>
+        </div>
+        <div class="canvas-panel">
+          <div class="canvas-panel-header">
+            <span>🔍 线索</span>
+            <button class="btn-icon btn-sm" onclick="addCanvasClue()" title="新增线索">+</button>
+          </div>
+          <div class="canvas-panel-body" id="canvasCluesList"></div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <div class="resizer" id="resizerRight"></div>
@@ -2853,29 +3130,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
     <h2>📋 版本更新说明</h2>
     <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;max-height:400px;overflow-y:auto;">
       <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-light);border-radius:6px;">
-        <b style="color:var(--accent);">当前版本: 20260925-v7</b>
+        <b style="color:var(--accent);">当前版本: 20260926-v8</b>
       </div>
       <div style="margin-bottom:10px;">
         <b>🆕 新增功能</b>
         <ul style="margin:6px 0 0 20px;padding:0;">
-          <li>设置面板合并到整体页面右上角，导出提醒可开关并自定义间隔天数</li>
-          <li>版本号统一显示在左上角 XFY工作坊 下方</li>
-          <li>左侧影片新增片长信息，点击可编辑</li>
-          <li>导出支持"仅导出当前影片"</li>
-          <li>评论功能优化：光标停留在序号行即可添加评论</li>
-          <li>右侧点击评论数可展开评论列表，按行号顺序显示</li>
-          <li>事件颜色按互补色交错排布，相邻事件避免同色系</li>
-          <li>事件列表改为两行布局，事件名可换行完整显示</li>
-          <li>深色模式文字对比度大幅优化，新建事件文字清晰可读</li>
-          <li>标签"剧作-xfy的拉片笔记"更名为"拉片笔记-剧作"</li>
+          <li>新增「剧本画布」视图：点击顶部「🎬 画布」按钮切换</li>
+          <li>画布自动从原事件栏生成事件框（复制名称与背景色）</li>
+          <li>画布事件框与原事件栏单向独立：画布修改不影响原事件栏</li>
+          <li>画布空白处画闭合圆可新增空白事件框</li>
+          <li>事件框支持拖动、双击改名、改色、删除</li>
+          <li>事件框四边连接点可拖拽创建关系线，线可加备注、可删除</li>
+          <li>画布右侧常驻「角色栏」与「线索栏」，可增删改并持久化</li>
+          <li>画布模式隐藏正文序号行与文本工具栏，保留事件列表</li>
         </ul>
       </div>
       <div style="margin-bottom:10px;">
         <b>🔧 优化修复</b>
         <ul style="margin:6px 0 0 20px;padding:0;">
-          <li>修复导出时 notifyExported 未定义导致的错误</li>
-          <li>模态框输入框显式设置背景与文字色，确保深色模式可读</li>
-          <li>版本号强制缓存刷新至 v20260925-v7</li>
+          <li>版本号强制缓存刷新至 v20260926-v8</li>
+          <li>画布使用 CSS 变量，深色模式下自动适配</li>
         </ul>
       </div>
     </div>
@@ -2970,6 +3244,7 @@ const eventColors = (function() {
 function init() {
   loadData();
   initColorPickers();
+  initCanvasFreehand();
   initResizers();
   restoreLayoutPrefs();
   renderFilmList();
@@ -3003,10 +3278,10 @@ function init() {
   checkDataFreshness();
   // 首次加载此版本时显示更新说明
   var seenVersion = localStorage.getItem('xfy_seen_version');
-  if (seenVersion !== '20260925-v7') {
+  if (seenVersion !== '20260926-v8') {
     setTimeout(function() {
       document.getElementById('versionCompareModal').classList.add('show');
-      localStorage.setItem('xfy_seen_version', '20260925-v7');
+      localStorage.setItem('xfy_seen_version', '20260926-v8');
     }, 1000);
   }
   updateSaveStatus();
@@ -3193,6 +3468,14 @@ function selectFilm(filmId) {
   appData.currentFilmId = filmId;
   saveData();
   renderFilmList();
+  if (canvasMode) {
+    const film = getCanvasFilm();
+    if (film && film.canvasEvents.length === 0 && film.events && film.events.length > 0) {
+      generateCanvasFromEvents();
+    }
+    renderCanvas();
+    renderCanvasSidePanels();
+  }
   if (window.innerWidth <= 1024) {
     document.getElementById('sidebarLeft').classList.remove('open');
     document.getElementById('mobileOverlay').classList.remove('show');
@@ -5076,6 +5359,549 @@ function applyPageTheme() {
     root.style.setProperty('--glass', 'rgba(255,255,255,0.75)');
   }
 }
+
+// ==================== 剧本画布 ====================
+let canvasMode = false;
+let canvasDragState = null;       // 拖动节点 {nodeId, startX, startY, origX, origY}
+let canvasConnDragState = null;   // 拖动连线 {fromId, fromSide}
+let canvasFreehandState = null;   // 手绘状态 {points:[]}
+let canvasSelectedConnId = null;
+
+function getCanvasFilm() {
+  const f = getCurrentFilm();
+  if (!f) return null;
+  if (!f.canvasEvents) f.canvasEvents = [];
+  if (!f.canvasConnections) f.canvasConnections = [];
+  if (!f.canvasCharacters) f.canvasCharacters = [];
+  if (!f.canvasClues) f.canvasClues = [];
+  return f;
+}
+
+function toggleCanvasMode() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  canvasMode = !canvasMode;
+  const btn = document.getElementById('canvasToggleBtn');
+  const toolbar = document.querySelector('.toolbar');
+  const lapianContent = document.getElementById('lapianContent');
+  const canvasArea = document.getElementById('canvasArea');
+  if (canvasMode) {
+    btn.textContent = '📝 正文';
+    if (toolbar) toolbar.style.display = 'none';
+    lapianContent.style.display = 'none';
+    canvasArea.style.display = 'flex';
+    // 首次进入且画布为空时，从原事件栏单向复制生成
+    if (film.canvasEvents.length === 0 && film.events && film.events.length > 0) {
+      generateCanvasFromEvents();
+    }
+    renderCanvas();
+    renderCanvasSidePanels();
+  } else {
+    btn.textContent = '🎬 画布';
+    if (toolbar) toolbar.style.display = '';
+    lapianContent.style.display = '';
+    canvasArea.style.display = 'none';
+  }
+}
+
+// 从原事件栏单向复制生成画布事件框（不绑定原事件 id）
+function generateCanvasFromEvents() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  film.canvasEvents = film.events.map((ev, idx) => ({
+    id: generateId(),
+    name: ev.name,
+    color: ev.color,
+    x: 80 + (idx % 4) * 280,
+    y: 80 + Math.floor(idx / 4) * 160
+  }));
+  saveData();
+}
+
+function canvasAutoLayout() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  const cols = Math.ceil(Math.sqrt(film.canvasEvents.length)) || 1;
+  film.canvasEvents.forEach((ev, idx) => {
+    ev.x = 80 + (idx % cols) * 280;
+    ev.y = 80 + Math.floor(idx / cols) * 160;
+  });
+  saveData();
+  renderCanvas();
+}
+
+function canvasClearAll() {
+  if (!confirm('确定清空画布所有事件框与连线？（不影响原事件栏）')) return;
+  const film = getCanvasFilm();
+  if (!film) return;
+  film.canvasEvents = [];
+  film.canvasConnections = [];
+  saveData();
+  renderCanvas();
+}
+
+function renderCanvas() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  const nodesLayer = document.getElementById('canvasNodesLayer');
+  const connLayer = document.getElementById('canvasConnectionsLayer');
+
+  // 渲染连线
+  connLayer.innerHTML = '';
+  film.canvasConnections.forEach(conn => {
+    const from = film.canvasEvents.find(e => e.id === conn.fromId);
+    const to = film.canvasEvents.find(e => e.id === conn.toId);
+    if (!from || !to) return;
+    const fromPt = getNodeCenter(from);
+    const toPt = getNodeCenter(to);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const dx = toPt.x - fromPt.x;
+    const d = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx/2} ${fromPt.y}, ${toPt.x - dx/2} ${toPt.y}, ${toPt.x} ${toPt.y}`;
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'conn-path' + (canvasSelectedConnId === conn.id ? ' selected' : ''));
+    path.setAttribute('stroke', canvasSelectedConnId === conn.id ? 'var(--danger)' : 'var(--ink)');
+    path.setAttribute('stroke-width', canvasSelectedConnId === conn.id ? '3' : '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    path.style.opacity = '0.7';
+    path.addEventListener('click', (e) => {
+      e.stopPropagation();
+      canvasSelectedConnId = conn.id;
+      renderCanvas();
+    });
+    path.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      const label = prompt('输入关系线备注：', conn.label || '');
+      if (label !== null) {
+        conn.label = label;
+        saveData();
+        renderCanvas();
+      }
+    });
+    connLayer.appendChild(path);
+  });
+
+  // 渲染节点
+  nodesLayer.innerHTML = '';
+  film.canvasEvents.forEach(ev => {
+    const node = document.createElement('div');
+    node.className = 'canvas-node';
+    node.style.left = ev.x + 'px';
+    node.style.top = ev.y + 'px';
+    node.style.background = ev.color;
+    node.style.color = getContrastColor(ev.color);
+    node.dataset.id = ev.id;
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'canvas-node-name';
+    nameEl.textContent = ev.name || '（未命名事件）';
+    nameEl.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      nameEl.contentEditable = 'true';
+      nameEl.focus();
+      const range = document.createRange();
+      range.selectNodeContents(nameEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+    nameEl.addEventListener('blur', () => {
+      nameEl.contentEditable = 'false';
+      const newName = nameEl.textContent.trim();
+      if (newName !== ev.name) {
+        ev.name = newName;
+        saveData();
+      }
+    });
+    nameEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'canvas-node-actions';
+    const colorBtn = document.createElement('button');
+    colorBtn.title = '改色';
+    colorBtn.innerHTML = '🎨';
+    colorBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.value = ev.color;
+      input.addEventListener('input', () => {
+        ev.color = input.value;
+        node.style.background = ev.color;
+        node.style.color = getContrastColor(ev.color);
+      });
+      input.addEventListener('change', () => { saveData(); renderCanvas(); });
+      input.click();
+    });
+    const delBtn = document.createElement('button');
+    delBtn.title = '删除';
+    delBtn.innerHTML = '🗑';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('删除此事件框？（不影响原事件栏）')) {
+        deleteCanvasEvent(ev.id);
+      }
+    });
+    actions.appendChild(colorBtn);
+    actions.appendChild(delBtn);
+
+    // 四个连接点
+    ['top', 'bottom', 'left', 'right'].forEach(side => {
+      const port = document.createElement('div');
+      port.className = 'canvas-port ' + side;
+      port.addEventListener('mousedown', (e) => startConnDrag(e, ev.id, side));
+      port.addEventListener('touchstart', (e) => startConnDrag(e, ev.id, side), { passive: false });
+      node.appendChild(port);
+    });
+
+    node.appendChild(nameEl);
+    node.appendChild(actions);
+
+    // 节点拖动
+    node.addEventListener('mousedown', (e) => startNodeDrag(e, ev.id));
+    node.addEventListener('touchstart', (e) => startNodeDrag(e, ev.id), { passive: false });
+
+    nodesLayer.appendChild(node);
+  });
+
+  // 渲染连线标签
+  document.querySelectorAll('.conn-label').forEach(l => l.remove());
+  film.canvasConnections.forEach(conn => {
+    if (!conn.label) return;
+    const from = film.canvasEvents.find(e => e.id === conn.fromId);
+    const to = film.canvasEvents.find(e => e.id === conn.toId);
+    if (!from || !to) return;
+    const fromPt = getNodeCenter(from);
+    const toPt = getNodeCenter(to);
+    const mid = { x: (fromPt.x + toPt.x) / 2, y: (fromPt.y + toPt.y) / 2 };
+    const lbl = document.createElement('div');
+    lbl.className = 'conn-label';
+    lbl.style.left = mid.x + 'px';
+    lbl.style.top = mid.y + 'px';
+    lbl.textContent = conn.label;
+    lbl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      canvasSelectedConnId = conn.id;
+      renderCanvas();
+    });
+    lbl.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      const label = prompt('输入关系线备注：', conn.label || '');
+      if (label !== null) { conn.label = label; saveData(); renderCanvas(); }
+    });
+    nodesLayer.appendChild(lbl);
+  });
+
+  // 键盘删除选中连线
+  if (canvasSelectedConnId) {
+    // 提示可删除
+  }
+}
+
+function getNodeCenter(ev) {
+  // 粗略用节点中心（节点宽高约 160x60）
+  return { x: ev.x + 80, y: ev.y + 30 };
+}
+
+function deleteCanvasEvent(id) {
+  const film = getCanvasFilm();
+  if (!film) return;
+  film.canvasEvents = film.canvasEvents.filter(e => e.id !== id);
+  film.canvasConnections = film.canvasConnections.filter(c => c.fromId !== id && c.toId !== id);
+  saveData();
+  renderCanvas();
+}
+
+// 节点拖动
+function startNodeDrag(e, nodeId) {
+  if (e.target.classList.contains('canvas-node-name') && e.target.contentEditable === 'true') return;
+  if (e.target.closest('.canvas-port') || e.target.closest('.canvas-node-actions')) return;
+  e.preventDefault();
+  const pt = getCanvasPoint(e);
+  const film = getCanvasFilm();
+  const ev = film.canvasEvents.find(e => e.id === nodeId);
+  if (!ev) return;
+  canvasDragState = { nodeId, startX: pt.x, startY: pt.y, origX: ev.x, origY: ev.y };
+  document.addEventListener('mousemove', onNodeDrag);
+  document.addEventListener('mouseup', endNodeDrag);
+  document.addEventListener('touchmove', onNodeDrag, { passive: false });
+  document.addEventListener('touchend', endNodeDrag);
+}
+function onNodeDrag(e) {
+  if (!canvasDragState) return;
+  e.preventDefault();
+  const pt = getCanvasPoint(e);
+  const film = getCanvasFilm();
+  const ev = film.canvasEvents.find(e => e.id === canvasDragState.nodeId);
+  if (!ev) return;
+  ev.x = Math.max(0, canvasDragState.origX + (pt.x - canvasDragState.startX));
+  ev.y = Math.max(0, canvasDragState.origY + (pt.y - canvasDragState.startY));
+  const node = document.querySelector(`.canvas-node[data-id="${ev.id}"]`);
+  if (node) {
+    node.style.left = ev.x + 'px';
+    node.style.top = ev.y + 'px';
+  }
+  renderCanvasConnectionsOnly();
+}
+function endNodeDrag() {
+  if (canvasDragState) {
+    saveData();
+    renderCanvas();
+  }
+  canvasDragState = null;
+  document.removeEventListener('mousemove', onNodeDrag);
+  document.removeEventListener('mouseup', endNodeDrag);
+  document.removeEventListener('touchmove', onNodeDrag);
+  document.removeEventListener('touchend', endNodeDrag);
+}
+function renderCanvasConnectionsOnly() {
+  // 只重绘连线层，避免拖动时节点闪烁
+  const film = getCanvasFilm();
+  if (!film) return;
+  const connLayer = document.getElementById('canvasConnectionsLayer');
+  connLayer.innerHTML = '';
+  film.canvasConnections.forEach(conn => {
+    const from = film.canvasEvents.find(e => e.id === conn.fromId);
+    const to = film.canvasEvents.find(e => e.id === conn.toId);
+    if (!from || !to) return;
+    const fromPt = getNodeCenter(from);
+    const toPt = getNodeCenter(to);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const dx = toPt.x - fromPt.x;
+    path.setAttribute('d', `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx/2} ${fromPt.y}, ${toPt.x - dx/2} ${toPt.y}, ${toPt.x} ${toPt.y}`);
+    path.setAttribute('stroke', 'var(--ink)');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    path.style.opacity = '0.7';
+    connLayer.appendChild(path);
+  });
+}
+
+// 获取画布坐标（相对 canvas-viewport，含滚动）
+function getCanvasPoint(e) {
+  const viewport = document.getElementById('canvasViewport');
+  const rect = viewport.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - rect.left + viewport.scrollLeft, y: clientY - rect.top + viewport.scrollTop };
+}
+
+// 连线拖动
+function startConnDrag(e, fromId, side) {
+  e.preventDefault();
+  e.stopPropagation();
+  const pt = getCanvasPoint(e);
+  canvasConnDragState = { fromId, side, startPt: pt };
+  document.addEventListener('mousemove', onConnDrag);
+  document.addEventListener('mouseup', endConnDrag);
+  document.addEventListener('touchmove', onConnDrag, { passive: false });
+  document.addEventListener('touchend', endConnDrag);
+  const tempPath = document.getElementById('canvasTempPath');
+  tempPath.style.display = 'block';
+}
+function onConnDrag(e) {
+  if (!canvasConnDragState) return;
+  e.preventDefault();
+  const pt = getCanvasPoint(e);
+  const film = getCanvasFilm();
+  const from = film.canvasEvents.find(e => e.id === canvasConnDragState.fromId);
+  if (!from) return;
+  const fromPt = getNodeCenter(from);
+  const tempPath = document.getElementById('canvasTempPath');
+  tempPath.setAttribute('d', `M ${fromPt.x} ${fromPt.y} L ${pt.x} ${pt.y}`);
+}
+function endConnDrag(e) {
+  if (!canvasConnDragState) return;
+  const tempPath = document.getElementById('canvasTempPath');
+  tempPath.style.display = 'none';
+  tempPath.setAttribute('d', '');
+  // 检测释放点是否落在某个节点的连接点或节点上
+  const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+  const target = document.elementFromPoint(clientX, clientY);
+  const toNode = target ? target.closest('.canvas-node') : null;
+  if (toNode) {
+    const toId = toNode.dataset.id;
+    if (toId !== canvasConnDragState.fromId) {
+      const film = getCanvasFilm();
+      // 避免重复连线
+      const exists = film.canvasConnections.some(c =>
+        (c.fromId === canvasConnDragState.fromId && c.toId === toId) ||
+        (c.fromId === toId && c.toId === canvasConnDragState.fromId));
+      if (!exists) {
+        film.canvasConnections.push({
+          id: generateId(),
+          fromId: canvasConnDragState.fromId,
+          toId: toId,
+          label: ''
+        });
+        saveData();
+      }
+    }
+  }
+  canvasConnDragState = null;
+  document.removeEventListener('mousemove', onConnDrag);
+  document.removeEventListener('mouseup', endConnDrag);
+  document.removeEventListener('touchmove', onConnDrag);
+  document.removeEventListener('touchend', endConnDrag);
+  renderCanvas();
+}
+
+// 手绘闭合圆新增事件框
+function initCanvasFreehand() {
+  const viewport = document.getElementById('canvasViewport');
+  viewport.addEventListener('mousedown', onFreehandStart);
+  viewport.addEventListener('touchstart', onFreehandStart, { passive: false });
+}
+function onFreehandStart(e) {
+  if (!canvasMode) return;
+  // 仅在空白处（非节点、非连接点、非标签）开始
+  if (e.target.closest('.canvas-node') || e.target.closest('.conn-label') || e.target.closest('.canvas-side-panels') || e.target.closest('.canvas-toolbar')) return;
+  e.preventDefault();
+  const pt = getCanvasPoint(e);
+  canvasFreehandState = { points: [pt] };
+  document.addEventListener('mousemove', onFreehandMove);
+  document.addEventListener('mouseup', onFreehandEnd);
+  document.addEventListener('touchmove', onFreehandMove, { passive: false });
+  document.addEventListener('touchend', onFreehandEnd);
+  const fh = document.getElementById('canvasFreehandPath');
+  fh.style.display = 'block';
+  fh.setAttribute('d', `M ${pt.x} ${pt.y}`);
+}
+function onFreehandMove(e) {
+  if (!canvasFreehandState) return;
+  e.preventDefault();
+  const pt = getCanvasPoint(e);
+  canvasFreehandState.points.push(pt);
+  const fh = document.getElementById('canvasFreehandPath');
+  const pts = canvasFreehandState.points;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
+  fh.setAttribute('d', d);
+}
+function onFreehandEnd(e) {
+  if (!canvasFreehandState) return;
+  const fh = document.getElementById('canvasFreehandPath');
+  fh.style.display = 'none';
+  fh.setAttribute('d', '');
+  const pts = canvasFreehandState.points;
+  document.removeEventListener('mousemove', onFreehandMove);
+  document.removeEventListener('mouseup', onFreehandEnd);
+  document.removeEventListener('touchmove', onFreehandMove);
+  document.removeEventListener('touchend', onFreehandEnd);
+  canvasFreehandState = null;
+
+  if (pts.length < 8) return;
+  // 判断闭合：首尾距离 < 半径的一半
+  const first = pts[0], last = pts[pts.length - 1];
+  const closeDist = Math.hypot(first.x - last.x, first.y - last.y);
+  // 计算包围盒得到半径
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  pts.forEach(p => {
+    minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+    maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
+  });
+  const radius = Math.max(maxX - minX, maxY - minY) / 2;
+  if (closeDist < radius && radius > 20) {
+    // 闭合圆，在中心新建事件框
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const film = getCanvasFilm();
+    const colorIdx = film.canvasEvents.length % eventColors.length;
+    const newEv = {
+      id: generateId(),
+      name: '',
+      color: eventColors[colorIdx],
+      x: cx - 80,
+      y: cy - 30
+    };
+    film.canvasEvents.push(newEv);
+    saveData();
+    renderCanvas();
+    // 自动进入编辑态
+    setTimeout(() => {
+      const node = document.querySelector(`.canvas-node[data-id="${newEv.id}"] .canvas-node-name`);
+      if (node) {
+        node.contentEditable = 'true';
+        node.focus();
+      }
+    }, 50);
+  }
+}
+
+// 角色栏 / 线索栏
+function renderCanvasSidePanels() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  const charList = document.getElementById('canvasCharactersList');
+  const clueList = document.getElementById('canvasCluesList');
+  charList.innerHTML = film.canvasCharacters.map(c => `
+    <div class="canvas-item">
+      <button class="canvas-item-del" onclick="delCanvasCharacter('${c.id}')">×</button>
+      <input class="canvas-item-name" value="${escapeHtml(c.name)}" placeholder="角色名" oninput="updCanvasCharacter('${c.id}','name',this.value)">
+      <textarea class="canvas-item-desc" placeholder="简述" oninput="updCanvasCharacter('${c.id}','desc',this.value)">${escapeHtml(c.desc || '')}</textarea>
+    </div>
+  `).join('') || '<div style="text-align:center;color:var(--muted);font-size:11px;padding:8px;">暂无角色</div>';
+  clueList.innerHTML = film.canvasClues.map(c => `
+    <div class="canvas-item">
+      <button class="canvas-item-del" onclick="delCanvasClue('${c.id}')">×</button>
+      <input class="canvas-item-name" value="${escapeHtml(c.name)}" placeholder="线索名" oninput="updCanvasClue('${c.id}','name',this.value)">
+      <textarea class="canvas-item-desc" placeholder="简述" oninput="updCanvasClue('${c.id}','desc',this.value)">${escapeHtml(c.desc || '')}</textarea>
+    </div>
+  `).join('') || '<div style="text-align:center;color:var(--muted);font-size:11px;padding:8px;">暂无线索</div>';
+}
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function addCanvasCharacter() {
+  const film = getCanvasFilm(); if (!film) return;
+  film.canvasCharacters.push({ id: generateId(), name: '', desc: '' });
+  saveData(); renderCanvasSidePanels();
+}
+function delCanvasCharacter(id) {
+  const film = getCanvasFilm(); if (!film) return;
+  film.canvasCharacters = film.canvasCharacters.filter(c => c.id !== id);
+  saveData(); renderCanvasSidePanels();
+}
+function updCanvasCharacter(id, field, val) {
+  const film = getCanvasFilm(); if (!film) return;
+  const c = film.canvasCharacters.find(x => x.id === id);
+  if (c) { c[field] = val; saveData(); }
+}
+function addCanvasClue() {
+  const film = getCanvasFilm(); if (!film) return;
+  film.canvasClues.push({ id: generateId(), name: '', desc: '' });
+  saveData(); renderCanvasSidePanels();
+}
+function delCanvasClue(id) {
+  const film = getCanvasFilm(); if (!film) return;
+  film.canvasClues = film.canvasClues.filter(c => c.id !== id);
+  saveData(); renderCanvasSidePanels();
+}
+function updCanvasClue(id, field, val) {
+  const film = getCanvasFilm(); if (!film) return;
+  const c = film.canvasClues.find(x => x.id === id);
+  if (c) { c[field] = val; saveData(); }
+}
+
+// 键盘：Delete 删除选中连线
+document.addEventListener('keydown', (e) => {
+  if (!canvasMode) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && canvasSelectedConnId) {
+    const film = getCanvasFilm();
+    if (film) {
+      film.canvasConnections = film.canvasConnections.filter(c => c.id !== canvasSelectedConnId);
+      canvasSelectedConnId = null;
+      saveData();
+      renderCanvas();
+    }
+  }
+  if (e.key === 'Escape') {
+    canvasSelectedConnId = null;
+    renderCanvas();
+  }
+});
 
 // 监听父窗口消息
 window.addEventListener('message', function(e) {

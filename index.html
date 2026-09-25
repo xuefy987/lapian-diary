@@ -1,4 +1,4 @@
-<html lang="zh-CN" data-trae-theme="light"><head>
+<html lang="zh-CN" data-trae-theme="light" class=""><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>XFY工作坊</title>
@@ -1042,7 +1042,7 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
     <div class="nav-left">
       <div class="brand-wrap">
         <span class="brand-title">XFY工作坊</span>
-        <span class="brand-version" id="brandVersion">v20260925-v7</span>
+        <span class="brand-version" id="brandVersion">v20260926-v8</span>
       </div>
       <div class="nav-tabs">
         <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">拉片笔记-剧作</button>
@@ -1055,8 +1055,8 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
   </div>
 
   <div class="app-container">
-    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20260925-v7"></iframe>
-    <iframe class="app-frame" id="app-ai" src="ai-platform.html?v=20260925-v7"></iframe>
+    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20260926-v8"></iframe>
+    <iframe class="app-frame" id="app-ai" src="ai-platform.html?v=20260926-v8"></iframe>
   </div>
 
   <div class="settings-overlay" id="settingsOverlay">
@@ -1145,7 +1145,7 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
     const LAST_EXPORT_KEY = 'xfy_last_export_time';
     const REPO = 'xuefy987/lapian-diary';
     const CLOUD_FILE = 'cloud-backup.json';
-    const APP_VERSION = '20260925-v7';
+    const APP_VERSION = '20260926-v8';
 
     function loadSettings() {
       try { const raw = localStorage.getItem(LAYOUT_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
