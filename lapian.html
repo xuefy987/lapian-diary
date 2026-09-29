@@ -320,8 +320,8 @@
   .canvas-svg {
     position: absolute;
     top: 0; left: 0;
-    width: 3000px;
-    height: 2000px;
+    width: 10000px;
+    height: 10000px;
     pointer-events: none;
     z-index: 1;
   }
@@ -336,8 +336,8 @@
   .canvas-nodes-layer {
     position: absolute;
     top: 0; left: 0;
-    width: 3000px;
-    height: 2000px;
+    width: 10000px;
+    height: 10000px;
     z-index: 2;
   }
   .canvas-node {
@@ -2411,10 +2411,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .canvas-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg2); border-bottom: 1px solid var(--rule); flex-shrink: 0; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
 .canvas-viewport { flex: 1 1 0%; position: relative; overflow: hidden; touch-action: none; background-color: var(--bg); background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 15%, transparent) 1px, transparent 1px); background-size: 24px 24px; }
-.canvas-svg { position: absolute; top: 0px; left: 0px; width: 3000px; height: 2000px; pointer-events: none; z-index: 1; }
+.canvas-svg { position: absolute; top: 0px; left: 0px; width: 10000px; height: 10000px; pointer-events: none; z-index: 1; }
 .canvas-svg path.conn-path { pointer-events: stroke; cursor: pointer; }
 .canvas-svg path.conn-path.selected { stroke: var(--danger) !important; stroke-width: 3 !important; }
-.canvas-nodes-layer { position: absolute; top: 0px; left: 0px; width: 3000px; height: 2000px; z-index: 2; }
+.canvas-nodes-layer { position: absolute; top: 0px; left: 0px; width: 10000px; height: 10000px; z-index: 2; }
 .canvas-node { position: absolute; min-width: 120px; max-width: 220px; border-radius: 10px; padding: 10px 12px; box-shadow: var(--shadow); cursor: grab; user-select: none; border: 2px solid transparent; transition: border-color 0.15s, box-shadow 0.15s; }
 .canvas-node:active { cursor: grabbing; }
 .canvas-node.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
@@ -2807,7 +2807,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
         <button class="btn btn-secondary" onclick="openModal('exportFormatModal')">📤 导出</button>
         <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
-        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">上次保存: 01:02:47</span>
+        <span id="saveStatus" style="font-size:11px;color:var(--muted);margin-left:4px;">上次保存: 08:46:30</span>
       </div>
     </div>
 
@@ -2968,6 +2968,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <div class="canvas-toolbar">
         <span style="font-size:12px;color:var(--muted);">💡 单指拖动画布 · 双指缩放 · 手写笔画圆新增事件 · 双击框改名 · 拖动连接点连线 · 单击连线加备注</span>
         <div style="flex:1;"></div>
+        <button class="btn btn-secondary btn-sm" onclick="undoCanvas()" title="回退上一步操作">↶ 回退</button>
         <button class="btn btn-secondary btn-sm" onclick="addCanvasEvent()">➕ 添加事件</button>
         <button class="btn btn-secondary btn-sm" onclick="deleteSelectedConn()" title="删除选中的连线">✂ 删除连线</button>
         <button class="btn btn-secondary btn-sm" onclick="resetCanvasView()">⤢ 重置视图</button>
@@ -4893,8 +4894,9 @@ function generateExportHTML() {
         html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;font-weight:600;">' + row.number + '</td>';
         html += '<td style="border:1px solid #ddd;padding:8px 12px;text-align:center;white-space:nowrap;">' + escapeHtml(timeRange) + '</td>';
         html += '<td style="border:1px solid #ddd;padding:8px 12px;">' + (row.content || '');
-        if (row.dialogue && row.dialogue.trim()) {
-          html += '<div style="margin-top:6px;padding:6px 10px;background:rgba(79,70,229,0.06);border-left:3px solid #4f46e5;border-radius:0 4px 4px 0;font-size:12px;"><b>台词:</b> ' + row.dialogue + '</div>';
+        var dialogue = String(row.dialogue || '').trim();
+        if (dialogue) {
+          html += '<div style="margin-top:6px;padding:6px 10px;background:rgba(79,70,229,0.06);border-left:3px solid #4f46e5;border-radius:0 4px 4px 0;font-size:12px;"><b>台词:</b> ' + escapeHtml(dialogue) + '</div>';
         }
         html += '</td>';
         html += '</tr>';
@@ -4953,17 +4955,20 @@ function generateExportHTML() {
       }
     }
 
-    if (film.plotSummary && film.plotSummary.trim()) {
+    var plotSummary = String(film.plotSummary || '').trim();
+    var characters = String(film.characters || '').trim();
+    var theme = String(film.theme || '').trim();
+    if (plotSummary) {
       html += '<h3 style="font-size:15px;margin:20px 0 10px;">剧情梗概</h3>';
-      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.plotSummary + '</div>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + escapeHtml(plotSummary) + '</div>';
     }
-    if (film.characters && film.characters.trim()) {
+    if (characters) {
       html += '<h3 style="font-size:15px;margin:20px 0 10px;">人物分析</h3>';
-      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.characters + '</div>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + escapeHtml(characters) + '</div>';
     }
-    if (film.theme && film.theme.trim()) {
+    if (theme) {
       html += '<h3 style="font-size:15px;margin:20px 0 10px;">主题思考</h3>';
-      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + film.theme + '</div>';
+      html += '<div style="background:#f9fafb;padding:16px;border-radius:8px;font-size:14px;border:1px solid #e5e7eb;">' + escapeHtml(theme) + '</div>';
     }
   });
 
@@ -5555,6 +5560,9 @@ const canvasPointers = new Map(); // 活跃指针
 let canvasGesture = null;         // 'freehand' | 'pan' | 'zoom'
 let canvasPanState = null;        // 平移状态
 let canvasPinchState = null;      // 捏合状态
+let canvasConnTapState = null;    // 连线轻触状态
+const canvasHistory = [];         // 画布撤销历史栈
+const CANVAS_HISTORY_LIMIT = 50;  // 历史栈最大长度
 
 const CANVAS_GRID = 10;            // 网格吸附粒度
 const CANVAS_SNAP_DIST = 8;        // 对齐吸附阈值
@@ -5568,6 +5576,37 @@ function getCanvasFilm() {
   if (!f.canvasCharacters) f.canvasCharacters = [];
   if (!f.canvasClues) f.canvasClues = [];
   return f;
+}
+
+// 快照当前画布状态（深拷贝事件框与连线）并压入历史栈
+function pushCanvasHistory() {
+  const film = getCanvasFilm();
+  if (!film) return;
+  const snapshot = {
+    canvasEvents: JSON.parse(JSON.stringify(film.canvasEvents || [])),
+    canvasConnections: JSON.parse(JSON.stringify(film.canvasConnections || [])),
+    canvasCharacters: JSON.parse(JSON.stringify(film.canvasCharacters || [])),
+    canvasClues: JSON.parse(JSON.stringify(film.canvasClues || []))
+  };
+  canvasHistory.push(snapshot);
+  if (canvasHistory.length > CANVAS_HISTORY_LIMIT) canvasHistory.shift();
+}
+
+// 回退到上一个画布状态
+function undoCanvas() {
+  if (canvasHistory.length === 0) { showToast('没有可回退的操作'); return; }
+  const film = getCanvasFilm();
+  if (!film) return;
+  const prev = canvasHistory.pop();
+  film.canvasEvents = prev.canvasEvents;
+  film.canvasConnections = prev.canvasConnections;
+  film.canvasCharacters = prev.canvasCharacters;
+  film.canvasClues = prev.canvasClues;
+  canvasSelectedConnId = null;
+  saveData();
+  renderCanvas();
+  renderCanvasSidePanels();
+  showToast('已回退（剩余 ' + canvasHistory.length + ' 步）');
 }
 
 function toggleCanvasMode() {
@@ -5647,42 +5686,107 @@ function getConnectionPoints(from, to) {
 function canvasAutoLayout() {
   const film = getCanvasFilm();
   if (!film || film.canvasEvents.length === 0) return;
-  // 按 y 坐标聚类成行（行间距阈值 100px），行内按 x 排序并左对齐
-  const sorted = [...film.canvasEvents].sort((a, b) => a.y - b.y);
-  const rows = [];
-  const ROW_THRESHOLD = 120;
-  sorted.forEach(ev => {
-    let placed = false;
-    for (const row of rows) {
-      if (Math.abs(ev.y - row.avgY) < ROW_THRESHOLD) {
-        row.items.push(ev);
-        row.avgY = row.items.reduce((s, e) => s + e.y, 0) / row.items.length;
-        placed = true;
-        break;
+  pushCanvasHistory();
+
+  const events = film.canvasEvents;
+  const conns = film.canvasConnections || [];
+
+  // 构建邻接表
+  const downstream = new Map(); // id -> [toId]
+  const upstream = new Map();   // id -> [fromId]
+  events.forEach(ev => { downstream.set(ev.id, []); upstream.set(ev.id, []); });
+  conns.forEach(c => {
+    if (downstream.has(c.fromId)) downstream.get(c.fromId).push(c.toId);
+    if (upstream.has(c.toId)) upstream.get(c.toId).push(c.fromId);
+  });
+
+  // 拓扑排序分层：入度为0的节点为第0层
+  const inDeg = new Map();
+  events.forEach(ev => inDeg.set(ev.id, upstream.get(ev.id).length));
+  const layers = []; // layers[i] = [eventId, ...]
+  const queue = [];
+  const inDegCopy = new Map(inDeg);
+  events.forEach(ev => { if (inDegCopy.get(ev.id) === 0) queue.push(ev.id); });
+
+  while (queue.length > 0) {
+    const layer = [];
+    const nextQueue = [];
+    // 同一层：按入队顺序排列
+    for (const id of queue) {
+      layer.push(id);
+      for (const childId of downstream.get(id)) {
+        inDegCopy.set(childId, inDegCopy.get(childId) - 1);
+        if (inDegCopy.get(childId) === 0) nextQueue.push(childId);
       }
     }
-    if (!placed) rows.push({ items: [ev], avgY: ev.y });
+    layers.push(layer);
+    queue.length = 0;
+    queue.push(...nextQueue);
+  }
+
+  // 处理有环的残留节点
+  const placed = new Set(layers.flat());
+  const remaining = events.filter(ev => !placed.has(ev.id)).map(ev => ev.id);
+  if (remaining.length > 0) layers.push(remaining);
+
+  // 布局参数
+  const BOX_W = 160, BOX_H = 64;
+  const H_GAP = 50;    // 水平间距
+  const V_GAP = 60;    // 垂直间距
+  const START_X = 100, START_Y = 80;
+
+  // 计算每层最大宽度
+  const layerWidths = layers.map(layer => {
+    return layer.length * BOX_W + (layer.length - 1) * H_GAP;
   });
-  // 行内按 x 排序，水平均匀排布；行间垂直均匀排布
-  let curY = 80;
-  rows.forEach((row, rIdx) => {
-    row.items.sort((a, b) => a.x - b.x);
-    let curX = 80;
-    row.items.forEach((ev, i) => {
+  const maxLayerWidth = Math.max(...layerWidths, BOX_W);
+
+  // 垂直排列每一层
+  let curY = START_Y;
+  layers.forEach((layer, li) => {
+    const layerW = layerWidths[li];
+    const startX = START_X + (maxLayerWidth - layerW) / 2; // 居中
+    let curX = startX;
+    layer.forEach(eid => {
+      const ev = events.find(e => e.id === eid);
+      if (!ev) return;
       ev.x = curX;
       ev.y = curY;
-      curX += (ev.w || 160) + 60;
+      curX += (ev.w || BOX_W) + H_GAP;
     });
-    curY += (row.items[0].h || 64) + 90;
+    // 取该层最大高度
+    const maxH = layer.reduce((m, eid) => {
+      const ev = events.find(e => e.id === eid);
+      return Math.max(m, ev ? (ev.h || BOX_H) : BOX_H);
+    }, BOX_H);
+    curY += maxH + V_GAP;
   });
+
+  // 优化：同一节点的多个上游，尽量水平并列
+  // 重新调整：对每个有多上游的节点，检查上游是否在同一层，若在则均匀分布
+  layers.forEach((layer, li) => {
+    if (li === 0) return;
+    layer.forEach(eid => {
+      const ups = upstream.get(eid) || [];
+      if (ups.length <= 1) return;
+      // 找到上游节点在上一层的位置
+      const prevLayer = layers[li - 1] || [];
+      const upInPrev = ups.filter(uid => prevLayer.includes(uid));
+      if (upInPrev.length <= 1) return;
+      // 这些上游已经等距排列了，无需额外处理
+    });
+  });
+
   saveData();
   renderCanvas();
+  showToast('已按连线关系自动布局（共' + layers.length + '层）');
 }
 
 function canvasClearAll() {
   if (!confirm('确定清空画布所有事件框与连线？（不影响原事件栏）')) return;
   const film = getCanvasFilm();
   if (!film) return;
+  pushCanvasHistory();
   film.canvasEvents = [];
   film.canvasConnections = [];
   saveData();
@@ -5712,14 +5816,7 @@ function renderCanvas() {
     path.setAttribute('fill', 'none');
     path.setAttribute('marker-end', 'url(#arrowhead)');
     path.style.opacity = '0.75';
-    // 单击连线：选中并弹出备注输入（平板友好）
-    path.addEventListener('click', (e) => {
-      e.stopPropagation();
-      canvasSelectedConnId = conn.id;
-      const label = prompt('输入关系线备注（留空则无备注）：', conn.label || '');
-      if (label !== null) { conn.label = label; saveData(); }
-      renderCanvas();
-    });
+    // 连线交互（选中/备注/删除）由 onCanvasPointerDown + getConnAtPoint 统一处理
     connLayer.appendChild(path);
   });
 
@@ -5753,7 +5850,7 @@ function renderCanvas() {
     nameEl.addEventListener('blur', () => {
       nameEl.contentEditable = 'false';
       const newName = nameEl.textContent.trim();
-      if (newName !== ev.name) { ev.name = newName; saveData(); }
+      if (newName !== ev.name) { pushCanvasHistory(); ev.name = newName; saveData(); }
     });
     nameEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
@@ -5769,7 +5866,9 @@ function renderCanvas() {
       const input = document.createElement('input');
       input.type = 'color';
       input.value = ev.color;
+      let colorPushed = false;
       input.addEventListener('input', () => {
+        if (!colorPushed) { pushCanvasHistory(); colorPushed = true; }
         ev.color = input.value;
         node.style.background = ev.color;
         node.style.color = getContrastColor(ev.color);
@@ -5828,13 +5927,7 @@ function renderCanvas() {
     lbl.style.left = mid.x + 'px';
     lbl.style.top = mid.y + 'px';
     lbl.textContent = conn.label;
-    lbl.addEventListener('click', (e) => {
-      e.stopPropagation();
-      canvasSelectedConnId = conn.id;
-      const label = prompt('输入关系线备注（留空则无备注）：', conn.label || '');
-      if (label !== null) { conn.label = label; saveData(); }
-      renderCanvas();
-    });
+    // 标签交互同样由 getConnAtPoint 统一处理
     nodesLayer.appendChild(lbl);
   });
 
@@ -5844,6 +5937,7 @@ function renderCanvas() {
 function deleteCanvasEvent(id) {
   const film = getCanvasFilm();
   if (!film) return;
+  pushCanvasHistory();
   film.canvasEvents = film.canvasEvents.filter(e => e.id !== id);
   film.canvasConnections = film.canvasConnections.filter(c => c.fromId !== id && c.toId !== id);
   saveData();
@@ -5855,6 +5949,7 @@ function deleteSelectedConn() {
   if (!canvasSelectedConnId) { showToast('请先单击选中一条连线'); return; }
   const film = getCanvasFilm();
   if (!film) return;
+  pushCanvasHistory();
   film.canvasConnections = film.canvasConnections.filter(c => c.id !== canvasSelectedConnId);
   canvasSelectedConnId = null;
   saveData();
@@ -5870,6 +5965,7 @@ function startNodeDrag(e, nodeId) {
   const film = getCanvasFilm();
   const ev = film.canvasEvents.find(e => e.id === nodeId);
   if (!ev) return;
+  pushCanvasHistory();
   canvasDragState = {
     nodeId, startX: pt.x, startY: pt.y, origX: ev.x, origY: ev.y,
     moved: false
@@ -5972,6 +6068,7 @@ function startNodeResize(e, nodeId) {
   const film = getCanvasFilm();
   const ev = film.canvasEvents.find(e => e.id === nodeId);
   if (!ev) return;
+  pushCanvasHistory();
   canvasResizeState = { nodeId, startX: pt.x, startY: pt.y, origW: ev.w || 160, origH: ev.h || 64 };
   document.addEventListener('mousemove', onNodeResize);
   document.addEventListener('mouseup', endNodeResize);
@@ -6074,6 +6171,7 @@ function endConnDrag(e) {
         (c.fromId === canvasConnDragState.fromId && c.toId === toId) ||
         (c.fromId === toId && c.toId === canvasConnDragState.fromId));
       if (!exists) {
+        pushCanvasHistory();
         film.canvasConnections.push({ id: generateId(), fromId: canvasConnDragState.fromId, toId: toId, label: '' });
         saveData();
       }
@@ -6097,8 +6195,35 @@ function applyCanvasTransform() {
 }
 
 // 判断是否命中可交互元素（节点、连接点、缩放手柄、连线标签等）
+// 注意：连线(.conn-path)不在此列，改用 getConnAtPoint 手动命中检测
 function isCanvasInteractiveTarget(e) {
-  return !!(e.target.closest && e.target.closest('.canvas-node, .canvas-port, .canvas-resize-handle, .canvas-node-actions, .conn-label, .conn-path, .canvas-side-panels, .canvas-toolbar'));
+  return !!(e.target.closest && e.target.closest('.canvas-node, .canvas-port, .canvas-resize-handle, .canvas-node-actions, .conn-label, .canvas-side-panels, .canvas-toolbar'));
+}
+
+// 手动命中检测：判断世界坐标 (wx, wy) 是否靠近某条连线
+// 采样贝塞尔曲线上的点，检查最近距离
+function getConnAtPoint(wx, wy) {
+  const film = getCanvasFilm();
+  if (!film || !film.canvasConnections) return null;
+  const HIT_DIST = 16; // 命中半径（世界坐标）
+  let bestConn = null, bestDist = HIT_DIST;
+  for (const conn of film.canvasConnections) {
+    const from = film.canvasEvents.find(e => e.id === conn.fromId);
+    const to = film.canvasEvents.find(e => e.id === conn.toId);
+    if (!from || !to) continue;
+    const { fromPt, toPt } = getConnectionPoints(from, to);
+    // 在贝塞尔曲线上采样 40 个点
+    const dx = toPt.x - fromPt.x;
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40;
+      // 三次贝塞尔: P0=fromPt, P1=(fromPt.x+dx/2, fromPt.y), P2=(toPt.x-dx/2, toPt.y), P3=toPt
+      const cx = (1 - t) ** 3 * fromPt.x + 3 * (1 - t) ** 2 * t * (fromPt.x + dx / 2) + 3 * (1 - t) * t ** 2 * (toPt.x - dx / 2) + t ** 3 * toPt.x;
+      const cy = (1 - t) ** 3 * fromPt.y + 3 * (1 - t) ** 2 * t * fromPt.y + 3 * (1 - t) * t ** 2 * toPt.y + t ** 3 * toPt.y;
+      const d = Math.hypot(cx - wx, cy - wy);
+      if (d < bestDist) { bestDist = d; bestConn = conn; }
+    }
+  }
+  return bestConn;
 }
 
 // 指针事件：手指平移、双指缩放、手写笔/鼠标手绘
@@ -6136,6 +6261,25 @@ function onCanvasPointerDown(e) {
     return;
   }
 
+  // 单指/鼠标 → 先检测是否点中连线
+  const worldPt = getCanvasPoint(e);
+  const conn = getConnAtPoint(worldPt.x, worldPt.y);
+  if (conn) {
+    // 进入"连线轻触"模式：松手时弹出备注；如果移动了则转为平移
+    canvasGesture = 'connTap';
+    canvasConnTapState = {
+      connId: conn.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      startPanX: canvasPanX,
+      startPanY: canvasPanY,
+      moved: false
+    };
+    canvasSelectedConnId = conn.id;
+    renderCanvas();
+    return;
+  }
+
   // 单指 → 平移；鼠标 → 手绘（桌面端保持原行为）
   if (e.pointerType === 'mouse') {
     canvasGesture = 'freehand';
@@ -6152,6 +6296,23 @@ function onCanvasPointerMove(e) {
 
   if (canvasGesture === 'freehand' && canvasFreehandState && canvasFreehandState.pointerId === e.pointerId) {
     addFreehandPoint(e);
+  } else if (canvasGesture === 'connTap' && canvasConnTapState) {
+    // 移动超过阈值则转为平移
+    const dx = e.clientX - canvasConnTapState.startX;
+    const dy = e.clientY - canvasConnTapState.startY;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+      canvasConnTapState.moved = true;
+      canvasGesture = 'pan';
+      canvasPanState = {
+        startX: canvasConnTapState.startX,
+        startY: canvasConnTapState.startY,
+        startPanX: canvasConnTapState.startPanX,
+        startPanY: canvasConnTapState.startPanY
+      };
+      canvasPanX = canvasPanState.startPanX + dx;
+      canvasPanY = canvasPanState.startPanY + dy;
+      applyCanvasTransform();
+    }
   } else if (canvasGesture === 'pan' && canvasPanState) {
     const dx = e.clientX - canvasPanState.startX;
     const dy = e.clientY - canvasPanState.startY;
@@ -6166,11 +6327,32 @@ function onCanvasPointerMove(e) {
 function onCanvasPointerUp(e) {
   if (!canvasPointers.has(e.pointerId)) return;
   const wasFreehand = (canvasGesture === 'freehand' && canvasFreehandState && canvasFreehandState.pointerId === e.pointerId);
+  const wasConnTap = (canvasGesture === 'connTap' && canvasConnTapState);
   canvasPointers.delete(e.pointerId);
 
   if (wasFreehand) {
     endFreehand();
   }
+
+  if (wasConnTap && !canvasConnTapState.moved) {
+    // 轻触连线 → 弹出备注编辑
+    const connId = canvasConnTapState.connId;
+    const film = getCanvasFilm();
+    const conn = film ? film.canvasConnections.find(c => c.id === connId) : null;
+    canvasConnTapState = null;
+    canvasGesture = null;
+    if (conn) {
+      const label = prompt('输入关系线备注（留空则无备注）：', conn.label || '');
+      if (label !== null && label !== conn.label) {
+        pushCanvasHistory();
+        conn.label = label;
+        saveData();
+      }
+      renderCanvas();
+    }
+    return;
+  }
+  canvasConnTapState = null;
 
   if (canvasGesture === 'zoom') {
     if (canvasPointers.size < 2) {
@@ -6283,6 +6465,7 @@ function endFreehand() {
 function createCanvasEventAt(x, y) {
   const film = getCanvasFilm();
   if (!film) return;
+  pushCanvasHistory();
   const colorIdx = film.canvasEvents.length % eventColors.length;
   const newEv = {
     id: generateId(), name: '', color: eventColors[colorIdx],
@@ -6338,11 +6521,13 @@ function renderCanvasSidePanels() {
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function addCanvasCharacter() {
   const film = getCanvasFilm(); if (!film) return;
+  pushCanvasHistory();
   film.canvasCharacters.push({ id: generateId(), name: '', desc: '' });
   saveData(); renderCanvasSidePanels();
 }
 function delCanvasCharacter(id) {
   const film = getCanvasFilm(); if (!film) return;
+  pushCanvasHistory();
   film.canvasCharacters = film.canvasCharacters.filter(c => c.id !== id);
   saveData(); renderCanvasSidePanels();
 }
@@ -6353,11 +6538,13 @@ function updCanvasCharacter(id, field, val) {
 }
 function addCanvasClue() {
   const film = getCanvasFilm(); if (!film) return;
+  pushCanvasHistory();
   film.canvasClues.push({ id: generateId(), name: '', desc: '' });
   saveData(); renderCanvasSidePanels();
 }
 function delCanvasClue(id) {
   const film = getCanvasFilm(); if (!film) return;
+  pushCanvasHistory();
   film.canvasClues = film.canvasClues.filter(c => c.id !== id);
   saveData(); renderCanvasSidePanels();
 }
