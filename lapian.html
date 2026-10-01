@@ -1,11 +1,11 @@
-<html lang="zh-CN" data-trae-theme="light" style="--bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --accent: #4f46e5; --accent2: #06b6d4; --accent-light: #eef2ff; --glass: rgba(255,255,255,0.75);"><head>
+<html lang="zh-CN" data-trae-theme="light" style="--bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --accent: #4f46e5; --accent2: #06b6d4; --accent-light: #eef2ff; --glass: rgba(255,255,255,0.75);" class=""><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>剧作-xfy的拉片笔记</title>
 <script>
 // 强制版本检测：如果URL中没有版本参数，自动添加并刷新
 (function(){
-  var REQUIRED_VERSION = '20260926-v8';
+  var REQUIRED_VERSION = '20261002-v9';
   var url = new URL(window.location.href);
   var currentV = url.searchParams.get('v');
   if (currentV !== REQUIRED_VERSION) {
@@ -454,7 +454,34 @@
     gap: 10px;
     z-index: 10;
     pointer-events: none;
+    transition: width 0.2s;
   }
+  .canvas-side-panels.collapsed { width: 32px; }
+  .canvas-side-panels-toggle {
+    align-self: flex-end;
+    width: 28px; height: 28px;
+    background: var(--bg2);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--ink);
+    pointer-events: auto;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+    margin-bottom: 4px;
+  }
+  .canvas-side-panels.collapsed .canvas-side-panels-toggle { transform: rotate(180deg); }
+  .canvas-side-panels-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  .canvas-side-panels.collapsed .canvas-side-panels-inner { display: none; }
   .canvas-panel {
     background: var(--bg2);
     border: 1px solid var(--rule);
@@ -2447,7 +2474,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .canvas-resize-handle:hover { opacity: 1; }
 .conn-label { position: absolute; background: var(--bg2); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; padding: 2px 8px; font-size: 11px; cursor: pointer; transform: translate(-50%, -50%); white-space: nowrap; z-index: 4; }
 .conn-label.selected { border-color: var(--accent); }
-.canvas-side-panels { position: absolute; top: 50px; right: 12px; width: 220px; max-height: calc(100% - 70px); display: flex; flex-direction: column; gap: 10px; z-index: 10; pointer-events: none; }
+.canvas-side-panels { position: absolute; top: 50px; right: 12px; width: 220px; max-height: calc(100% - 70px); display: flex; flex-direction: column; gap: 10px; z-index: 10; pointer-events: none; transition: width 0.2s; }
+.canvas-side-panels.collapsed { width: 32px; }
+.canvas-side-panels-toggle { align-self: flex-end; width: 28px; height: 28px; background: var(--bg2); border: 1px solid var(--rule); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink); pointer-events: auto; box-shadow: var(--shadow); transition: transform 0.2s; margin-bottom: 4px; }
+.canvas-side-panels.collapsed .canvas-side-panels-toggle { transform: rotate(180deg); }
+.canvas-side-panels-inner { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
+.canvas-side-panels.collapsed .canvas-side-panels-inner { display: none; }
 .canvas-panel { background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; max-height: 50%; pointer-events: auto; }
 .canvas-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--rule); font-weight: 600; font-size: 13px; }
 .canvas-panel-body { padding: 8px; overflow-y: auto; flex: 1 1 0%; }
@@ -3006,19 +3038,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       </div>
       <!-- 画布右侧：角色栏 + 线索栏 -->
       <div class="canvas-side-panels" id="canvasSidePanels">
-        <div class="canvas-panel">
-          <div class="canvas-panel-header">
-            <span>👥 角色</span>
-            <button class="btn-icon btn-sm" onclick="addCanvasCharacter()" title="新增角色">+</button>
+        <div class="canvas-side-panels-toggle" onclick="toggleCanvasSidePanels()" title="收起/展开">◀</div>
+        <div class="canvas-side-panels-inner" id="canvasSidePanelsInner">
+          <div class="canvas-panel">
+            <div class="canvas-panel-header">
+              <span>👥 角色</span>
+              <button class="btn-icon btn-sm" onclick="addCanvasCharacter()" title="新增角色">+</button>
+            </div>
+            <div class="canvas-panel-body" id="canvasCharactersList"></div>
           </div>
-          <div class="canvas-panel-body" id="canvasCharactersList"></div>
-        </div>
-        <div class="canvas-panel">
-          <div class="canvas-panel-header">
-            <span>🔍 线索</span>
-            <button class="btn-icon btn-sm" onclick="addCanvasClue()" title="新增线索">+</button>
+          <div class="canvas-panel">
+            <div class="canvas-panel-header">
+              <span>🔍 线索</span>
+              <button class="btn-icon btn-sm" onclick="addCanvasClue()" title="新增线索">+</button>
+            </div>
+            <div class="canvas-panel-body" id="canvasCluesList"></div>
           </div>
-          <div class="canvas-panel-body" id="canvasCluesList"></div>
         </div>
       </div>
     </div>
@@ -3223,7 +3258,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
     <h2>📋 版本更新说明</h2>
     <div style="font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:16px;max-height:400px;overflow-y:auto;">
       <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-light);border-radius:6px;">
-        <b style="color:var(--accent);">当前版本: 20260926-v8</b>
+        <b style="color:var(--accent);">当前版本: 20261002-v9</b>
       </div>
       <div style="margin-bottom:10px;">
         <b>🆕 新增功能</b>
@@ -3241,8 +3276,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <div style="margin-bottom:10px;">
         <b>🔧 优化修复</b>
         <ul style="margin:6px 0 0 20px;padding:0;">
-          <li>版本号强制缓存刷新至 v20260926-v8</li>
+          <li>版本号强制缓存刷新至 v20261002-v9</li>
           <li>画布使用 CSS 变量，深色模式下自动适配</li>
+          <li>关系线箭头智能选择最短依附位置（垂直/水平/斜向自动适配）</li>
+          <li>修复缩放事件框时关系线移位问题，线条始终依附四个端点</li>
+          <li>画布右侧角色/线索栏支持收起展开</li>
+          <li>事件框支持复制粘贴（Ctrl+C / Ctrl+V）</li>
+          <li>新增「对齐连线」按钮，自动拉直垂直/水平关系线</li>
+          <li>画布取消边界限制，支持负坐标区域</li>
+          <li>导出支持选择指定影片，Word(.doc)兼容WPS打开</li>
+          <li>页面右上角新增电子表与计时器</li>
         </ul>
       </div>
     </div>
@@ -3377,10 +3420,10 @@ function init() {
   checkDataFreshness();
   // 首次加载此版本时显示更新说明
   var seenVersion = localStorage.getItem('xfy_seen_version');
-  if (seenVersion !== '20260926-v8') {
+  if (seenVersion !== '20261002-v9') {
     setTimeout(function() {
       document.getElementById('versionCompareModal').classList.add('show');
-      localStorage.setItem('xfy_seen_version', '20260926-v8');
+      localStorage.setItem('xfy_seen_version', '20261002-v9');
     }, 1000);
   }
   updateSaveStatus();
@@ -5728,7 +5771,7 @@ function getNodePorts(ev) {
   };
 }
 
-// 计算 from 节点上朝向 to 节点的连接端口
+// 计算 from 节点上朝向 to 节点的连接端口（旧版，保留用于单端口判断）
 function getConnectionPort(from, to) {
   const fromPorts = getNodePorts(from);
   const toCenter = getNodePorts(to).center;
@@ -5740,6 +5783,45 @@ function getConnectionPort(from, to) {
   return best;
 }
 
+// 智能选择连线两端的依附端口（自动选择最短/最合理的依附位置）
+// 规则：
+//   1. 垂直并列 → 用上框的下端口 + 下框的上端口
+//   2. 水平并列 → 用左框的右端口 + 右框的左端口
+//   3. 斜向排列 → 用上框的下端口（或下框的上端口）配合另一框的左/右端口，形成 L 形
+function getOptimalConnectionSides(from, to) {
+  const fromCenter = getNodePorts(from).center;
+  const toCenter = getNodePorts(to).center;
+  const dx = toCenter.x - fromCenter.x;
+  const dy = toCenter.y - fromCenter.y;
+  const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+  const fromBelow = dy > 0;  // to 在 from 下方
+  const fromRight = dx > 0;  // to 在 from 右方
+
+  // 垂直并列：高度差远大于水平差
+  if (absDy > absDx * 1.5) {
+    return {
+      fromSide: fromBelow ? 'bottom' : 'top',
+      toSide: fromBelow ? 'top' : 'bottom'
+    };
+  }
+  // 水平并列：水平差远大于高度差
+  if (absDx > absDy * 1.5) {
+    return {
+      fromSide: fromRight ? 'right' : 'left',
+      toSide: fromRight ? 'left' : 'right'
+    };
+  }
+  // 斜向排列：优先用竖直方向（上下）连接，另一框用左右端口形成 L 形
+  if (fromBelow) {
+    // to 在 from 下方：from 用下端口，to 用左或右端口（朝向 from 的一侧）
+    return { fromSide: 'bottom', toSide: fromRight ? 'left' : 'right' };
+  } else {
+    // to 在 from 上方：from 用上端口，to 用左或右端口
+    return { fromSide: 'top', toSide: fromRight ? 'left' : 'right' };
+  }
+}
+
 // 连线样式
 const CONN_STYLES = {
   solid: { name: '实线', dasharray: 'none' },
@@ -5748,13 +5830,16 @@ const CONN_STYLES = {
 };
 
 function getConnectionPoints(from, to, conn) {
-  // 优先使用连线存储的 fromSide/toSide（避免框缩放时端口跳变）
-  let fromSide = conn && conn.fromSide ? conn.fromSide : getConnectionPort(from, to);
-  let toSide = conn && conn.toSide ? conn.toSide : getConnectionPort(to, from);
-  // 简单校正：避免 from 与 to 朝向相同导致线条穿框
-  const valid = { top: ['bottom'], bottom: ['top'], left: ['right'], right: ['left'] };
-  if (fromSide === toSide && valid[fromSide]) {
-    toSide = valid[fromSide][0];
+  let fromSide, toSide;
+  // 优先使用连线存储的 fromSide/toSide（用户手动设置或首次自动探测后固定）
+  if (conn && conn.fromSide && conn.toSide) {
+    fromSide = conn.fromSide;
+    toSide = conn.toSide;
+  } else {
+    // 自动选择最优依附端口
+    const optimal = getOptimalConnectionSides(from, to);
+    fromSide = optimal.fromSide;
+    toSide = optimal.toSide;
   }
   return {
     fromPt: getNodePorts(from)[fromSide],
@@ -6628,7 +6713,26 @@ function endConnDrag(e) {
         (c.fromId === toId && c.toId === canvasConnDragState.fromId));
       if (!exists) {
         pushCanvasHistory();
-        film.canvasConnections.push({ id: generateId(), fromId: canvasConnDragState.fromId, toId: toId, label: '' });
+        const fromEv = film.canvasEvents.find(e => e.id === canvasConnDragState.fromId);
+        const toEv = film.canvasEvents.find(e => e.id === toId);
+        // 起点端口使用用户拖拽的端口，终点端口自动选择最优
+        const optimal = getOptimalConnectionSides(fromEv, toEv);
+        const fromSide = canvasConnDragState.side || optimal.fromSide;
+        // 若用户选择的起点端口与自动选择的不同，终点端口按起点端口做合理配对
+        let toSide = optimal.toSide;
+        if (fromSide !== optimal.fromSide) {
+          const fromHoriz = (fromSide === 'left' || fromSide === 'right');
+          const toHoriz = (optimal.toSide === 'left' || optimal.toSide === 'right');
+          if (fromHoriz === toHoriz) {
+            // 同轴向：终点用相反侧
+            toSide = fromSide === 'left' ? 'right' : fromSide === 'right' ? 'left' : fromSide === 'top' ? 'bottom' : 'top';
+          }
+          // 不同轴向保持 optimal.toSide
+        }
+        film.canvasConnections.push({
+          id: generateId(), fromId: canvasConnDragState.fromId, toId: toId,
+          label: '', fromSide: fromSide, toSide: toSide
+        });
         saveData();
       }
     }
@@ -6961,6 +7065,13 @@ function resetCanvasView() {
 }
 
 // 角色栏 / 线索栏
+// 收起/展开画布右侧角色/线索栏
+function toggleCanvasSidePanels() {
+  const panels = document.getElementById('canvasSidePanels');
+  if (!panels) return;
+  panels.classList.toggle('collapsed');
+}
+
 function renderCanvasSidePanels() {
   const film = getCanvasFilm();
   if (!film) return;
