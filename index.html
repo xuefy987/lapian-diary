@@ -1493,6 +1493,7 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
       </div>
       <div class="nav-tabs">
         <button class="nav-tab active" data-app="lapian" onclick="switchApp('lapian')">拉片笔记-剧作</button>
+        <button class="nav-tab" data-app="clip" onclick="switchApp('clip')">片段拉片</button>
         <button class="nav-tab" data-app="ai" onclick="switchApp('ai')">AI短片创作</button>
       </div>
     </div>
@@ -1504,7 +1505,8 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
   </div>
 
   <div class="app-container">
-    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20261002-v9"></iframe>
+    <iframe class="app-frame active" id="app-lapian" src="lapian.html?v=20261002-v10"></iframe>
+    <iframe class="app-frame" id="app-clip" src="clip.html?v=20261002-v10"></iframe>
     <iframe class="app-frame" id="app-ai" src="ai-platform.html?v=20261002-v9"></iframe>
   </div>
 
@@ -1688,6 +1690,7 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
       try {
         document.getElementById('app-ai').contentWindow.postMessage({ type: 'theme', mode: mode }, '*');
         document.getElementById('app-lapian').contentWindow.postMessage({ type: 'theme', mode: mode }, '*');
+        document.getElementById('app-clip').contentWindow.postMessage({ type: 'theme', mode: mode }, '*');
       } catch(e) {}
     }
 
