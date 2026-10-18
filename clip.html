@@ -1,4 +1,6 @@
-<html lang="zh-CN" data-theme="light" data-trae-theme="light" class=""><head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>片段拉片 - XFY工作坊</title>
@@ -136,31 +138,79 @@
   }
   .info-value input:focus { border-color: var(--accent); }
 
-  /* 镜头卡片 */
-  .clip-card {
-    background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px;
-    box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px;
+  /* 镜头列表头部 */
+  .shots-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
   }
-  .clip-card-header {
+  .shots-title { font-size: 15px; font-weight: 700; color: var(--accent); }
+  .shots-count { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .shots-list { display: flex; flex-direction: column; gap: 16px; }
+
+  /* 镜头卡片 */
+  .shot-card {
+    background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .shot-card-header {
     padding: 10px 14px; border-bottom: 1px solid var(--rule);
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg3);
+    gap: 10px; background: var(--bg3); flex-wrap: wrap;
   }
-  .clip-card-title { font-size: 14px; font-weight: 600; }
-  .clip-card-body { padding: 14px; display: grid; grid-template-columns: 240px 1fr; gap: 16px; }
-  .clip-screenshot { display: flex; flex-direction: column; gap: 8px; }
-  .clip-img-wrap {
+  .shot-card-title { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 180px; }
+  .shot-index { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 2px 8px; border-radius: 4px; }
+  .shot-name-input {
+    flex: 1; padding: 5px 10px; border: 1px solid transparent; border-radius: 4px;
+    background: transparent; color: var(--ink); font-size: 14px; font-weight: 600;
+    outline: none; min-width: 120px;
+  }
+  .shot-name-input:hover { background: var(--bg); }
+  .shot-name-input:focus { background: var(--bg); border-color: var(--accent); }
+  .shot-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .shot-card-body { padding: 14px; display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+  .empty-inline { padding: 24px; }
+
+  /* 截图区 */
+  .shot-screenshot-col { display: flex; flex-direction: column; gap: 8px; }
+  .shot-img-empty {
     width: 100%; aspect-ratio: 16/9; background: var(--bg3);
     border: 1px dashed var(--rule); border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; overflow: hidden; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted); font-size: 13px; text-align: center;
   }
-  .clip-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-  .clip-img-wrap .placeholder { color: var(--muted); font-size: 12px; text-align: center; padding: 10px; }
-  .clip-img-actions { display: flex; gap: 6px; }
-  .clip-img-actions .btn { flex: 1; justify-content: center; }
+  .shot-img-empty:hover { border-color: var(--accent); color: var(--accent); }
+  .shot-gallery { display: flex; flex-direction: column; gap: 8px; }
+  .shot-gallery-main {
+    width: 100%; aspect-ratio: 16/9; background: var(--bg3);
+    border-radius: 6px; overflow: hidden; cursor: zoom-in;
+    border: 1px solid var(--rule);
+  }
+  .shot-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+  .shot-gallery-thumbs {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+  }
+  .shot-thumb {
+    position: relative; width: 64px; height: 48px; flex-shrink: 0;
+    border-radius: 4px; overflow: hidden; cursor: pointer;
+    border: 2px solid transparent; background: var(--bg3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .shot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .shot-thumb.active { border-color: var(--accent); }
+  .shot-thumb-del {
+    position: absolute; top: 0; right: 0; width: 16px; height: 16px;
+    background: var(--danger); color: #fff; border: none; cursor: pointer;
+    font-size: 12px; line-height: 1; border-radius: 0 0 0 4px;
+    display: none; align-items: center; justify-content: center;
+  }
+  .shot-thumb:hover .shot-thumb-del { display: flex; }
+  .shot-thumb-add {
+    font-size: 20px; color: var(--muted); border: 1px dashed var(--rule);
+  }
+  .shot-thumb-add:hover { border-color: var(--accent); color: var(--accent); }
+  .shot-img-count { font-size: 11px; color: var(--muted); text-align: center; }
 
-  .clip-fields { display: flex; flex-direction: column; gap: 10px; }
+  .shot-fields-col { display: flex; flex-direction: column; gap: 10px; }
   .field-row { display: flex; flex-direction: column; gap: 4px; }
   .field-label { font-size: 12px; font-weight: 600; color: var(--accent); }
   .field-input, .field-textarea {
@@ -229,959 +279,13 @@
   .context-menu-item.danger { color: var(--danger); }
 
   @media (max-width: 768px) {
-    .clip-card-body { grid-template-columns: 1fr; }
+    .shot-card-body { grid-template-columns: 1fr; }
     .fields-grid { grid-template-columns: 1fr; }
     .sidebar-left { position: fixed; z-index: 100; height: 100%; transform: translateX(-100%); transition: transform 0.3s; }
     .sidebar-left.open { transform: translateX(0); }
   }
 </style>
-<style data-trae-edit-ui="true" id="trae-previewer-tools-styles">:root {
-  --trae-layer-image-download: 89990;
-  --trae-layer-browser-inspect-overlay: 90000;
-  --trae-layer-browser-inspect-highlight: 90010;
-  --trae-layer-browser-inspect-action: 90020;
-  --trae-layer-text-selection-action: 90030;
-  --trae-layer-edit-tooltip: 100095;
-}
-:root,
-[data-trae-theme='dark'] {
-  --trae-bg-base-default: #171717;
-  --trae-bg-menu: #222427;
-  --trae-bg-overlay-l1: rgba(255, 255, 255, 0.04);
-  --trae-bg-overlay-l2: rgba(255, 255, 255, 0.08);
-  --trae-bg-overlay-l3: rgba(255, 255, 255, 0.12);
-  --trae-bg-overlay-l4: rgba(255, 255, 255, 0.16);
-  --trae-bg-invert: #f5f9fe;
-  --trae-bg-invert-hover: #e8ecf0;
-  --trae-bg-invert-active: #dce0e4;
-  --trae-bg-invert-disabled: rgba(224, 226, 242, 0.12);
-  --bg-bg-brand-disabled: rgba(75, 63, 227, 0.35);
-  --bg-bg-brand-popup: rgba(106, 111, 255, 0.15);
-  --trae-border-l1: #e0e2f217;
-  --trae-border-l2: rgba(255, 255, 255, 0.12);
-  --trae-border-l3: rgba(255, 255, 255, 0.08);
-  --trae-border-neutral-l3: rgba(229, 229, 229, 0.20);
-  --trae-border-brand: #6a6fff;
-  --trae-text-default: #f5f9fe;
-  --trae-text-default-hover: #f5f9fe;
-  --trae-text-default-active: #f5f9fe;
-  --trae-text-secondary: rgba(245, 249, 254, 0.5);
-  --trae-text-tertiary: rgba(245, 249, 254, 0.4);
-  --trae-text-disabled: #666b75;
-  --trae-text-onaccent: #222427;
-  --trae-icon-default: #f5f9fe;
-  --trae-icon-secondary: rgba(245, 249, 254, 0.5);
-  --trae-icon-brand: #6a6fff;
-  --icon-icon-brand: var(--trae-icon-brand);
-  --trae-icon-onaccent: #222427;
-  --trae-status-success: #22c55e;
-  --trae-status-primary: #3b82f6;
-  --trae-status-primary-default: #387bff;
-  --trae-status-primary-surface-l1: rgba(53, 121, 255, 0.18);
-  --trae-status-success-default: #33c192;
-  --trae-status-success-surface-l1: rgba(0, 165, 110, 0.18);
-  --trae-status-error-default: #f65a5a;
-  --trae-status-error-surface-l1: rgba(246, 70, 70, 0.18);
-  --trae-annotation-marker-bg: #4b3fe3;
-  --trae-annotation-marker-text: #ffffff;
-  --trae-annotation-region-border: var(--trae-status-primary-default);
-  --trae-region-outside-mask-bg: rgba(0, 0, 0, 0.32);
-  --trae-panel-shadow: 0px 6px 24px -1px rgba(0, 0, 0, 0.16);
-  --trae-floating-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.2);
-  --trae-shadow-elevation-50: 0 1px 2px -1px rgba(0, 0, 0, 0.45);
-  --text-text-default: var(--trae-text-default);
-  --text-text-onaccent: var(--trae-text-onaccent);
-  --bg-bg-menu: var(--trae-bg-menu);
-  --bg-bg-white: var(--trae-bg-menu);
-  --bg-bg-invert: var(--trae-bg-invert);
-  --bg-bg-invert-disabled: var(--trae-bg-invert-disabled);
-  --bg-bg-overlay-l1: var(--trae-bg-overlay-l1);
-  --bg-bg-overlay-l2: var(--trae-bg-overlay-l2);
-  --bg-bg-overlay-l3: var(--trae-bg-overlay-l3);
-  --border-border-neutral-l1: var(--trae-border-l1);
-  --border-border-brand: var(--trae-border-brand);
-  --border-border-brand-half: rgba(106, 111, 255, 0.4);
-  --status-error-default: var(--trae-status-error-default);
-  --status-error-surface-l1: var(--trae-status-error-surface-l1);
-  --radius-radius-md-12: 12px;
-  --spacers-spacer-0: 0;
-  --spacers-spacer-6: 6px;
-}
-
-[data-trae-theme='light'] {
-  --trae-bg-base-default: #fafafa;
-  --trae-bg-menu: #ffffff;
-  --trae-bg-overlay-l1: rgba(0, 0, 0, 0.04);
-  --trae-bg-overlay-l2: rgba(0, 0, 0, 0.06);
-  --trae-bg-overlay-l3: rgba(0, 0, 0, 0.08);
-  --trae-bg-overlay-l4: rgba(0, 0, 0, 0.12);
-  --trae-bg-invert: #1f2328;
-  --trae-bg-invert-hover: #32383f;
-  --trae-bg-invert-active: #444d56;
-  --trae-bg-invert-disabled: rgba(115, 115, 115, 0.20);
-  --bg-bg-brand-disabled: rgba(75, 63, 227, 0.22);
-  --bg-bg-brand-popup: rgba(170, 183, 255, 0.36);
-  --trae-border-l1: rgba(0, 0, 0, 0.1);
-  --trae-border-l2: rgba(0, 0, 0, 0.12);
-  --trae-border-l3: rgba(0, 0, 0, 0.08);
-  --trae-border-neutral-l3: rgba(115, 115, 115, 0.36);
-  --trae-border-brand: #4b3fe3;
-  --trae-text-default: #1f2328;
-  --trae-text-default-hover: #111214;
-  --trae-text-default-active: #111214;
-  --trae-text-secondary: rgba(31, 35, 40, 0.5);
-  --trae-text-tertiary: rgba(31, 35, 40, 0.4);
-  --trae-text-disabled: #a1a1a1;
-  --trae-text-onaccent: #ffffff;
-  --trae-icon-default: #1f2328;
-  --trae-icon-secondary: rgba(31, 35, 40, 0.5);
-  --trae-icon-brand: #4b3fe3;
-  --icon-icon-brand: var(--trae-icon-brand);
-  --trae-icon-onaccent: #ffffff;
-  --trae-status-success: #22c55e;
-  --trae-status-primary: #3b82f6;
-  --trae-status-primary-default: #2f74ff;
-  --trae-status-primary-surface-l1: rgba(47, 116, 255, 0.12);
-  --trae-status-success-default: #15a877;
-  --trae-status-success-surface-l1: rgba(64, 176, 139, 0.12);
-  --trae-status-error-default: #e8463a;
-  --trae-status-error-surface-l1: rgba(232, 70, 58, 0.12);
-  --trae-annotation-marker-bg: #4b3fe3;
-  --trae-annotation-marker-text: #ffffff;
-  --trae-annotation-region-border: var(--trae-status-primary-default);
-  --trae-region-outside-mask-bg: rgba(0, 0, 0, 0.18);
-  --trae-panel-shadow: 0px 6px 24px -1px rgba(24, 24, 24, 0.06);
-  --trae-floating-shadow: 0px 2px 8px 0px rgba(24, 24, 24, 0.2);
-  --trae-shadow-elevation-50: 0 1px 2px -1px rgba(24, 24, 24, 0.08);
-  --text-text-default: var(--trae-text-default);
-  --text-text-onaccent: var(--trae-text-onaccent);
-  --bg-bg-menu: var(--trae-bg-menu);
-  --bg-bg-white: var(--trae-bg-menu);
-  --bg-bg-invert: var(--trae-bg-invert);
-  --bg-bg-invert-disabled: var(--trae-bg-invert-disabled);
-  --bg-bg-overlay-l1: var(--trae-bg-overlay-l1);
-  --bg-bg-overlay-l2: var(--trae-bg-overlay-l2);
-  --bg-bg-overlay-l3: var(--trae-bg-overlay-l3);
-  --border-border-neutral-l1: var(--trae-border-l1);
-  --border-border-brand: var(--trae-border-brand);
-  --border-border-brand-half: rgba(75, 63, 227, 0.4);
-  --status-error-default: var(--trae-status-error-default);
-  --status-error-surface-l1: var(--trae-status-error-surface-l1);
-  --radius-radius-md-12: 12px;
-  --spacers-spacer-0: 0;
-  --spacers-spacer-6: 6px;
-}
-
-@keyframes trae-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes trae-edit-bar-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes trae-edit-bar-leave {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-}
-
-@keyframes trae-edit-panel-leave {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-}
-
-.trae-edit-mode-active:not(.trae-edit-mode-dragging) body *:not([data-trae-edit-ui]):not([data-trae-edit-ui] *) {
-  transition: none !important;
-  animation-play-state: paused !important;
-}
-
-.trae-edit-mode-reorder-hit-test [data-trae-edit-ui]:not(.trae-edit-pointer-shield):not(.trae-edit-panel),
-.trae-edit-mode-reorder-hit-test [data-trae-edit-ui]:not(.trae-edit-pointer-shield):not(.trae-edit-panel) * {
-  pointer-events: none !important;
-}
-
-.trae-browser-inspect-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: var(--trae-layer-browser-inspect-overlay);
-  pointer-events: auto;
-  background: transparent;
-}
-
-.trae-browser-inspect-highlight-box {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: var(--trae-layer-browser-inspect-highlight);
-  display: none;
-}
-
-.trae-browser-inspect-highlight-tag {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  height: 18px;
-  padding: 0 6px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  background-color: var(--trae-status-success-default);
-  color: var(--trae-text-onaccent);
-  font-size: 12px;
-  font-weight: 400;
-  display: none;
-  align-items: center;
-  z-index: var(--trae-layer-browser-inspect-action);
-}
-
-.trae-browser-inspect-highlight-box-show {
-  display: flex;
-}
-
-.trae-browser-inspect-highlight-tag.trae-browser-inspect-highlight-box-show {
-  display: none;
-}
-
-.trae-browser-inspect-select-button.trae-browser-inspect-highlight-box-show {
-  display: block !important;
-}
-
-.trae-browser-inspect-select-button {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: none;
-  z-index: var(--trae-layer-browser-inspect-action);
-}
-
-.trae-browser-inspect-select-highlight-box {
-  background: transparent !important;
-}
-
-.trae-browser-inspect-select-highlight-box .trae-browser-inspect-highlight-tag {
-  background-color: var(--trae-status-success-default);
-}
-
-.trae-add-to-chat-card {
-  display: block;
-  overflow: hidden;
-  background: var(--trae-bg-menu);
-  border: 1px solid var(--trae-border-l1);
-  border-radius: 8px;
-  box-shadow: var(--trae-floating-shadow);
-  transition:
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.trae-add-to-chat-content {
-  position: relative;
-  width: max-content;
-}
-
-.trae-fade-exit {
-  opacity: 0;
-  transition: opacity 0.15s ease-out;
-}
-
-.trae-fade-enter {
-  opacity: 1;
-  transition: opacity 0.2s ease-in;
-}
-
-.trae-buttons-view {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px;
-  background: transparent;
-}
-
-.trae-action-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transform: none !important;
-  transition: none !important;
-  animation: none !important;
-}
-
-.trae-action-button:hover {
-  background: var(--trae-bg-overlay-l2);
-}
-
-.trae-action-button:active {
-  background: var(--trae-bg-overlay-l3);
-}
-
-.trae-action-button:focus-visible {
-  outline: 2px solid var(--trae-status-primary);
-  outline-offset: 1px;
-}
-
-.trae-action-button-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  color: var(--trae-icon-default);
-  flex-shrink: 0;
-}
-
-.trae-action-button-title {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 16px;
-  color: var(--trae-text-default);
-  white-space: nowrap;
-}
-
-.trae-edit-toolbar-button-active {
-  background: var(--bg-bg-brand-disabled, rgba(75, 63, 227, 0.22)) !important;
-  color: var(--icon-icon-brand, #4b3fe3) !important;
-  font-weight: bold !important;
-}
-
-.trae-edit-toolbar-button-active:hover {
-  background: var(--bg-bg-brand-popup, rgba(170, 183, 255, 0.36)) !important;
-}
-
-.trae-edit-toolbar button[data-action='alignment-dropdown']:hover,
-.trae-edit-toolbar button[data-action='text-align-dropdown']:hover,
-.trae-edit-toolbar button[data-action='font-decrease']:hover,
-.trae-edit-toolbar button[data-action='font-increase']:hover,
-.trae-edit-toolbar button[data-action^='align-']:hover {
-  border-radius: 8px;
-  background: var(--bg-bg-overlay-l1, rgba(115, 115, 115, 0.08)) !important;
-}
-
-.trae-edit-toolbar button[data-action='alignment-dropdown']:active,
-.trae-edit-toolbar button[data-action='text-align-dropdown']:active,
-.trae-edit-toolbar button[data-action='font-decrease']:active,
-.trae-edit-toolbar button[data-action='font-increase']:active,
-.trae-edit-toolbar button[data-action^='align-']:active {
-  border-radius: 8px;
-  background: var(--bg-bg-overlay-l2, rgba(115, 115, 115, 0.12)) !important;
-}
-
-.trae-comment-input {
-  background: transparent;
-  color: var(--trae-text-default);
-  caret-color: var(--trae-text-default);
-}
-
-.trae-comment-input::placeholder {
-  color: var(--trae-text-tertiary);
-}
-
-.trae-point-edit-bar,
-.trae-point-comment-input-bar,
-.trae-comment-only-panel {
-  transform-origin: top center;
-  will-change: opacity, transform;
-}
-
-.trae-edit-panel:not(.trae-edit-panel-leave) {
-  pointer-events: auto !important;
-}
-
-.trae-edit-bar-enter {
-  animation: trae-edit-bar-enter var(--transition-normal, 0.18s cubic-bezier(0.2, 0, 0, 1)) both;
-}
-
-.trae-edit-bar-leave {
-  pointer-events: none;
-  animation: trae-edit-bar-leave var(--transition-fast, 0.14s ease) both;
-}
-
-.trae-edit-panel-leave {
-  pointer-events: none;
-  animation: trae-edit-panel-leave var(--transition-fast, 0.14s ease) both;
-}
-
-.trae-edit-panel [data-trae-tooltip] {
-  position: relative;
-}
-
-.trae-edit-panel [data-trae-tooltip]::after {
-  content: attr(data-trae-tooltip);
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  z-index: var(--trae-layer-edit-tooltip);
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--trae-bg-invert, var(--bg-bg-invert));
-  color: var(--trae-text-onaccent, var(--text-text-onaccent));
-  box-shadow: var(--trae-floating-shadow);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 16px;
-  letter-spacing: 0.039px;
-  white-space: nowrap;
-  pointer-events: none;
-  box-sizing: border-box;
-  opacity: 0;
-  transform: translateX(-50%);
-  visibility: hidden;
-}
-
-.trae-edit-panel [data-trae-tooltip]::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 5px);
-  z-index: var(--trae-layer-edit-tooltip);
-  width: 8px;
-  height: 4px;
-  background: var(--trae-bg-invert, var(--bg-bg-invert));
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  transform: translateX(-50%);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-}
-
-.trae-edit-panel [data-trae-tooltip]:hover::after,
-.trae-edit-panel [data-trae-tooltip]:focus-visible::after,
-.trae-edit-panel [data-trae-tooltip]:hover::before,
-.trae-edit-panel [data-trae-tooltip]:focus-visible::before {
-  opacity: 1;
-  visibility: visible;
-}
-
-.trae-comment-btn {
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.trae-comment-btn:disabled {
-  cursor: not-allowed;
-}
-
-.trae-comment-btn:focus-visible {
-  outline: 2px solid var(--trae-status-primary);
-  outline-offset: 1px;
-}
-
-.trae-comment-btn-primary {
-  background: var(--trae-bg-invert);
-  color: var(--trae-text-onaccent);
-}
-
-.trae-comment-btn-primary:hover:not(:disabled) {
-  background: var(--trae-bg-invert-hover);
-}
-
-.trae-comment-btn-primary:active:not(:disabled) {
-  background: var(--trae-bg-invert-active);
-}
-
-.trae-comment-btn-primary:disabled {
-  background: var(--trae-bg-invert-disabled);
-  color: var(--trae-text-disabled);
-}
-
-.trae-comment-btn-secondary {
-  background: var(--trae-bg-overlay-l2);
-  color: var(--trae-text-default);
-}
-
-.trae-comment-btn-secondary:hover:not(:disabled) {
-  background: var(--trae-bg-overlay-l3);
-}
-
-.trae-comment-btn-secondary:active:not(:disabled) {
-  background: var(--trae-bg-overlay-l4);
-}
-
-.trae-comment-btn-secondary:disabled {
-  background: var(--trae-bg-overlay-l2);
-  color: var(--trae-text-disabled);
-}
-
-.trae-comment-btn-text {
-  background: transparent;
-  color: var(--trae-text-default);
-}
-
-.trae-comment-btn-text:hover:not(:disabled) {
-  border-radius: 8px;
-  background: var(--bg-bg-overlay-l1, var(--trae-bg-overlay-l1));
-  color: var(--trae-text-default-hover);
-}
-
-.trae-comment-btn-text:active:not(:disabled) {
-  border-radius: 8px;
-  background: var(--trae-bg-overlay-l2);
-  color: var(--trae-text-default-active);
-}
-
-.trae-comment-btn-text:disabled {
-  background: transparent;
-  color: var(--trae-text-disabled);
-}
-
-.trae-marking-btn {
-  justify-content: center;
-}
-
-.trae-marking-btn:hover:not(:disabled) {
-  background: var(--trae-bg-overlay-l1) !important;
-}
-
-.trae-marking-btn-active {
-  background: var(--bg-bg-brand-disabled, rgba(75, 63, 227, 0.22)) !important;
-  color: var(--icon-icon-brand, var(--trae-icon-brand)) !important;
-}
-
-.trae-marking-btn-active:hover {
-  background: var(--bg-bg-brand-popup, rgba(170, 183, 255, 0.36)) !important;
-  color: var(--icon-icon-brand, var(--trae-icon-brand)) !important;
-}
-
-.trae-marking-btn:active:not(:disabled) {
-  background: var(--trae-bg-overlay-l2) !important;
-}
-
-.trae-marking-btn:disabled {
-  color: var(--trae-text-disabled) !important;
-  cursor: not-allowed !important;
-}
-
-.trae-action-button-shortcut {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--trae-icon-secondary);
-  flex-shrink: 0;
-}
-
-.trae-shortcut-container {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.trae-shortcut-key {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 12px;
-  color: var(--trae-icon-secondary);
-}
-
-.trae-add-to-chat-divider {
-  width: 2px;
-  height: 12px;
-  padding: 0 6px;
-  box-sizing: content-box;
-  background-clip: content-box;
-  background-color: var(--trae-border-l2);
-  flex-shrink: 0;
-}
-
-.trae-editor-view {
-  display: flex;
-  flex-direction: column;
-  width: 320px;
-  padding: 8px;
-  background: transparent;
-}
-
-.trae-editor-text-container {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  background: var(--trae-bg-overlay-l1);
-  border: 1px solid var(--trae-border-l3);
-  border-radius: 4px;
-  gap: 8px;
-}
-
-.trae-editor-textarea {
-  flex: 1;
-  padding: 0 2px;
-  border: none;
-  background: transparent;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 20px;
-  color: var(--trae-text-default);
-  resize: none;
-  outline: none;
-  overflow-y: auto;
-  max-height: 140px;
-}
-
-.trae-editor-textarea::placeholder {
-  color: var(--trae-text-tertiary);
-}
-
-.trae-editor-action-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition:
-    max-height 0.2s ease-out,
-    opacity 0.2s ease-out,
-    margin-top 0.2s ease-out;
-}
-
-.trae-editor-action-bar-visible {
-  max-height: 32px;
-  opacity: 1;
-  margin-top: 8px;
-}
-
-.trae-editor-cancel-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  padding: 0 4px;
-  background: var(--trae-bg-overlay-l2);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.trae-editor-cancel-button:hover {
-  background: var(--trae-bg-overlay-l3);
-}
-
-.trae-editor-cancel-button:active {
-  background: var(--trae-bg-overlay-l3);
-}
-
-.trae-editor-cancel-button:focus-visible {
-  outline: 2px solid var(--trae-status-primary);
-  outline-offset: 1px;
-}
-
-.trae-editor-cancel-text {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 16px;
-  color: var(--trae-text-default);
-  white-space: nowrap;
-  padding: 0 4px;
-}
-
-.trae-editor-submit-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  padding: 0 8px;
-  background: var(--trae-bg-invert);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.trae-editor-submit-button:hover {
-  background: var(--trae-bg-invert-hover);
-}
-
-.trae-editor-submit-button:active {
-  background: var(--trae-bg-invert-active);
-}
-
-.trae-editor-submit-button:focus-visible {
-  outline: 2px solid var(--trae-status-primary);
-  outline-offset: 1px;
-}
-
-.trae-editor-submit-text {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 16px;
-  color: var(--trae-text-onaccent);
-  white-space: nowrap;
-  padding: 0 4px;
-}
-
-.trae-editor-submit-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 12px;
-  height: 12px;
-  color: var(--trae-icon-onaccent);
-  flex-shrink: 0;
-}
-
-.trae-success-view {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 12px;
-  height: 32px;
-  white-space: nowrap;
-}
-
-.trae-success-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  color: var(--trae-status-success);
-  flex-shrink: 0;
-}
-
-.trae-success-text {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 18px;
-  color: var(--trae-text-default);
-  user-select: none;
-}
-</style><style data-trae-pptx-captured-css="true">:root { --bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --accent: #4f46e5; --accent2: #06b6d4; --accent-light: #eef2ff; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; --shadow: 0 2px 8px rgba(0,0,0,0.08); --shadow-lg: 0 4px 16px rgba(0,0,0,0.12); }
-:root[data-theme="dark"] { --bg: #0f1419; --bg2: #1a1f2e; --bg3: #242b3d; --ink: #f0f2f5; --muted: #9ca3af; --rule: #374151; --accent: #818cf8; --accent2: #22d3ee; --accent-light: rgba(129,140,248,0.2); --shadow: 0 2px 8px rgba(0,0,0,0.4); --shadow-lg: 0 4px 16px rgba(0,0,0,0.5); }
-* { box-sizing: border-box; margin: 0px; padding: 0px; }
-html, body { height: 100%; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; font-size: 14px; line-height: 1.6; }
-.app-container { display: flex; height: 100%; width: 100%; }
-.sidebar-left { width: 260px; min-width: 200px; max-width: 400px; background: var(--bg2); border-right: 1px solid var(--rule); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.25s; overflow: hidden; }
-.sidebar-left.collapsed { border-right: none; width: 0px !important; min-width: 0px !important; }
-.sidebar-header { padding: 12px 16px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.sidebar-title { font-size: 15px; font-weight: 700; color: var(--accent); }
-.sidebar-actions { display: flex; gap: 4px; }
-.icon-btn { width: 28px; height: 28px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
-.icon-btn:hover { background: var(--accent-light); border-color: var(--accent); }
-.sidebar-left.collapsed + .toggle-left-btn { display: block; }
-.clip-tree { flex: 1 1 0%; overflow-y: auto; padding: 8px; }
-.folder-block { margin-bottom: 6px; }
-.folder-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 6px; cursor: pointer; user-select: none; font-weight: 600; font-size: 13px; color: var(--ink); }
-.folder-header:hover { background: var(--bg3); }
-.folder-arrow { font-size: 10px; transition: transform 0.2s; color: var(--muted); width: 12px; }
-.folder-block.collapsed .folder-arrow { transform: rotate(-90deg); }
-.folder-name { flex: 1 1 0%; }
-.folder-count { font-size: 11px; color: var(--muted); font-weight: 400; }
-.folder-actions { display: none; gap: 2px; }
-.folder-header:hover .folder-actions { display: flex; }
-.folder-actions button { background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; font-size: 12px; color: var(--muted); }
-.folder-actions button:hover { background: var(--rule); color: var(--ink); }
-.folder-clips { padding-left: 18px; display: flex; flex-direction: column; gap: 2px; }
-.folder-block.collapsed .folder-clips { display: none; }
-.clip-item { padding: 8px 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: background 0.15s; display: flex; flex-direction: column; gap: 2px; }
-.clip-item:hover { background: var(--bg3); }
-.clip-item.active { background: var(--accent-light); border-color: var(--accent); }
-.clip-item-name { font-size: 13px; font-weight: 500; }
-.clip-item-source { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 3px; }
-.uncategorized-title { padding: 8px 10px; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.empty-state { text-align: center; color: var(--muted); padding: 30px 16px; font-size: 13px; }
-.toggle-left-btn { position: fixed; left: 0px; top: 50%; transform: translateY(-50%); z-index: 90; background: var(--bg2); border-top-color: ; border-top-style: ; border-top-width: ; border-right-color: ; border-right-style: ; border-right-width: ; border-bottom-color: ; border-bottom-style: ; border-bottom-width: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-left: none; border-radius: 0px 8px 8px 0px; padding: 12px 4px; cursor: pointer; font-size: 14px; color: var(--ink); box-shadow: var(--shadow); display: none; }
-.main-content { flex: 1 1 0%; display: flex; flex-direction: column; min-width: 0px; background: var(--bg); }
-.main-header { padding: 10px 16px; background: var(--bg2); border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.main-title { font-size: 15px; font-weight: 700; }
-.main-title small { font-size: 12px; color: var(--muted); font-weight: 400; }
-.btn { cursor: pointer; border: none; border-radius: 6px; padding: 6px 12px; font-size: 13px; font-weight: 500; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
-.btn-primary { background: var(--accent); color: rgb(255, 255, 255); }
-.btn-primary:hover { opacity: 0.9; }
-.btn-secondary { background: var(--bg3); color: var(--ink); }
-.btn-secondary:hover { background: var(--rule); }
-.btn-danger { background: var(--danger); color: rgb(255, 255, 255); }
-.btn-sm { padding: 4px 10px; font-size: 12px; }
-.clips-area { flex: 1 1 0%; overflow-y: auto; padding: 16px; }
-.clips-container { max-width: 960px; margin: 0px auto; }
-.clip-info-bar { background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow); }
-.info-item { display: flex; flex-direction: column; gap: 2px; flex: 1 1 0%; min-width: 140px; }
-.info-label { font-size: 11px; color: var(--muted); font-weight: 600; }
-.info-value { font-size: 13px; color: var(--ink); }
-.info-value input { width: 100%; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); font-size: 13px; outline: none; }
-.info-value input:focus { border-color: var(--accent); }
-.clip-card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
-.clip-card-header { padding: 10px 14px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; background: var(--bg3); }
-.clip-card-title { font-size: 14px; font-weight: 600; }
-.clip-card-body { padding: 14px; display: grid; grid-template-columns: 240px 1fr; gap: 16px; }
-.clip-screenshot { display: flex; flex-direction: column; gap: 8px; }
-.clip-img-wrap { width: 100%; aspect-ratio: 16 / 9; background: var(--bg3); border: 1px dashed var(--rule); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; }
-.clip-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.clip-img-wrap .placeholder { color: var(--muted); font-size: 12px; text-align: center; padding: 10px; }
-.clip-img-actions { display: flex; gap: 6px; }
-.clip-img-actions .btn { flex: 1 1 0%; justify-content: center; }
-.clip-fields { display: flex; flex-direction: column; gap: 10px; }
-.field-row { display: flex; flex-direction: column; gap: 4px; }
-.field-label { font-size: 12px; font-weight: 600; color: var(--accent); }
-.field-input, .field-textarea { width: 100%; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 4px; font-size: 13px; background: var(--bg); color: var(--ink); outline: none; font-family: inherit; }
-.field-input:focus, .field-textarea:focus { border-color: var(--accent); }
-.field-textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
-.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.modal-overlay { position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.5); z-index: 9998; display: none; align-items: center; justify-content: center; }
-.modal-overlay.show { display: flex; }
-.modal-box { background: var(--bg2); border-radius: 12px; padding: 20px; width: 90%; max-width: 420px; box-shadow: var(--shadow-lg); }
-.modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
-.modal-field { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
-.modal-field label { font-size: 12px; font-weight: 600; color: var(--muted); }
-.modal-field input, .modal-field select, .modal-field textarea { padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; background: var(--bg); color: var(--ink); outline: none; font-family: inherit; }
-.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); }
-.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.lightbox { position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.9); z-index: 9999; display: none; align-items: center; justify-content: center; cursor: zoom-out; }
-.lightbox.show { display: flex; }
-.lightbox img { max-width: 92%; max-height: 92%; object-fit: contain; border-radius: 4px; }
-.lightbox-close { position: absolute; top: 16px; right: 20px; color: rgb(255, 255, 255); font-size: 32px; cursor: pointer; background: none; border: none; line-height: 1; }
-.save-indicator { position: fixed; bottom: 16px; right: 16px; padding: 8px 16px; background: var(--success); color: rgb(255, 255, 255); border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none; }
-.save-indicator.show { opacity: 1; }
-.context-menu { position: fixed; z-index: 10000; background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow-lg); padding: 4px; min-width: 140px; display: none; }
-.context-menu.show { display: block; }
-.context-menu-item { padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-.context-menu-item:hover { background: var(--accent-light); }
-.context-menu-item.danger { color: var(--danger); }
-@media (max-width: 768px) {
-  .clip-card-body { grid-template-columns: 1fr; }
-  .fields-grid { grid-template-columns: 1fr; }
-  .sidebar-left { position: fixed; z-index: 100; height: 100%; transform: translateX(-100%); transition: transform 0.3s; }
-  .sidebar-left.open { transform: translateX(0px); }
-}
-:root { --trae-layer-image-download: 89990; --trae-layer-browser-inspect-overlay: 90000; --trae-layer-browser-inspect-highlight: 90010; --trae-layer-browser-inspect-action: 90020; --trae-layer-text-selection-action: 90030; --trae-layer-edit-tooltip: 100095; }
-:root, [data-trae-theme="dark"] { --trae-bg-base-default: #171717; --trae-bg-menu: #222427; --trae-bg-overlay-l1: rgba(255, 255, 255, 0.04); --trae-bg-overlay-l2: rgba(255, 255, 255, 0.08); --trae-bg-overlay-l3: rgba(255, 255, 255, 0.12); --trae-bg-overlay-l4: rgba(255, 255, 255, 0.16); --trae-bg-invert: #f5f9fe; --trae-bg-invert-hover: #e8ecf0; --trae-bg-invert-active: #dce0e4; --trae-bg-invert-disabled: rgba(224, 226, 242, 0.12); --bg-bg-brand-disabled: rgba(75, 63, 227, 0.35); --bg-bg-brand-popup: rgba(106, 111, 255, 0.15); --trae-border-l1: #e0e2f217; --trae-border-l2: rgba(255, 255, 255, 0.12); --trae-border-l3: rgba(255, 255, 255, 0.08); --trae-border-neutral-l3: rgba(229, 229, 229, 0.20); --trae-border-brand: #6a6fff; --trae-text-default: #f5f9fe; --trae-text-default-hover: #f5f9fe; --trae-text-default-active: #f5f9fe; --trae-text-secondary: rgba(245, 249, 254, 0.5); --trae-text-tertiary: rgba(245, 249, 254, 0.4); --trae-text-disabled: #666b75; --trae-text-onaccent: #222427; --trae-icon-default: #f5f9fe; --trae-icon-secondary: rgba(245, 249, 254, 0.5); --trae-icon-brand: #6a6fff; --icon-icon-brand: var(--trae-icon-brand); --trae-icon-onaccent: #222427; --trae-status-success: #22c55e; --trae-status-primary: #3b82f6; --trae-status-primary-default: #387bff; --trae-status-primary-surface-l1: rgba(53, 121, 255, 0.18); --trae-status-success-default: #33c192; --trae-status-success-surface-l1: rgba(0, 165, 110, 0.18); --trae-status-error-default: #f65a5a; --trae-status-error-surface-l1: rgba(246, 70, 70, 0.18); --trae-annotation-marker-bg: #4b3fe3; --trae-annotation-marker-text: #ffffff; --trae-annotation-region-border: var(--trae-status-primary-default); --trae-region-outside-mask-bg: rgba(0, 0, 0, 0.32); --trae-panel-shadow: 0px 6px 24px -1px rgba(0, 0, 0, 0.16); --trae-floating-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.2); --trae-shadow-elevation-50: 0 1px 2px -1px rgba(0, 0, 0, 0.45); --text-text-default: var(--trae-text-default); --text-text-onaccent: var(--trae-text-onaccent); --bg-bg-menu: var(--trae-bg-menu); --bg-bg-white: var(--trae-bg-menu); --bg-bg-invert: var(--trae-bg-invert); --bg-bg-invert-disabled: var(--trae-bg-invert-disabled); --bg-bg-overlay-l1: var(--trae-bg-overlay-l1); --bg-bg-overlay-l2: var(--trae-bg-overlay-l2); --bg-bg-overlay-l3: var(--trae-bg-overlay-l3); --border-border-neutral-l1: var(--trae-border-l1); --border-border-brand: var(--trae-border-brand); --border-border-brand-half: rgba(106, 111, 255, 0.4); --status-error-default: var(--trae-status-error-default); --status-error-surface-l1: var(--trae-status-error-surface-l1); --radius-radius-md-12: 12px; --spacers-spacer-0: 0; --spacers-spacer-6: 6px; }
-[data-trae-theme="light"] { --trae-bg-base-default: #fafafa; --trae-bg-menu: #ffffff; --trae-bg-overlay-l1: rgba(0, 0, 0, 0.04); --trae-bg-overlay-l2: rgba(0, 0, 0, 0.06); --trae-bg-overlay-l3: rgba(0, 0, 0, 0.08); --trae-bg-overlay-l4: rgba(0, 0, 0, 0.12); --trae-bg-invert: #1f2328; --trae-bg-invert-hover: #32383f; --trae-bg-invert-active: #444d56; --trae-bg-invert-disabled: rgba(115, 115, 115, 0.20); --bg-bg-brand-disabled: rgba(75, 63, 227, 0.22); --bg-bg-brand-popup: rgba(170, 183, 255, 0.36); --trae-border-l1: rgba(0, 0, 0, 0.1); --trae-border-l2: rgba(0, 0, 0, 0.12); --trae-border-l3: rgba(0, 0, 0, 0.08); --trae-border-neutral-l3: rgba(115, 115, 115, 0.36); --trae-border-brand: #4b3fe3; --trae-text-default: #1f2328; --trae-text-default-hover: #111214; --trae-text-default-active: #111214; --trae-text-secondary: rgba(31, 35, 40, 0.5); --trae-text-tertiary: rgba(31, 35, 40, 0.4); --trae-text-disabled: #a1a1a1; --trae-text-onaccent: #ffffff; --trae-icon-default: #1f2328; --trae-icon-secondary: rgba(31, 35, 40, 0.5); --trae-icon-brand: #4b3fe3; --icon-icon-brand: var(--trae-icon-brand); --trae-icon-onaccent: #ffffff; --trae-status-success: #22c55e; --trae-status-primary: #3b82f6; --trae-status-primary-default: #2f74ff; --trae-status-primary-surface-l1: rgba(47, 116, 255, 0.12); --trae-status-success-default: #15a877; --trae-status-success-surface-l1: rgba(64, 176, 139, 0.12); --trae-status-error-default: #e8463a; --trae-status-error-surface-l1: rgba(232, 70, 58, 0.12); --trae-annotation-marker-bg: #4b3fe3; --trae-annotation-marker-text: #ffffff; --trae-annotation-region-border: var(--trae-status-primary-default); --trae-region-outside-mask-bg: rgba(0, 0, 0, 0.18); --trae-panel-shadow: 0px 6px 24px -1px rgba(24, 24, 24, 0.06); --trae-floating-shadow: 0px 2px 8px 0px rgba(24, 24, 24, 0.2); --trae-shadow-elevation-50: 0 1px 2px -1px rgba(24, 24, 24, 0.08); --text-text-default: var(--trae-text-default); --text-text-onaccent: var(--trae-text-onaccent); --bg-bg-menu: var(--trae-bg-menu); --bg-bg-white: var(--trae-bg-menu); --bg-bg-invert: var(--trae-bg-invert); --bg-bg-invert-disabled: var(--trae-bg-invert-disabled); --bg-bg-overlay-l1: var(--trae-bg-overlay-l1); --bg-bg-overlay-l2: var(--trae-bg-overlay-l2); --bg-bg-overlay-l3: var(--trae-bg-overlay-l3); --border-border-neutral-l1: var(--trae-border-l1); --border-border-brand: var(--trae-border-brand); --border-border-brand-half: rgba(75, 63, 227, 0.4); --status-error-default: var(--trae-status-error-default); --status-error-surface-l1: var(--trae-status-error-surface-l1); --radius-radius-md-12: 12px; --spacers-spacer-0: 0; --spacers-spacer-6: 6px; }
-@keyframes trae-spin { 
-  100% { transform: rotate(360deg); }
-}
-@keyframes trae-edit-bar-enter { 
-  0% { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  100% { opacity: 1; transform: translateY(0px) scale(1); }
-}
-@keyframes trae-edit-bar-leave { 
-  0% { opacity: 1; transform: translateY(0px) scale(1); }
-  100% { opacity: 0; transform: translateY(-4px) scale(0.98); }
-}
-@keyframes trae-edit-panel-leave { 
-  0% { opacity: 1; transform: translateY(0px) scale(1); }
-  100% { opacity: 0; transform: translateY(-4px) scale(0.98); }
-}
-.trae-edit-mode-active:not(.trae-edit-mode-dragging) body :not([data-trae-edit-ui]):not([data-trae-edit-ui] *) { transition: none !important; animation-play-state: paused !important; }
-.trae-edit-mode-reorder-hit-test [data-trae-edit-ui]:not(.trae-edit-pointer-shield):not(.trae-edit-panel), .trae-edit-mode-reorder-hit-test [data-trae-edit-ui]:not(.trae-edit-pointer-shield):not(.trae-edit-panel) * { pointer-events: none !important; }
-.trae-browser-inspect-overlay { position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: var(--trae-layer-browser-inspect-overlay); pointer-events: auto; background: transparent; }
-.trae-browser-inspect-highlight-box { position: absolute; top: 0px; left: 0px; z-index: var(--trae-layer-browser-inspect-highlight); display: none; }
-.trae-browser-inspect-highlight-tag { position: absolute; left: 0px; top: 0px; height: 18px; padding: 0px 6px; box-sizing: border-box; border-radius: 4px; background-color: var(--trae-status-success-default); color: var(--trae-text-onaccent); font-size: 12px; font-weight: 400; display: none; align-items: center; z-index: var(--trae-layer-browser-inspect-action); }
-.trae-browser-inspect-highlight-box-show { display: flex; }
-.trae-browser-inspect-highlight-tag.trae-browser-inspect-highlight-box-show { display: none; }
-.trae-browser-inspect-select-button.trae-browser-inspect-highlight-box-show { display: block !important; }
-.trae-browser-inspect-select-button { position: absolute; top: 0px; left: 0px; display: none; z-index: var(--trae-layer-browser-inspect-action); }
-.trae-browser-inspect-select-highlight-box { background: transparent !important; }
-.trae-browser-inspect-select-highlight-box .trae-browser-inspect-highlight-tag { background-color: var(--trae-status-success-default); }
-.trae-add-to-chat-card { display: block; overflow: hidden; background: var(--trae-bg-menu); border: 1px solid var(--trae-border-l1); border-radius: 8px; box-shadow: var(--trae-floating-shadow); transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), height 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-.trae-add-to-chat-content { position: relative; width: max-content; }
-.trae-fade-exit { opacity: 0; transition: opacity 0.15s ease-out; }
-.trae-fade-enter { opacity: 1; transition: opacity 0.2s ease-in; }
-.trae-buttons-view { display: flex; align-items: center; gap: 6px; padding: 4px; background: transparent; }
-.trae-action-button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: transparent; border: none; border-radius: 4px; cursor: pointer; transform: none !important; transition: none !important; animation: auto ease 0s 1 normal none running none !important; }
-.trae-action-button:hover { background: var(--trae-bg-overlay-l2); }
-.trae-action-button:active { background: var(--trae-bg-overlay-l3); }
-.trae-action-button:focus-visible { outline: 2px solid var(--trae-status-primary); outline-offset: 1px; }
-.trae-action-button-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: var(--trae-icon-default); flex-shrink: 0; }
-.trae-action-button-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 500; line-height: 16px; color: var(--trae-text-default); white-space: nowrap; }
-.trae-edit-toolbar-button-active { background: var(--bg-bg-brand-disabled, rgba(75, 63, 227, 0.22)) !important; color: var(--icon-icon-brand, #4b3fe3) !important; font-weight: bold !important; }
-.trae-edit-toolbar-button-active:hover { background: var(--bg-bg-brand-popup, rgba(170, 183, 255, 0.36)) !important; }
-.trae-edit-toolbar button[data-action="alignment-dropdown"]:hover, .trae-edit-toolbar button[data-action="text-align-dropdown"]:hover, .trae-edit-toolbar button[data-action="font-decrease"]:hover, .trae-edit-toolbar button[data-action="font-increase"]:hover, .trae-edit-toolbar button[data-action^="align-"]:hover { border-radius: 8px; background: var(--bg-bg-overlay-l1, rgba(115, 115, 115, 0.08)) !important; }
-.trae-edit-toolbar button[data-action="alignment-dropdown"]:active, .trae-edit-toolbar button[data-action="text-align-dropdown"]:active, .trae-edit-toolbar button[data-action="font-decrease"]:active, .trae-edit-toolbar button[data-action="font-increase"]:active, .trae-edit-toolbar button[data-action^="align-"]:active { border-radius: 8px; background: var(--bg-bg-overlay-l2, rgba(115, 115, 115, 0.12)) !important; }
-.trae-comment-input { background: transparent; color: var(--trae-text-default); caret-color: var(--trae-text-default); }
-.trae-comment-input::placeholder { color: var(--trae-text-tertiary); }
-.trae-point-edit-bar, .trae-point-comment-input-bar, .trae-comment-only-panel { transform-origin: center top; will-change: opacity, transform; }
-.trae-edit-panel:not(.trae-edit-panel-leave) { pointer-events: auto !important; }
-.trae-edit-bar-enter { animation: trae-edit-bar-enter var(--transition-normal, 0.18s cubic-bezier(0.2, 0, 0, 1)) both; }
-.trae-edit-bar-leave { pointer-events: none; animation: trae-edit-bar-leave var(--transition-fast, 0.14s ease) both; }
-.trae-edit-panel-leave { pointer-events: none; animation: trae-edit-panel-leave var(--transition-fast, 0.14s ease) both; }
-.trae-edit-panel [data-trae-tooltip] { position: relative; }
-.trae-edit-panel [data-trae-tooltip]::after { content: attr(data-trae-tooltip); position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: var(--trae-layer-edit-tooltip); padding: 6px 10px; border-radius: 6px; background: var(--trae-bg-invert, var(--bg-bg-invert)); color: var(--trae-text-onaccent, var(--text-text-onaccent)); box-shadow: var(--trae-floating-shadow); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif; font-size: 11px; font-weight: 500; line-height: 16px; letter-spacing: 0.039px; white-space: nowrap; pointer-events: none; box-sizing: border-box; opacity: 0; transform: translateX(-50%); visibility: hidden; }
-.trae-edit-panel [data-trae-tooltip]::before { content: ""; position: absolute; left: 50%; bottom: calc(100% + 5px); z-index: var(--trae-layer-edit-tooltip); width: 8px; height: 4px; background: var(--trae-bg-invert, var(--bg-bg-invert)); clip-path: polygon(0px 0px, 100% 0px, 50% 100%); transform: translateX(-50%); pointer-events: none; opacity: 0; visibility: hidden; }
-.trae-edit-panel [data-trae-tooltip]:hover::after, .trae-edit-panel [data-trae-tooltip]:focus-visible::after, .trae-edit-panel [data-trae-tooltip]:hover::before, .trae-edit-panel [data-trae-tooltip]:focus-visible::before { opacity: 1; visibility: visible; }
-.trae-comment-btn { justify-content: center; cursor: pointer; transition: background-color 0.15s; }
-.trae-comment-btn:disabled { cursor: not-allowed; }
-.trae-comment-btn:focus-visible { outline: 2px solid var(--trae-status-primary); outline-offset: 1px; }
-.trae-comment-btn-primary { background: var(--trae-bg-invert); color: var(--trae-text-onaccent); }
-.trae-comment-btn-primary:hover:not(:disabled) { background: var(--trae-bg-invert-hover); }
-.trae-comment-btn-primary:active:not(:disabled) { background: var(--trae-bg-invert-active); }
-.trae-comment-btn-primary:disabled { background: var(--trae-bg-invert-disabled); color: var(--trae-text-disabled); }
-.trae-comment-btn-secondary { background: var(--trae-bg-overlay-l2); color: var(--trae-text-default); }
-.trae-comment-btn-secondary:hover:not(:disabled) { background: var(--trae-bg-overlay-l3); }
-.trae-comment-btn-secondary:active:not(:disabled) { background: var(--trae-bg-overlay-l4); }
-.trae-comment-btn-secondary:disabled { background: var(--trae-bg-overlay-l2); color: var(--trae-text-disabled); }
-.trae-comment-btn-text { background: transparent; color: var(--trae-text-default); }
-.trae-comment-btn-text:hover:not(:disabled) { border-radius: 8px; background: var(--bg-bg-overlay-l1, var(--trae-bg-overlay-l1)); color: var(--trae-text-default-hover); }
-.trae-comment-btn-text:active:not(:disabled) { border-radius: 8px; background: var(--trae-bg-overlay-l2); color: var(--trae-text-default-active); }
-.trae-comment-btn-text:disabled { background: transparent; color: var(--trae-text-disabled); }
-.trae-marking-btn { justify-content: center; }
-.trae-marking-btn:hover:not(:disabled) { background: var(--trae-bg-overlay-l1) !important; }
-.trae-marking-btn-active { background: var(--bg-bg-brand-disabled, rgba(75, 63, 227, 0.22)) !important; color: var(--icon-icon-brand, var(--trae-icon-brand)) !important; }
-.trae-marking-btn-active:hover { background: var(--bg-bg-brand-popup, rgba(170, 183, 255, 0.36)) !important; color: var(--icon-icon-brand, var(--trae-icon-brand)) !important; }
-.trae-marking-btn:active:not(:disabled) { background: var(--trae-bg-overlay-l2) !important; }
-.trae-marking-btn:disabled { color: var(--trae-text-disabled) !important; cursor: not-allowed !important; }
-.trae-action-button-shortcut { display: flex; align-items: center; gap: 2px; color: var(--trae-icon-secondary); flex-shrink: 0; }
-.trae-shortcut-container { display: flex; align-items: center; gap: 2px; }
-.trae-shortcut-key { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 500; line-height: 12px; color: var(--trae-icon-secondary); }
-.trae-add-to-chat-divider { width: 2px; height: 12px; padding: 0px 6px; box-sizing: content-box; background-clip: content-box; background-color: var(--trae-border-l2); flex-shrink: 0; }
-.trae-editor-view { display: flex; flex-direction: column; width: 320px; padding: 8px; background: transparent; }
-.trae-editor-text-container { display: flex; align-items: center; padding: 8px; background: var(--trae-bg-overlay-l1); border: 1px solid var(--trae-border-l3); border-radius: 4px; gap: 8px; }
-.trae-editor-textarea { flex: 1 1 0%; padding: 0px 2px; border: none; background: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 400; line-height: 20px; color: var(--trae-text-default); resize: none; outline: none; overflow-y: auto; max-height: 140px; }
-.trae-editor-textarea::placeholder { color: var(--trae-text-tertiary); }
-.trae-editor-action-bar { display: flex; align-items: center; justify-content: flex-end; gap: 4px; max-height: 0px; opacity: 0; overflow: hidden; transition: max-height 0.2s ease-out, opacity 0.2s ease-out, margin-top 0.2s ease-out; }
-.trae-editor-action-bar-visible { max-height: 32px; opacity: 1; margin-top: 8px; }
-.trae-editor-cancel-button { display: flex; align-items: center; justify-content: center; height: 24px; padding: 0px 4px; background: var(--trae-bg-overlay-l2); border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.15s; }
-.trae-editor-cancel-button:hover { background: var(--trae-bg-overlay-l3); }
-.trae-editor-cancel-button:active { background: var(--trae-bg-overlay-l3); }
-.trae-editor-cancel-button:focus-visible { outline: 2px solid var(--trae-status-primary); outline-offset: 1px; }
-.trae-editor-cancel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 500; line-height: 16px; color: var(--trae-text-default); white-space: nowrap; padding: 0px 4px; }
-.trae-editor-submit-button { display: flex; align-items: center; justify-content: center; height: 24px; padding: 0px 8px; background: var(--trae-bg-invert); border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.15s; }
-.trae-editor-submit-button:hover { background: var(--trae-bg-invert-hover); }
-.trae-editor-submit-button:active { background: var(--trae-bg-invert-active); }
-.trae-editor-submit-button:focus-visible { outline: 2px solid var(--trae-status-primary); outline-offset: 1px; }
-.trae-editor-submit-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 500; line-height: 16px; color: var(--trae-text-onaccent); white-space: nowrap; padding: 0px 4px; }
-.trae-editor-submit-icon { display: flex; align-items: center; justify-content: center; width: 12px; height: 12px; color: var(--trae-icon-onaccent); flex-shrink: 0; }
-.trae-success-view { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0px 12px; height: 32px; white-space: nowrap; }
-.trae-success-icon { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: var(--trae-status-success); flex-shrink: 0; }
-.trae-success-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 400; line-height: 18px; color: var(--trae-text-default); user-select: none; }</style></head>
+</head>
 <body>
 <div class="app-container">
   <!-- 左侧片段栏 -->
@@ -1194,7 +298,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
         <button class="icon-btn" onclick="toggleLeftSidebar()" title="收起">◀</button>
       </div>
     </div>
-    <div class="clip-tree" id="clipTree"><div class="empty-state">暂无片段<br><small>点击 ➕ 新建片段</small></div></div>
+    <div class="clip-tree" id="clipTree"></div>
   </aside>
   <button class="toggle-left-btn" onclick="toggleLeftSidebar()">▶</button>
 
@@ -1204,7 +308,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
       <div class="main-title" id="mainTitle">片段拉片 <small>请选择左侧片段或新建片段</small></div>
     </div>
     <div class="clips-area">
-      <div class="clips-container" id="clipsContainer"><div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🎞️</div><div>点击左侧 ➕ 新建片段，或选择已有片段开始拉片分析</div></div></div>
+      <div class="clips-container" id="clipsContainer">
+        <div class="empty-state">
+          <div style="font-size:40px;margin-bottom:12px;">🎞️</div>
+          <div>点击左侧 ➕ 新建片段，或选择已有片段开始拉片分析</div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -1336,6 +445,27 @@ function loadClipData() {
   } catch(e) { console.error('读取片段数据失败', e); }
   if (!clipData.folders) clipData.folders = [];
   if (!clipData.clips) clipData.clips = [];
+
+  // 数据迁移：旧版片段（单截图+单组字段）升级为「多镜头」结构
+  clipData.clips.forEach(c => {
+    if (!Array.isArray(c.shots)) {
+      c.shots = [{
+        id: generateId(),
+        name: '镜头1',
+        images: c.image ? [c.image] : [],
+        cameraMovement: c.cameraMovement || '',
+        shotScale: c.shotScale || '',
+        duration: c.duration || '',
+        color: c.color || '',
+        composition: c.composition || '',
+        atmosphere: c.atmosphere || '',
+        directorIntention: c.directorIntention || ''
+      }];
+      delete c.image; delete c.cameraMovement; delete c.shotScale; delete c.duration;
+      delete c.color; delete c.composition; delete c.atmosphere; delete c.directorIntention;
+      saveClipData();
+    }
+  });
 }
 
 function saveClipData() {
@@ -1444,8 +574,7 @@ function createClip() {
     id: generateId(),
     name, sourceFilm: source, folderId,
     clipDuration: duration, originalPosition: position,
-    image: '', cameraMovement: '', shotScale: '', duration: '',
-    color: '', composition: '', atmosphere: '', directorIntention: ''
+    shots: []
   };
   clipData.clips.push(clip);
   saveClipData();
@@ -1582,7 +711,7 @@ function moveClipToFolder(clipId) {
 
 document.addEventListener('click', hideContextMenu);
 
-// ============ 片段详情 ============
+// ============ 片段详情（多镜头结构） ============
 function renderClipDetail() {
   const container = document.getElementById('clipsContainer');
   if (!currentClipId) {
@@ -1593,6 +722,14 @@ function renderClipDetail() {
   if (!clip) {
     container.innerHTML = '<div class="empty-state">片段不存在</div>';
     return;
+  }
+  if (!Array.isArray(clip.shots)) clip.shots = [];
+
+  let shotsHtml = '';
+  if (clip.shots.length === 0) {
+    shotsHtml = `<div class="empty-state empty-inline"><div style="font-size:32px;margin-bottom:8px;">🎬</div><div>此片段暂无镜头</div><div style="margin-top:8px;font-size:12px;color:var(--muted);">点击上方「➕ 新增镜头」开始分析</div></div>`;
+  } else {
+    shotsHtml = clip.shots.map((shot, idx) => renderShotCard(clip.id, shot, idx)).join('');
   }
 
   container.innerHTML = `
@@ -1619,65 +756,219 @@ function renderClipDetail() {
       </div>
     </div>
 
-    <div class="clip-card">
-      <div class="clip-card-header">
-        <span class="clip-card-title">镜头分析</span>
-      </div>
-      <div class="clip-card-body">
-        <div class="clip-screenshot">
-          <div class="clip-img-wrap" onclick="${clip.image ? `openLightbox('${clip.image}')` : `document.getElementById('upload_${clip.id}').click()`}">
-            ${clip.image
-              ? `<img src="${clip.image}" alt="截图">`
-              : `<div class="placeholder">📷 点击上传截图<br><small>（自动压缩）</small></div>`}
-          </div>
-          <input type="file" id="upload_${clip.id}" accept="image/*" style="display:none" onchange="handleImageUpload(event, '${clip.id}')">
-          <div class="clip-img-actions">
-            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload_${clip.id}').click()">📷 上传</button>
-            ${clip.image ? `<button class="btn btn-secondary btn-sm" onclick="clearClipImage('${clip.id}')">🗑 移除</button>` : ''}
-          </div>
+    <div class="shots-header">
+      <div class="shots-title">🎬 镜头列表 <span class="shots-count">（${clip.shots.length} 个镜头）</span></div>
+      <button class="btn btn-primary btn-sm" onclick="addShot('${clip.id}')">➕ 新增镜头</button>
+    </div>
+
+    <div class="shots-list">
+      ${shotsHtml}
+    </div>
+  `;
+}
+
+// 渲染单个镜头卡片
+function renderShotCard(clipId, shot, idx) {
+  const images = shot.images || [];
+  const galleryHtml = images.length === 0
+    ? `<div class="shot-img-empty" onclick="document.getElementById('shotUpload_${shot.id}').click()">
+         <div style="font-size:24px;margin-bottom:6px;">📷</div>
+         <div>点击上传截图</div>
+         <div style="font-size:11px;color:var(--muted);margin-top:4px;">支持多张</div>
+       </div>`
+    : `<div class="shot-gallery">
+         <div class="shot-gallery-main" onclick="openLightbox('${images[0]}')">
+           <img src="${images[0]}" alt="镜头截图">
+         </div>
+         <div class="shot-gallery-thumbs">
+           ${images.map((img, i) => `
+             <div class="shot-thumb ${i === 0 ? 'active' : ''}" onclick="setShotMainImage('${clipId}','${shot.id}',${i})">
+               <img src="${img}" alt="">
+               <button class="shot-thumb-del" onclick="event.stopPropagation();removeShotImage('${clipId}','${shot.id}',${i})" title="删除此截图">×</button>
+             </div>
+           `).join('')}
+           <div class="shot-thumb shot-thumb-add" onclick="document.getElementById('shotUpload_${shot.id}').click()" title="添加截图">＋</div>
+         </div>
+       </div>`;
+
+  return `
+    <div class="shot-card" id="shot_${shot.id}">
+      <div class="shot-card-header">
+        <div class="shot-card-title">
+          <span class="shot-index">#${idx + 1}</span>
+          <input class="shot-name-input" value="${escapeHtml(shot.name || '')}" placeholder="镜头名称"
+                 oninput="updateShotField('${clipId}','${shot.id}','name',this.value)">
         </div>
-        <div class="clip-fields">
+        <div class="shot-card-actions">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('shotUpload_${shot.id}').click()">📷 上传截图</button>
+          <button class="btn btn-secondary btn-sm" onclick="moveShot('${clipId}','${shot.id}',-1)" title="上移">↑</button>
+          <button class="btn btn-secondary btn-sm" onclick="moveShot('${clipId}','${shot.id}',1)" title="下移">↓</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteShot('${clipId}','${shot.id}')">🗑 删除镜头</button>
+        </div>
+      </div>
+      <div class="shot-card-body">
+        <div class="shot-screenshot-col">
+          ${galleryHtml}
+          <input type="file" id="shotUpload_${shot.id}" accept="image/*" multiple style="display:none"
+                 onchange="handleShotImageUpload(event, '${clipId}', '${shot.id}')">
+          <div class="shot-img-count">共 ${images.length} 张截图</div>
+        </div>
+        <div class="shot-fields-col">
           <div class="fields-grid">
             <div class="field-row">
               <label class="field-label">运镜</label>
-              <input class="field-input" placeholder="如 推/拉/摇/移/跟" value="${escapeHtml(clip.cameraMovement)}"
-                     oninput="updateClipField('${clip.id}','cameraMovement',this.value)">
+              <input class="field-input" placeholder="如 推/拉/摇/移/跟" value="${escapeHtml(shot.cameraMovement || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','cameraMovement',this.value)">
             </div>
             <div class="field-row">
               <label class="field-label">景别</label>
-              <input class="field-input" placeholder="如 特写/近景/中景/全景" value="${escapeHtml(clip.shotScale)}"
-                     oninput="updateClipField('${clip.id}','shotScale',this.value)">
+              <input class="field-input" placeholder="如 特写/近景/中景/全景" value="${escapeHtml(shot.shotScale || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','shotScale',this.value)">
             </div>
             <div class="field-row">
               <label class="field-label">持续时长</label>
-              <input class="field-input" placeholder="如 3.5秒" value="${escapeHtml(clip.duration)}"
-                     oninput="updateClipField('${clip.id}','duration',this.value)">
+              <input class="field-input" placeholder="如 3.5秒" value="${escapeHtml(shot.duration || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','duration',this.value)">
             </div>
             <div class="field-row">
               <label class="field-label">色彩</label>
-              <input class="field-input" placeholder="如 冷色调/暖色调/高对比" value="${escapeHtml(clip.color)}"
-                     oninput="updateClipField('${clip.id}','color',this.value)">
+              <input class="field-input" placeholder="如 冷色调/暖色调/高对比" value="${escapeHtml(shot.color || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','color',this.value)">
             </div>
             <div class="field-row">
               <label class="field-label">构图</label>
-              <input class="field-input" placeholder="如 三分法/对称/框架" value="${escapeHtml(clip.composition)}"
-                     oninput="updateClipField('${clip.id}','composition',this.value)">
+              <input class="field-input" placeholder="如 三分法/对称/框架" value="${escapeHtml(shot.composition || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','composition',this.value)">
             </div>
             <div class="field-row">
               <label class="field-label">气氛</label>
-              <input class="field-input" placeholder="如 紧张/压抑/温馨" value="${escapeHtml(clip.atmosphere)}"
-                     oninput="updateClipField('${clip.id}','atmosphere',this.value)">
+              <input class="field-input" placeholder="如 紧张/压抑/温馨" value="${escapeHtml(shot.atmosphere || '')}"
+                     oninput="updateShotField('${clipId}','${shot.id}','atmosphere',this.value)">
             </div>
           </div>
           <div class="field-row">
             <label class="field-label">导演意图</label>
             <textarea class="field-textarea" placeholder="分析导演在此镜头中的表达意图..."
-                      oninput="updateClipField('${clip.id}','directorIntention',this.value)">${escapeHtml(clip.directorIntention)}</textarea>
+                      oninput="updateShotField('${clipId}','${shot.id}','directorIntention',this.value)">${escapeHtml(shot.directorIntention || '')}</textarea>
           </div>
         </div>
       </div>
     </div>
   `;
+}
+
+// ============ 镜头操作 ============
+function addShot(clipId) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  if (!Array.isArray(clip.shots)) clip.shots = [];
+  const shot = {
+    id: generateId(),
+    name: '镜头' + (clip.shots.length + 1),
+    images: [],
+    cameraMovement: '', shotScale: '', duration: '',
+    color: '', composition: '', atmosphere: '', directorIntention: ''
+  };
+  clip.shots.push(shot);
+  saveClipData();
+  renderClipDetail();
+}
+
+function deleteShot(clipId, shotId) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  if (!confirm('确定删除此镜头？该镜头的所有截图与分析将被清除。')) return;
+  clip.shots = clip.shots.filter(s => s.id !== shotId);
+  saveClipData();
+  renderClipDetail();
+}
+
+function moveShot(clipId, shotId, direction) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip || !clip.shots) return;
+  const idx = clip.shots.findIndex(s => s.id === shotId);
+  const target = idx + direction;
+  if (idx < 0 || target < 0 || target >= clip.shots.length) return;
+  [clip.shots[idx], clip.shots[target]] = [clip.shots[target], clip.shots[idx]];
+  saveClipData();
+  renderClipDetail();
+}
+
+function updateShotField(clipId, shotId, field, value) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  const shot = clip.shots.find(s => s.id === shotId);
+  if (shot) {
+    shot[field] = value;
+    saveClipData();
+  }
+}
+
+// 设置主图（点击缩略图切换）
+function setShotMainImage(clipId, shotId, index) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  const shot = clip.shots.find(s => s.id === shotId);
+  if (!shot || !shot.images) return;
+  // 将选中的图移到数组首位
+  const [img] = shot.images.splice(index, 1);
+  shot.images.unshift(img);
+  saveClipData();
+  renderClipDetail();
+}
+
+// 删除单张截图
+function removeShotImage(clipId, shotId, index) {
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  const shot = clip.shots.find(s => s.id === shotId);
+  if (!shot || !shot.images) return;
+  shot.images.splice(index, 1);
+  saveClipData();
+  renderClipDetail();
+}
+
+// ============ 镜头截图上传（支持多张） ============
+function handleShotImageUpload(event, clipId, shotId) {
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
+  const clip = clipData.clips.find(c => c.id === clipId);
+  if (!clip) return;
+  const shot = clip.shots.find(s => s.id === shotId);
+  if (!shot) return;
+  if (!Array.isArray(shot.images)) shot.images = [];
+
+  let processed = 0;
+  const total = files.length;
+  files.forEach(file => {
+    if (!file.type.startsWith('image/')) { processed++; return; }
+    if (file.size > 10 * 1024 * 1024) { processed++; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const MAX_W = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        shot.images.push(dataUrl);
+        processed++;
+        if (processed === total) {
+          saveClipData();
+          renderClipDetail();
+        }
+      };
+      img.onerror = function() { processed++; if (processed === total) { saveClipData(); renderClipDetail(); } };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() { processed++; if (processed === total) { saveClipData(); renderClipDetail(); } };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
 }
 
 function updateTitle() {
@@ -1686,45 +977,6 @@ function updateTitle() {
   if (clip) {
     document.getElementById('mainTitle').innerHTML = `片段拉片 <small>${escapeHtml(clip.sourceFilm || '')} · ${escapeHtml(clip.name || '')}</small>`;
   }
-}
-
-// ============ 图片处理（最省内存：缩放+JPEG压缩） ============
-function handleImageUpload(event, clipId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { alert('请选择图片文件'); return; }
-  if (file.size > 10 * 1024 * 1024) { alert('图片过大（超过10MB），请选择较小的图片'); return; }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const MAX_W = 800;
-      let w = img.width, h = img.height;
-      if (w > MAX_W) {
-        h = Math.round(h * MAX_W / w);
-        w = MAX_W;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      updateClipField(clipId, 'image', dataUrl);
-      renderClipDetail();
-    };
-    img.onerror = function() { alert('图片加载失败'); };
-    img.src = e.target.result;
-  };
-  reader.onerror = function() { alert('文件读取失败'); };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-}
-
-function clearClipImage(clipId) {
-  updateClipField(clipId, 'image', '');
-  renderClipDetail();
 }
 
 // ============ 灯箱 ============
@@ -1785,8 +1037,5 @@ renderTree();
 renderClipDetail();
 window.parent.postMessage({ type: 'ready' }, '*');
 </script>
-
-
-<div data-trae-edit-ui="true" class="trae-image-download-btn" title="Download image" style="position: fixed; display: none; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: var(--trae-bg-menu, #222427); border: 1px solid var(--trae-border-l2, rgba(255,255,255,0.12)); box-shadow: var(--trae-floating-shadow, 0px 2px 8px 0px rgba(0,0,0,0.2)); color: var(--trae-icon-default, #f5f9fe); cursor: pointer; z-index: 89990; transition: background 0.15s; pointer-events: auto;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 2v8m0 0L5 7m3 3l3-3M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg></div></body></html>
+</body>
+</html>
