@@ -1702,7 +1702,14 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
       const st = document.getElementById('cloudStatus');
       st.textContent = '正在上传...'; st.style.color = '#4f46e5';
       try {
-        const allData = { lapian: localStorage.getItem('lapian_platform_v2'), lapianHistory: localStorage.getItem('lapian_platform_history'), aiProjects: localStorage.getItem('ai_drama_projects'), timestamp: Date.now() };
+        const allData = {
+          lapian: localStorage.getItem('lapian_platform_v2'),
+          lapianHistory: localStorage.getItem('lapian_platform_history'),
+          clips: localStorage.getItem('lapian_clips_v2'),
+          aiProjects: localStorage.getItem('ai_drama_projects'),
+          aiPhrases: localStorage.getItem('ai_common_phrases'),
+          timestamp: Date.now()
+        };
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(allData))));
         let sha = null;
         try { const r = await fetch('https://api.github.com/repos/'+REPO+'/contents/'+CLOUD_FILE, { headers: { 'Authorization': 'Bearer '+token, 'Accept': 'application/vnd.github+json' } }); if (r.ok) { const d = await r.json(); sha = d.sha; } } catch(e) {}
@@ -1725,7 +1732,9 @@ body.dark-mode .cloud-status { color: rgb(138, 150, 176); }
           const d = await r.json(); const c = decodeURIComponent(escape(atob(d.content))); const a = JSON.parse(c);
           if (a.lapian) localStorage.setItem('lapian_platform_v2', a.lapian);
           if (a.lapianHistory) localStorage.setItem('lapian_platform_history', a.lapianHistory);
+          if (a.clips) localStorage.setItem('lapian_clips_v2', a.clips);
           if (a.aiProjects) localStorage.setItem('ai_drama_projects', a.aiProjects);
+          if (a.aiPhrases) localStorage.setItem('ai_common_phrases', a.aiPhrases);
           st.textContent = '恢复成功！请刷新页面'; st.style.color = '#10b981';
         } else { st.textContent = '未找到云端备份'; st.style.color = '#f59e0b'; }
       } catch(err) { st.textContent = '失败: ' + err.message; st.style.color = '#ef4444'; }

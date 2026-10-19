@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head>
+<html lang="zh-CN" style="--bg: #f5f6f8; --bg2: #ffffff; --bg3: #f0f2f5; --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb; --glass: rgba(255,255,255,0.75); --input-bg: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -65,10 +65,6 @@
   .sidebar-actions .btn { width: 100%; justify-content: center; }
   .sidebar-actions .row { display: flex; gap: 6px; }
   .sidebar-actions .row .btn { flex: 1; }
-  .sidebar-cloud-section { padding: 14px 18px; border-bottom: 1px solid var(--rule); }
-  .sidebar-cloud-section .row { display: flex; gap: 6px; }
-  .sidebar-cloud-section .row .btn { flex: 1; }
-  .cloud-status { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; min-height: 14px; }
   .sidebar-projects { padding: 14px 18px; flex: 1; overflow-y: auto; }
   .sidebar-projects-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .sidebar-projects-header h3 { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -166,8 +162,8 @@
   <!-- ====== SIDEBAR ====== -->
   <aside class="sidebar" id="aiSidebar">
     <div class="sidebar-header">
-      <h1>AI短片创作</h1>
-      <div class="subtitle">剧本 · 参考图 · 常用语句</div>
+      
+      
     </div>
 
     <div class="project-name-section">
@@ -186,20 +182,12 @@
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importProject(event)">
     </div>
 
-    <div class="sidebar-cloud-section">
-      <div class="row">
-        <button class="btn btn-primary btn-sm" onclick="aiCloudBackup()" id="aiCloudBackupBtn">☁️ 云端备份</button>
-        <button class="btn btn-secondary btn-sm" onclick="aiCloudRestore()" id="aiCloudRestoreBtn">⬇️ 云端恢复</button>
-      </div>
-      <div class="cloud-status" id="aiCloudStatus"></div>
-    </div>
-
     <div class="sidebar-projects">
       <div class="sidebar-projects-header">
         <h3>我的作品</h3>
         <span class="pm-count-badge" id="pmCount">0</span>
       </div>
-      <div class="pm-list" id="pmList"></div>
+      <div class="pm-list" id="pmList"><div class="pm-empty">暂无作品，点击「新建」开始</div></div>
     </div>
   </aside>
 
@@ -217,7 +205,8 @@
       </div>
       <div class="section-desc">上传或粘贴剧本（支持 .txt / .md / .docx / .json / .csv），保存后随作品一同备份。</div>
       <input type="file" id="scriptUpload" accept=".txt,.md,.markdown,.docx,.json,.csv" style="display:none" onchange="handleScriptUpload(event)">
-      <textarea id="scriptInput" class="script-area" placeholder="在此粘贴剧本内容...&#10;也可点击上方「上传剧本」按钮导入文件"></textarea>
+      <textarea id="scriptInput" class="script-area" placeholder="在此粘贴剧本内容...
+也可点击上方「上传剧本」按钮导入文件"></textarea>
       <div id="scriptMeta" class="script-meta" style="display:none;"></div>
     </section>
 
@@ -230,7 +219,7 @@
         </div>
       </div>
       <div class="section-desc">上传角色参考图，保存后随作品一同备份。</div>
-      <div class="ref-grid" id="charGrid"></div>
+      <div class="ref-grid" id="charGrid"><div class="ref-empty">暂无角色参考图，点击上方「新增角色」添加</div></div>
     </section>
 
     <!-- 场景 + 道具参考图 -->
@@ -241,7 +230,7 @@
           <button class="btn btn-primary btn-sm" onclick="addRef('scene')">➕ 新增场景</button>
         </div>
       </div>
-      <div class="ref-grid" id="sceneGrid"></div>
+      <div class="ref-grid" id="sceneGrid"><div class="ref-empty">暂无场景参考图，点击上方「新增场景」添加</div></div>
 
       <div class="section-head" style="margin-top:18px;">
         <div class="section-title small">🎬 道具参考图</div>
@@ -249,7 +238,7 @@
           <button class="btn btn-primary btn-sm" onclick="addRef('prop')">➕ 新增道具</button>
         </div>
       </div>
-      <div class="ref-grid" id="propGrid"></div>
+      <div class="ref-grid" id="propGrid"><div class="ref-empty">暂无道具参考图，点击上方「新增道具」添加</div></div>
     </section>
 
     <!-- 常用语句 -->
@@ -262,7 +251,7 @@
         <textarea id="phraseInput" class="phrase-input" placeholder="输入常用语句..."></textarea>
         <button class="btn btn-primary btn-sm" onclick="addPhrase()">💾 保存语句</button>
       </div>
-      <div class="phrase-list" id="phraseList"></div>
+      <div class="phrase-list" id="phraseList"><div class="phrase-empty">暂无常用语句，输入后点击「保存语句」</div></div>
     </section>
   </main>
 </div>
@@ -283,9 +272,7 @@ var STORAGE_KEY = 'ai_drama_projects';     // 与平台云备份保持一致
 var PHRASES_KEY = 'ai_common_phrases';
 var CURRENT_KEY = 'ai_current_project';
 var THEME_KEY = 'xfy_theme_mode';
-var CLOUD_TOKEN_KEY = 'xfy_github_token';
-var CLOUD_REPO = 'xuefy987/lapian-diary';
-var CLOUD_FILE = 'cloud-backup.json';
+var AUTOSAVE_INTERVAL = 180000; // 3分钟定时保存（参考拉片平台）
 
 var REF_TYPES = {
   char:  { arr: 'characters', label: '角色', grid: 'charGrid' },
@@ -706,7 +693,7 @@ function handleRefImage(event) {
   event.target.value = '';
 }
 
-// 图片压缩为 JPEG dataURL，减小体积，避免 localStorage / 云端备份过大
+// 图片压缩为 JPEG dataURL，减小体积，避免 localStorage 过大
 function compressImage(file, maxDim, quality, cb) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -806,156 +793,22 @@ function fallbackCopy(text) {
   document.body.removeChild(ta);
 }
 
-// ==================== 自动保存 ====================
+// ==================== 自动保存（输入debounce + 定时保存） ====================
 function scheduleAutoSave() {
   if (autoSaveTimer) clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(function() {
-    project.name = (document.getElementById('projectName').value || '').trim() || '未命名作品';
-    project.script = document.getElementById('scriptInput').value;
-    project.updatedAt = Date.now();
-    persistProject(true);
+    autoSave();
   }, 1200);
 }
 
-// ==================== 云端备份（参考拉片平台：读取合并，不易覆盖） ====================
-function aiGetToken() {
-  var t = localStorage.getItem(CLOUD_TOKEN_KEY) || '';
-  if (t) return t;
+// 定时保存（每 3 分钟一次，参考拉片平台）
+function autoSave() {
   try {
-    if (window.parent && window.parent.EMBEDDED_TOKEN) return window.parent.EMBEDDED_TOKEN;
-    if (window.parent) { var pt = window.parent.localStorage.getItem(CLOUD_TOKEN_KEY); if (pt) return pt; }
-  } catch(e) {}
-  return '';
-}
-
-function setCloudStatus(msg, color) {
-  var el = document.getElementById('aiCloudStatus');
-  if (el) { el.textContent = msg || ''; el.style.color = color || 'var(--muted)'; }
-}
-
-function safeBtoa(str) {
-  var bytes = new TextEncoder().encode(str);
-  var binary = '';
-  var chunk = 8192;
-  for (var i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.slice(i, i + chunk));
-  }
-  return btoa(binary);
-}
-
-async function aiFetchCloud() {
-  var token = aiGetToken();
-  if (!token) throw new Error('未设置 GitHub Token');
-  var url = 'https://api.github.com/repos/' + CLOUD_REPO + '/contents/' + CLOUD_FILE;
-  var r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
-  if (!r.ok) { if (r.status === 404) return { sha: null, data: {} }; throw new Error('API ' + r.status); }
-  var d = await r.json();
-  var data = {};
-  try {
-    var content = decodeURIComponent(escape(atob((d.content || '').replace(/\n/g, ''))));
-    data = JSON.parse(content);
-  } catch(e) { data = {}; }
-  return { sha: d.sha, data: data };
-}
-
-async function aiCloudBackup() {
-  var token = aiGetToken();
-  if (!token) { showToast('请先在平台设置中输入 GitHub Token'); setCloudStatus('未设置 Token', 'var(--danger)'); return; }
-  var btn = document.getElementById('aiCloudBackupBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ 备份中...'; }
-  setCloudStatus('正在备份到云端...', 'var(--accent)');
-  try {
-    // 先保存到本地，确保备份的是最新数据
     project.name = (document.getElementById('projectName').value || '').trim() || '未命名作品';
     project.script = document.getElementById('scriptInput').value;
     project.updatedAt = Date.now();
     persistProject(true);
-    savePhrases();
-
-    // 读取云端已有内容并合并，只更新 AI 相关字段，避免覆盖拉片等其他数据
-    var cloud;
-    try { cloud = await aiFetchCloud(); } catch(e) { cloud = { sha: null, data: {} }; }
-    cloud.data = cloud.data || {};
-    cloud.data.aiProjects = localStorage.getItem(STORAGE_KEY) || '[]';
-    cloud.data.aiPhrases = localStorage.getItem(PHRASES_KEY) || '[]';
-    cloud.data.aiTimestamp = Date.now();
-
-    var content = safeBtoa(JSON.stringify(cloud.data));
-    var body = { message: 'AI短片备份 ' + new Date().toLocaleString(), content: content };
-    if (cloud.sha) body.sha = cloud.sha;
-    var url = 'https://api.github.com/repos/' + CLOUD_REPO + '/contents/' + CLOUD_FILE;
-    var r2 = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (r2.ok) {
-      setCloudStatus('✓ 备份成功 ' + new Date().toLocaleTimeString(), 'var(--success)');
-      showToast('已备份到云端');
-    } else {
-      var err = await r2.json().catch(function() { return {}; });
-      setCloudStatus('✗ ' + (err.message || '失败'), 'var(--danger)');
-      showToast('云端备份失败：' + (err.message || ''));
-    }
-  } catch(err) {
-    setCloudStatus('✗ ' + err.message, 'var(--danger)');
-    showToast('云端备份失败：' + err.message);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '☁️ 云端备份'; }
-  }
-}
-
-async function aiCloudRestore() {
-  var token = aiGetToken();
-  if (!token) { showToast('请先在平台设置中输入 GitHub Token'); setCloudStatus('未设置 Token', 'var(--danger)'); return; }
-  var btn = document.getElementById('aiCloudRestoreBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ 恢复中...'; }
-  setCloudStatus('正在从云端恢复...', 'var(--accent)');
-  try {
-    var cloud = await aiFetchCloud();
-    if (cloud.data.aiProjects) {
-      // 合并：按名称合并云端与本地作品，云端较新则采用，避免直接覆盖丢失本地
-      var localList = getStoredProjects();
-      var merged = mergeProjects(localList, JSON.parse(cloud.data.aiProjects || '[]'));
-      setStoredProjects(merged);
-    }
-    if (cloud.data.aiPhrases) {
-      var cloudPhrases = [];
-      try { cloudPhrases = JSON.parse(cloud.data.aiPhrases); } catch(e) {}
-      if (Array.isArray(cloudPhrases)) {
-        var seen = {}; phrases.forEach(function(p) { seen[p.text] = true; });
-        cloudPhrases.forEach(function(p) { if (!seen[p.text]) { phrases.push(p); seen[p.text] = true; } });
-        savePhrases();
-      }
-    }
-    renderPhrases();
-    // 重新载入当前作品
-    var list = getStoredProjects();
-    var cname = localStorage.getItem(CURRENT_KEY);
-    var found = list.find(function(p) { return p.name === cname; }) || list[0];
-    if (found) { project = migrateProject(found); applyProjectToUI(); }
-    renderProjectList();
-    var ts = cloud.data.aiTimestamp ? new Date(cloud.data.aiTimestamp).toLocaleString() : '未知时间';
-    setCloudStatus('✓ 恢复成功 (' + ts + ')', 'var(--success)');
-    showToast('已从云端恢复');
-  } catch(err) {
-    setCloudStatus('✗ ' + err.message, 'var(--danger)');
-    showToast('恢复失败：' + err.message);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇️ 云端恢复'; }
-  }
-}
-
-// 合并本地与云端作品列表：同名作品取更新时间较新者，其余全部保留
-function mergeProjects(localList, cloudList) {
-  var map = {};
-  (localList || []).forEach(function(p) { map[p.name] = p; });
-  (cloudList || []).forEach(function(c) {
-    var l = map[c.name];
-    if (!l) { map[c.name] = c; }
-    else if ((c.updatedAt || 0) > (l.updatedAt || 0)) { map[c.name] = c; }
-  });
-  return Object.keys(map).map(function(k) { return map[k]; });
+  } catch(e) {}
 }
 
 // ==================== 文件夹保存（可选） ====================
@@ -1042,21 +895,12 @@ function applyPageTheme() {
   }
 }
 
-// 监听父窗口消息（主题 / 云端）
+// 监听父窗口消息（主题）
 window.addEventListener('message', function(e) {
   if (!e.data) return;
   if (e.data.type === 'theme') {
     if (e.data.mode) localStorage.setItem(THEME_KEY, e.data.mode);
     applyPageTheme();
-  } else if (e.data.type === 'cloudRestored') {
-    // 平台已完成云端恢复，重新载入本地数据
-    var list = getStoredProjects();
-    var cname = localStorage.getItem(CURRENT_KEY);
-    var found = list.find(function(p) { return p.name === cname; }) || list[0];
-    if (found) { project = migrateProject(found); applyProjectToUI(); }
-    renderProjectList();
-    renderPhrases();
-    showToast('已从云端同步最新数据');
   }
 });
 
@@ -1089,19 +933,20 @@ window.addEventListener('message', function(e) {
   });
 
   window.addEventListener('beforeunload', function() {
-    if (autoSaveTimer) {
-      clearTimeout(autoSaveTimer);
-      try {
-        project.name = (document.getElementById('projectName').value || '').trim() || '未命名作品';
-        project.script = document.getElementById('scriptInput').value;
-        project.updatedAt = Date.now();
-        persistProject(true);
-      } catch(e) {}
-    }
+    // 页面关闭前立即保存（参考拉片平台）
+    try {
+      project.name = (document.getElementById('projectName').value || '').trim() || '未命名作品';
+      project.script = document.getElementById('scriptInput').value;
+      project.updatedAt = Date.now();
+      persistProject(true);
+    } catch(e) {}
   });
 
+  // 启动定时保存（每3分钟，参考拉片平台）
+  setInterval(autoSave, AUTOSAVE_INTERVAL);
+
   try { window.parent.postMessage({ type: 'ready' }, '*'); } catch(e) {}
-  setCloudStatus(aiGetToken() ? '云端已就绪' : '未设置 Token（可在平台设置）', aiGetToken() ? 'var(--muted)' : 'var(--warning)');
 })();
 </script>
+
 </body></html>
